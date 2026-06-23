@@ -53,32 +53,34 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 fade-in">
       <WatchlistSection watchlist={watchlist} setWatchlist={setWatchlist} trendingData={trending} />
 
-      {/* AI Daily Briefing */}
       <DailyBriefing briefing={briefing} loading={briefingLoading} />
 
-      {/* Top Movers */}
       <section>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <TrendingUp className="w-5 h-5 text-electric" />
-            <h2 className="text-lg font-semibold text-text-primary">Today's Top Movers</h2>
+            <div className="w-8 h-8 rounded-lg bg-electric/10 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-electric" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-text-primary">Top Movers</h2>
+              <p className="text-xs text-text-muted">Most discussed stocks in the last 24 hours</p>
+            </div>
           </div>
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-text-secondary bg-navy-800 border border-border rounded-md hover:border-electric/50 hover:text-electric transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 text-sm text-text-secondary bg-white/[0.04] border border-border rounded-xl hover:border-border-hover hover:text-text-primary transition-all disabled:opacity-50 cursor-pointer"
           >
-            {refreshing ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
-            {refreshing ? 'Scraping...' : 'Refresh Data'}
+            {refreshing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+            {refreshing ? 'Refreshing...' : 'Refresh'}
           </button>
         </div>
         <TrendingCards tickers={trending} loading={trendingLoading} />
       </section>
 
-      {/* Main Grid: Trending Table + Reddit + News */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <TrendingTable

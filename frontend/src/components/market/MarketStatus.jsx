@@ -11,9 +11,9 @@ const statusConfig = {
 
 function TimelineBar({ status }) {
   const segments = [
-    { label: 'Pre', start: 4, end: 9.5, color: 'bg-amber/30' },
-    { label: 'Regular', start: 9.5, end: 16, color: 'bg-electric/40' },
-    { label: 'After', start: 16, end: 20, color: 'bg-amber/30' },
+    { label: 'Pre', start: 4, end: 9.5, color: 'bg-amber/20' },
+    { label: 'Regular', start: 9.5, end: 16, color: 'bg-electric/30' },
+    { label: 'After', start: 16, end: 20, color: 'bg-amber/20' },
   ];
 
   const now = new Date();
@@ -23,8 +23,8 @@ function TimelineBar({ status }) {
   const nowPct = Math.max(0, Math.min(100, ((currentHour - 4) / totalRange) * 100));
 
   return (
-    <div className="mt-4">
-      <div className="relative h-6 bg-navy-700 rounded-full overflow-hidden">
+    <div className="mt-5">
+      <div className="relative h-5 bg-white/[0.04] rounded-full overflow-hidden">
         {segments.map((seg) => (
           <div
             key={seg.label}
@@ -42,7 +42,7 @@ function TimelineBar({ status }) {
           />
         )}
       </div>
-      <div className="flex justify-between mt-1 text-[10px] text-text-muted font-[family-name:var(--font-mono)]">
+      <div className="flex justify-between mt-2 text-[10px] text-text-muted font-[family-name:var(--font-mono)]">
         <span>4AM</span>
         <span>9:30AM</span>
         <span>4PM</span>
@@ -57,10 +57,10 @@ export default function MarketStatus() {
 
   if (loading) {
     return (
-      <div className="bg-navy-800 border border-border rounded-xl p-6 animate-pulse">
-        <div className="h-6 bg-navy-700 rounded w-40 mb-4" />
-        <div className="h-10 bg-navy-700 rounded w-32 mb-4" />
-        <div className="h-6 bg-navy-700 rounded w-full" />
+      <div className="card p-6">
+        <div className="h-6 shimmer rounded-lg w-40 mb-4" />
+        <div className="h-10 shimmer rounded-lg w-32 mb-4" />
+        <div className="h-5 shimmer rounded-lg w-full" />
       </div>
     );
   }
@@ -86,18 +86,18 @@ export default function MarketStatus() {
   };
 
   return (
-    <div className="bg-navy-800 border border-border rounded-xl overflow-hidden">
+    <div className="card overflow-hidden">
       <div className="p-6">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={`w-10 h-10 rounded-full ${config.bg} flex items-center justify-center`}>
-            <StatusIcon className={`w-5 h-5 ${config.color}`} />
+        <div className="flex items-center gap-4 mb-5">
+          <div className={`w-12 h-12 rounded-2xl ${config.bg} flex items-center justify-center`}>
+            <StatusIcon className={`w-6 h-6 ${config.color}`} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <div className={`w-2 h-2 rounded-full ${config.color === 'text-electric' ? 'bg-electric' : config.color === 'text-amber' ? 'bg-amber' : 'bg-danger'} ${config.pulse ? 'animate-pulse' : ''}`} />
-              <h3 className={`text-lg font-semibold ${config.color}`}>{config.label}</h3>
+              <h3 className={`text-xl font-semibold ${config.color}`}>{config.label}</h3>
             </div>
-            <p className="text-xs text-text-muted mt-0.5">
+            <p className="text-xs text-text-muted mt-1">
               {new Date(data.current_time_et).toLocaleTimeString('en-US', {
                 timeZone: 'America/New_York',
                 hour: 'numeric',
@@ -111,28 +111,27 @@ export default function MarketStatus() {
 
         {data.next_open && (
           <p className="text-sm text-text-secondary">
-            Opens at <span className="text-electric font-[family-name:var(--font-mono)]">{formatTime(data.next_open)}</span>
+            Opens at <span className="text-electric font-[family-name:var(--font-mono)] font-medium">{formatTime(data.next_open)}</span>
           </p>
         )}
         {data.next_close && (
           <p className="text-sm text-text-secondary">
-            Closes at <span className="text-amber font-[family-name:var(--font-mono)]">{formatTime(data.next_close)}</span>
+            Closes at <span className="text-amber font-[family-name:var(--font-mono)] font-medium">{formatTime(data.next_close)}</span>
           </p>
         )}
 
         <TimelineBar status={data.status} />
       </div>
 
-      {/* Market Hours Guide */}
-      <div className="border-t border-border px-6 py-4 space-y-3">
-        <h4 className="text-sm font-semibold text-text-primary">Market Hours Guide</h4>
+      <div className="border-t border-border px-6 py-5 space-y-3">
+        <h4 className="text-sm font-semibold text-text-primary">Market Hours</h4>
         <div className="grid grid-cols-1 gap-2">
           {[
             { label: 'Pre-Market', time: data.market_hours.pre_market.start + ' - ' + data.market_hours.pre_market.end, color: 'border-l-amber' },
             { label: 'Regular', time: data.market_hours.regular.start + ' - ' + data.market_hours.regular.end, color: 'border-l-electric' },
             { label: 'After Hours', time: data.market_hours.after_hours.start + ' - ' + data.market_hours.after_hours.end, color: 'border-l-amber' },
           ].map((h) => (
-            <div key={h.label} className={`bg-navy-700/50 rounded px-3 py-2 border-l-2 ${h.color}`}>
+            <div key={h.label} className={`bg-white/[0.02] rounded-xl px-4 py-2.5 border-l-2 ${h.color}`}>
               <div className="flex justify-between items-center">
                 <span className="text-xs font-medium text-text-primary">{h.label}</span>
                 <span className="text-xs font-[family-name:var(--font-mono)] text-text-secondary">{h.time}</span>
@@ -142,16 +141,16 @@ export default function MarketStatus() {
         </div>
 
         {data.guide && (
-          <div className="space-y-2 mt-3">
+          <div className="space-y-2.5 mt-4">
             {data.guide.best_times && (
-              <div className="bg-electric/5 border border-electric/20 rounded-lg p-3">
-                <p className="text-xs font-medium text-electric mb-1">Best Times to Trade</p>
+              <div className="bg-electric/[0.04] border border-electric/10 rounded-xl p-4">
+                <p className="text-xs font-medium text-electric mb-1.5">Best Times to Trade</p>
                 <p className="text-xs text-text-secondary leading-relaxed">{data.guide.best_times}</p>
               </div>
             )}
             {data.guide.settlement && (
-              <div className="bg-navy-700/50 rounded-lg p-3">
-                <p className="text-xs font-medium text-amber mb-1">Settlement (T+1)</p>
+              <div className="bg-white/[0.02] rounded-xl p-4">
+                <p className="text-xs font-medium text-amber mb-1.5">Settlement (T+1)</p>
                 <p className="text-xs text-text-secondary leading-relaxed">{data.guide.settlement}</p>
               </div>
             )}

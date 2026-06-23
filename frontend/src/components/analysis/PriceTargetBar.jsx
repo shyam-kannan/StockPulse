@@ -29,77 +29,71 @@ export default function PriceTargetBar({ priceTargets, currentPrice }) {
   const hardStop = priceTargets.hard_stop?.price;
 
   return (
-    <div className="space-y-4">
-      {/* Main range bar */}
+    <div className="space-y-5">
       <div className="relative pt-8 pb-6">
-        {/* Bar background */}
-        <div className="relative h-3 bg-navy-700 rounded-full overflow-hidden">
-          {/* Gradient fill from bear to stretched */}
+        <div className="relative h-2.5 bg-white/[0.06] rounded-full overflow-hidden">
           {markers.length >= 2 && (
             <div
               className="absolute h-full rounded-full"
               style={{
                 left: `${pct(markers[0].price)}%`,
                 width: `${pct(markers[markers.length - 1].price) - pct(markers[0].price)}%`,
-                background: 'linear-gradient(to right, #ff4757, #ffb800, #00cc6a, #00ff88)',
+                background: 'linear-gradient(to right, #ef4444, #f59e0b, #059669, #10b981)',
               }}
             />
           )}
         </div>
 
-        {/* Price markers */}
         {markers.map((m) => (
           <div
             key={m.label}
             className="absolute flex flex-col items-center"
             style={{ left: `${pct(m.price)}%`, transform: 'translateX(-50%)' }}
           >
-            <span className={`text-[10px] font-medium ${m.textColor} -mt-1`} style={{ position: 'absolute', top: '-24px' }}>
+            <span className={`text-[10px] font-medium ${m.textColor}`} style={{ position: 'absolute', top: '-24px' }}>
               {m.label}
             </span>
-            <div className={`w-2.5 h-2.5 ${m.color} rounded-full border-2 border-navy-800`} style={{ position: 'absolute', top: '0px', marginTop: '-1px' }} />
+            <div className={`w-3 h-3 ${m.color} rounded-full border-2 border-navy-800 shadow-sm`} style={{ position: 'absolute', top: '0px', marginTop: '-2px' }} />
             <span className="text-[10px] font-[family-name:var(--font-mono)] text-text-muted" style={{ position: 'absolute', top: '18px' }}>
               {formatPrice(m.price)}
             </span>
           </div>
         ))}
 
-        {/* Current price marker */}
         {currentPrice && currentPrice > 0 && (
           <div
             className="absolute flex flex-col items-center"
             style={{ left: `${pct(currentPrice)}%`, transform: 'translateX(-50%)' }}
           >
             <div className="w-0.5 h-6 bg-text-primary" style={{ position: 'absolute', top: '-4px' }} />
-            <span className="text-[10px] font-semibold text-text-primary font-[family-name:var(--font-mono)] bg-navy-800 px-1 rounded" style={{ position: 'absolute', top: '22px' }}>
+            <span className="text-[10px] font-semibold text-text-primary font-[family-name:var(--font-mono)] bg-navy-800 px-1.5 rounded-md" style={{ position: 'absolute', top: '22px' }}>
               NOW {formatPrice(currentPrice)}
             </span>
           </div>
         )}
       </div>
 
-      {/* Entry/Trim/Stop levels */}
       <div className="grid grid-cols-3 gap-3 text-center">
         {entryLow && entryHigh && (
-          <div className="bg-navy-700/50 rounded-lg p-2">
-            <p className="text-[10px] uppercase text-text-muted mb-0.5">Entry Zone</p>
-            <p className="text-xs font-[family-name:var(--font-mono)] text-electric">
+          <div className="bg-white/[0.03] rounded-xl p-3">
+            <p className="text-[10px] uppercase text-text-muted mb-1 tracking-wider">Entry Zone</p>
+            <p className="text-xs font-[family-name:var(--font-mono)] text-electric font-medium">
               {formatPrice(entryLow)} - {formatPrice(entryHigh)}
             </p>
           </div>
         )}
         {priceTargets.trim_levels?.length > 0 && (
-          <div className="bg-navy-700/50 rounded-lg p-2">
-            <p className="text-[10px] uppercase text-text-muted mb-0.5">Trim Levels</p>
-            <p className="text-xs font-[family-name:var(--font-mono)] text-amber">
+          <div className="bg-white/[0.03] rounded-xl p-3">
+            <p className="text-[10px] uppercase text-text-muted mb-1 tracking-wider">Trim Levels</p>
+            <p className="text-xs font-[family-name:var(--font-mono)] text-amber font-medium">
               {priceTargets.trim_levels.map((p) => formatPrice(p)).join(' / ')}
             </p>
           </div>
         )}
         {hardStop && (
-          <div className="bg-navy-700/50 rounded-lg p-2">
-            <p className="text-[10px] uppercase text-text-muted mb-0.5">Hard Stop</p>
-            <p className="text-xs font-[family-name:var(--font-mono)] text-danger">
+          <div className="bg-white/[0.03] rounded-xl p-3">
+            <p className="text-[10px] uppercase text-text-muted mb-1 tracking-wider">Hard Stop</p>
+            <p className="text-xs font-[family-name:var(--font-mono)] text-danger font-medium">
               {formatPrice(hardStop)}
             </p>
           </div>

@@ -14,17 +14,17 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar marketStatus={marketStatus} />
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-6">
+        <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/analysis" element={<AnalysisPage />} />
             <Route path="/analysis/:ticker" element={<AnalysisPage />} />
             <Route path="/market" element={<MarketPage />} />
             <Route path="*" element={
-              <div className="flex items-center justify-center h-64">
+              <div className="flex items-center justify-center h-[60vh]">
                 <div className="text-center">
-                  <h2 className="text-4xl font-bold text-text-muted font-[family-name:var(--font-mono)]">404</h2>
-                  <p className="text-text-secondary mt-2">Page not found</p>
+                  <h2 className="text-6xl font-bold text-text-muted/30 font-[family-name:var(--font-mono)]">404</h2>
+                  <p className="text-text-secondary mt-3 text-lg">Page not found</p>
                 </div>
               </div>
             } />

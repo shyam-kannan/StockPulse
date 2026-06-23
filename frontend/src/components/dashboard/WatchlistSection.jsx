@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Star, X, RefreshCw } from 'lucide-react';
+import { Star, X } from 'lucide-react';
 
 export default function WatchlistSection({ watchlist, setWatchlist, trendingData }) {
   const navigate = useNavigate();
@@ -17,23 +17,23 @@ export default function WatchlistSection({ watchlist, setWatchlist, trendingData
   };
 
   return (
-    <div className="bg-navy-800/50 border border-border rounded-xl p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
+    <div className="card p-5 fade-in">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
           <Star className="w-4 h-4 text-amber fill-amber" />
           <h3 className="text-sm font-semibold text-text-primary">Watchlist</h3>
         </div>
-        <span className="text-xs text-text-muted">{watchlist.length} tickers</span>
+        <span className="text-xs text-text-muted font-[family-name:var(--font-mono)]">{watchlist.length} tickers</span>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-3 overflow-x-auto pb-1">
         {watchlist.map((ticker) => {
           const data = getTickerData(ticker);
           return (
             <button
               key={ticker}
               onClick={() => navigate(`/analysis/${ticker}`)}
-              className="shrink-0 flex items-center gap-2 px-3 py-2 bg-navy-700 border border-border rounded-lg hover:border-electric/50 transition-colors group"
+              className="shrink-0 flex items-center gap-3 px-4 py-2.5 bg-white/[0.03] border border-border rounded-xl hover:border-border-hover hover:bg-white/[0.06] transition-all group"
             >
               <span className="text-sm font-semibold text-electric font-[family-name:var(--font-mono)]">
                 {ticker}
@@ -44,12 +44,12 @@ export default function WatchlistSection({ watchlist, setWatchlist, trendingData
                 </span>
               )}
               {data?.price_change_pct != null && (
-                <span className={`text-xs font-[family-name:var(--font-mono)] ${data.price_change_pct >= 0 ? 'text-electric' : 'text-danger'}`}>
+                <span className={`text-xs font-medium font-[family-name:var(--font-mono)] ${data.price_change_pct >= 0 ? 'text-electric' : 'text-danger'}`}>
                   {data.price_change_pct >= 0 ? '+' : ''}{data.price_change_pct}%
                 </span>
               )}
               <X
-                className="w-3 h-3 text-text-muted opacity-0 group-hover:opacity-100 hover:text-danger transition-all"
+                className="w-3.5 h-3.5 text-text-muted opacity-0 group-hover:opacity-100 hover:text-danger transition-all"
                 onClick={(e) => removeFromWatchlist(e, ticker)}
               />
             </button>

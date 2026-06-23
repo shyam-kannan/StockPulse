@@ -33,7 +33,7 @@ def get_client() -> AsyncAnthropic:
     return _client
 
 
-MODEL = "claude-sonnet-4-20250514"
+MODEL = "claude-sonnet-4-6"
 
 
 def fetch_yfinance_data(ticker: str) -> dict:
