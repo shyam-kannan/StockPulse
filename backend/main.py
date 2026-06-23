@@ -11,10 +11,10 @@ load_dotenv()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    from database import init_db
     print("StockPulse backend starting up...")
+    await init_db()
     yield
-    # Shutdown
     print("StockPulse backend shutting down...")
 
 
