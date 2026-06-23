@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 load_dotenv()
@@ -287,6 +287,22 @@ async def get_education():
             "details": "Diversification means if one investment drops, your whole portfolio doesn't tank. Basic rules: (1) Don't put more than 5-10% of your portfolio in a single stock. (2) Spread across sectors — tech, healthcare, finance, energy, consumer. (3) Include different asset types — stocks, bonds, international. (4) ETFs like SPY (S&P 500) or QQQ (Nasdaq 100) give instant diversification. A portfolio of 5 tech stocks is NOT diversified even though it's 5 stocks — they'll all drop together if tech sells off. Aim for 15-25 individual positions or a mix of ETFs and individual picks.",
         },
     ]
+
+
+@app.get("/api/stock/{ticker}")
+async def get_stock(ticker: str):
+    ticker = ticker.upper().strip()
+    if not ticker.isalpha() or len(ticker) > 5 or len(ticker) < 1:
+        raise HTTPException(status_code=400, detail="Invalid ticker format. Use 1-5 letters.")
+
+    from analysis import get_stock_analysis
+    try:
+        result = await get_stock_analysis(ticker)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 
 @app.get("/api/tickers/search")
