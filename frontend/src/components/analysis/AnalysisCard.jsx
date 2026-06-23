@@ -1,3 +1,5 @@
+import { AlertCircle } from 'lucide-react';
+
 function SkeletonContent() {
   return (
     <div className="space-y-3">
@@ -10,32 +12,37 @@ function SkeletonContent() {
   );
 }
 
+const accentStyles = {
+  electric: { border: 'border-l-electric', bg: 'bg-electric/[0.08]', text: 'text-electric' },
+  amber: { border: 'border-l-amber', bg: 'bg-amber/[0.08]', text: 'text-amber' },
+  danger: { border: 'border-l-danger', bg: 'bg-danger/[0.08]', text: 'text-danger' },
+};
+
 export default function AnalysisCard({ title, icon: Icon, accentColor = 'electric', loading, error, children }) {
-  const accentStyles = {
-    electric: 'from-electric/20 to-transparent',
-    amber: 'from-amber/20 to-transparent',
-    danger: 'from-danger/20 to-transparent',
-  };
+  const accent = accentStyles[accentColor] || accentStyles.electric;
 
   return (
-    <div className="card overflow-hidden">
-      <div className="relative px-5 py-4 border-b border-border flex items-center gap-2.5">
-        <div className={`absolute inset-0 bg-gradient-to-r ${accentStyles[accentColor] || accentStyles.electric} opacity-[0.04]`} />
-        <div className={`relative w-7 h-7 rounded-lg bg-${accentColor}/10 flex items-center justify-center`}>
-          {Icon && <Icon className={`w-3.5 h-3.5 text-${accentColor}`} />}
-        </div>
-        <h3 className="relative text-sm font-semibold text-text-primary">{title}</h3>
+    <div className={`card overflow-hidden border-l-2 ${accent.border}`}>
+      <div className="px-6 pt-5 pb-4 flex items-center gap-3">
+        {Icon && (
+          <div className={`w-8 h-8 rounded-xl ${accent.bg} flex items-center justify-center shrink-0`}>
+            <Icon className={`w-4 h-4 ${accent.text}`} />
+          </div>
+        )}
+        <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
       </div>
-      <div className="p-5">
+
+      <div className="px-6 pb-6">
         {loading ? (
           <SkeletonContent />
         ) : error ? (
-          <div className="text-center py-6">
-            <p className="text-amber text-sm">Analysis unavailable</p>
-            <p className="text-text-muted text-xs mt-1">{error}</p>
+          <div className="flex flex-col items-center justify-center py-8 gap-2">
+            <AlertCircle className="w-5 h-5 text-amber" />
+            <p className="text-sm text-text-secondary">Analysis unavailable</p>
+            <p className="text-xs text-text-muted mt-0.5">{error}</p>
           </div>
         ) : (
-          children
+          <div className="fade-in">{children}</div>
         )}
       </div>
     </div>
