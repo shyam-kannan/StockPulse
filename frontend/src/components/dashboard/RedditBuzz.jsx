@@ -12,6 +12,7 @@ const subredditColors = {
   Daytrading: 'bg-rose-500/10 text-rose-400',
   StockTwits: 'bg-sky-500/10 text-sky-400',
   'X/Twitter': 'bg-white/10 text-white',
+  'Reddit': 'bg-orange-500/10 text-orange-400',
 };
 
 export default function RedditBuzz({ posts, loading }) {
@@ -76,7 +77,7 @@ export default function RedditBuzz({ posts, loading }) {
                   </p>
                   <div className="flex items-center gap-2 mt-2 flex-wrap">
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md ${colorClass}`}>
-                      {post.subreddit === 'X/Twitter' ? '𝕏' : post.subreddit === 'StockTwits' ? 'ST' : `r/${post.subreddit}`}
+                      {post.subreddit === 'X/Twitter' ? '𝕏' : post.subreddit === 'StockTwits' ? 'ST' : post.subreddit === 'Reddit' ? 'Reddit' : `r/${post.subreddit}`}
                     </span>
                     <span className="text-xs text-text-muted flex items-center gap-1">
                       <MessageCircle className="w-3 h-3" />

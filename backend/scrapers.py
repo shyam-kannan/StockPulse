@@ -19,16 +19,6 @@ from database import (
     cleanup_old_data,
 )
 
-REDDIT_SUBREDDITS = [
-    "wallstreetbets",
-    "stocks",
-    "investing",
-    "StockMarket",
-    "SecurityAnalysis",
-    "options",
-    "Daytrading",
-]
-
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
@@ -64,117 +54,11 @@ def get_sentiment(text: str) -> float:
         return 0.0
 
 
-# ── Reddit scraping via AsyncPRAW (same approach as the HRL notebook) ──
-
-async def scrape_reddit_asyncpraw() -> tuple[list[dict], list[dict]]:
-    """Scrape Reddit using AsyncPRAW — simple, direct, works.
-    Mirrors the approach from Complete_HRL_with_NLP_Meta_data.ipynb:
-    connect, iterate subreddits, grab hot + new posts, extract tickers."""
-    try:
-        import asyncpraw
-    except ImportError:
-        print("  [Reddit] asyncpraw not installed, skipping")
-        return [], []
-
-    client_id = os.getenv("REDDIT_CLIENT_ID")
-    client_secret = os.getenv("REDDIT_CLIENT_SECRET")
-
-    if not client_id or not client_secret:
-        print("  [Reddit] REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET not set, skipping")
-        return [], []
-
-    all_posts = []
-    all_mentions = []
-    seen_ids = set()
-
-    try:
-        reddit = asyncpraw.Reddit(
-            client_id=client_id,
-            client_secret=client_secret,
-            user_agent="StockPulse/1.0 (financial sentiment tracker)",
-        )
-
-        for sub_name in REDDIT_SUBREDDITS:
-            try:
-                subreddit = await reddit.subreddit(sub_name)
-                count = 0
-
-                # Grab both hot and new posts (notebook uses .new with limit=500)
-                fetches = [
-                    ("hot", subreddit.hot(limit=50)),
-                    ("new", subreddit.new(limit=100)),
-                ]
-
-                for label, listing in fetches:
-                    async for submission in listing:
-                        if submission.id in seen_ids or submission.stickied:
-                            continue
-                        seen_ids.add(submission.id)
-
-                        title = submission.title or ""
-                        selftext = (submission.selftext or "")[:2000]
-                        full_text = f"{title} {selftext}"
-
-                        tickers = extract_tickers(full_text)
-                        if not tickers:
-                            continue
-
-                        sentiment = get_sentiment(full_text)
-
-                        all_posts.append({
-                            "id": submission.id,
-                            "subreddit": sub_name,
-                            "title": title,
-                            "selftext": selftext,
-                            "score": submission.score,
-                            "num_comments": submission.num_comments,
-                            "author": str(submission.author) if submission.author else "",
-                            "url": f"https://reddit.com{submission.permalink}",
-                            "created_utc": submission.created_utc,
-                            "sentiment": sentiment,
-                            "tickers": tickers,
-                        })
-                        count += 1
-
-                        for ticker in tickers:
-                            all_mentions.append({
-                                "ticker": ticker,
-                                "source_type": "reddit",
-                                "source_id": submission.id,
-                                "source_title": title[:200],
-                                "mentioned_at": submission.created_utc,
-                                "sentiment": sentiment,
-                            })
-
-                print(f"  [Reddit] r/{sub_name}: {count} posts with ticker mentions")
-
-            except Exception as e:
-                print(f"  [Reddit] r/{sub_name}: Error - {e}")
-
-        await reddit.close()
-
-    except Exception as e:
-        print(f"  [Reddit] Fatal error: {e}")
-
-    return all_posts, all_mentions
-
-
-def scrape_all_reddit() -> tuple[list[dict], list[dict]]:
-    print("[Scraper] Starting Reddit scrape...")
-    loop = asyncio.new_event_loop()
-    try:
-        posts, mentions = loop.run_until_complete(scrape_reddit_asyncpraw())
-    except Exception as e:
-        print(f"  [Reddit] Failed: {e}")
-        posts, mentions = [], []
-    finally:
-        loop.close()
-
-    print(f"[Scraper] Reddit complete: {len(posts)} posts, {len(mentions)} mentions")
-    return posts, mentions
-
-
-# ── Twitter/X via Grok (xAI API has native X access) ─────────────
+# ── Grok social scraper (Twitter/X + Reddit via xAI API) ─────────
+# Reddit's Data API policy requires explicit approval for API access,
+# so we use Grok (which has native X access and web access to public
+# Reddit) instead of direct Reddit API scraping. ApeWisdom provides
+# the quantitative Reddit mention counts separately.
 
 def _parse_grok_json(text: str) -> list:
     """Extract JSON array from Grok response, handling markdown fences."""
@@ -199,117 +83,139 @@ def _parse_grok_json(text: str) -> list:
     return []
 
 
-def scrape_twitter_via_grok() -> tuple[list[dict], list[dict]]:
-    """Use xAI's Grok API to find trending stock discussions on X/Twitter.
-    Grok has native real-time access to X posts."""
-    print("[Scraper] Starting Twitter/X scrape via Grok...")
+def _grok_request(api_key: str, system: str, prompt: str) -> list:
+    """Make a single Grok API call and parse the JSON array response."""
+    with httpx.Client() as client:
+        resp = client.post(
+            "https://api.x.ai/v1/chat/completions",
+            json={
+                "model": "grok-3-mini",
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": 0.2,
+            },
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            timeout=90,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        content = data["choices"][0]["message"]["content"]
+        return _parse_grok_json(content)
+
+
+def scrape_social_via_grok() -> tuple[list[dict], list[dict]]:
+    """Use Grok to find trending stock discussions on both X/Twitter AND Reddit.
+    One API call covers both platforms — Grok has native X access and can
+    see public Reddit content."""
+    print("[Scraper] Starting social scrape via Grok (X + Reddit)...")
 
     api_key = os.getenv("XAI_API_KEY")
     if not api_key:
-        print("  [Twitter/Grok] XAI_API_KEY not set, skipping")
+        print("  [Grok] XAI_API_KEY not set, skipping social scrape")
         return [], []
 
     all_posts = []
     all_mentions = []
 
+    system = (
+        "You are a financial market analyst with real-time access to X/Twitter "
+        "and public Reddit communities (r/wallstreetbets, r/stocks, r/investing, "
+        "r/StockMarket, r/options). Report only on stocks and tickers that are "
+        "genuinely being discussed right now. Be accurate about sentiment."
+    )
+
     prompt = (
-        "Search X (Twitter) right now for the most popular investing and stock market "
-        "conversations from the last 24 hours. Focus on posts from financial accounts, "
-        "traders, and investing communities.\n\n"
-        "Return a JSON array of the top 20 most discussed stocks/tickers with this exact format:\n"
+        "Search BOTH X (Twitter) AND Reddit right now for the most popular investing "
+        "and stock market conversations from the last 24 hours.\n\n"
+        "For X/Twitter: focus on posts from FinTwit accounts, traders, analysts.\n"
+        "For Reddit: focus on r/wallstreetbets, r/stocks, r/investing, r/StockMarket, r/options.\n\n"
+        "Return a JSON array of the top 25 most discussed stocks/tickers:\n"
         "[\n"
         '  {\n'
         '    "ticker": "AAPL",\n'
         '    "company": "Apple Inc.",\n'
+        '    "platform": "twitter",\n'
         '    "mentions": 1500,\n'
         '    "sentiment": "bullish",\n'
-        '    "narrative": "Brief description of why this stock is trending",\n'
+        '    "narrative": "Why this stock is trending right now",\n'
         '    "posts": [\n'
-        '      "Summary of a notable post or conversation about this stock",\n'
-        '      "Another notable post summary"\n'
+        '      "Summary of a notable post/conversation about this stock",\n'
+        '      "Another notable post"\n'
         '    ]\n'
         '  }\n'
         "]\n\n"
         "Rules:\n"
-        "- Only include real tickers actively being discussed right now on X\n"
+        "- platform must be exactly: twitter or reddit\n"
+        "- Include stocks from BOTH platforms (roughly half and half)\n"
         "- sentiment must be exactly: bullish, bearish, or neutral\n"
-        "- posts array should have 2-3 summaries of actual X conversations\n"
-        "- mentions is your estimate of how many X posts mention this ticker today\n"
+        "- posts array: 2-3 summaries of actual conversations on that platform\n"
+        "- mentions: estimated number of posts/comments mentioning this ticker today\n"
+        "- Only include real tickers actively being discussed RIGHT NOW\n"
         "- Return ONLY the JSON array, no other text"
     )
 
     try:
-        with httpx.Client() as client:
-            resp = client.post(
-                "https://api.x.ai/v1/chat/completions",
-                json={
-                    "model": "grok-3-mini",
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": (
-                                "You are a financial market analyst with real-time access to X/Twitter. "
-                                "Report only on stocks and tickers that are genuinely trending on X right now. "
-                                "Be accurate about sentiment and narratives."
-                            ),
-                        },
-                        {"role": "user", "content": prompt},
-                    ],
-                    "temperature": 0.2,
-                },
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json",
-                },
-                timeout=60,
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        stocks = _grok_request(api_key, system, prompt)
+        sentiment_map = {"bullish": 0.5, "bearish": -0.5, "neutral": 0.0}
 
-            content = data["choices"][0]["message"]["content"]
-            stocks = _parse_grok_json(content)
+        for stock in stocks:
+            ticker = stock.get("ticker", "").upper()
+            if not ticker:
+                continue
 
-            sentiment_map = {"bullish": 0.5, "bearish": -0.5, "neutral": 0.0}
+            platform = stock.get("platform", "twitter").lower()
+            sentiment_val = sentiment_map.get(stock.get("sentiment", "neutral"), 0.0)
+            company = stock.get("company", ticker)
+            narrative = stock.get("narrative", "trending")
+            est_mentions = stock.get("mentions", 0)
 
-            for stock in stocks:
-                ticker = stock.get("ticker", "").upper()
-                if not ticker:
-                    continue
+            if platform == "reddit":
+                source_label = "Reddit"
+                source_type = "reddit"
+                subreddit_val = "Reddit"
+                url = f"https://www.reddit.com/search/?q=%24{ticker}&type=link&sort=new"
+            else:
+                source_label = "X/Twitter"
+                source_type = "twitter"
+                subreddit_val = "X/Twitter"
+                url = f"https://x.com/search?q=%24{ticker}"
 
-                sentiment_val = sentiment_map.get(stock.get("sentiment", "neutral"), 0.0)
-                company = stock.get("company", ticker)
-                narrative = stock.get("narrative", "trending on X")
-                est_mentions = stock.get("mentions", 0)
-
-                for i, post_summary in enumerate(stock.get("posts", [])[:3]):
-                    post_id = f"xgrok_{ticker}_{int(time.time())}_{i}"
-                    all_posts.append({
-                        "id": post_id,
-                        "subreddit": "X/Twitter",
-                        "title": post_summary[:200],
-                        "selftext": "",
-                        "score": est_mentions,
-                        "num_comments": 0,
-                        "author": "",
-                        "url": f"https://x.com/search?q=%24{ticker}",
-                        "created_utc": time.time(),
-                        "sentiment": sentiment_val,
-                        "tickers": [ticker],
-                    })
-
-                all_mentions.append({
-                    "ticker": ticker,
-                    "source_type": "twitter",
-                    "source_id": f"xgrok_{ticker}",
-                    "source_title": f"[X/Twitter] {company} — {narrative} (~{est_mentions} posts)",
-                    "mentioned_at": time.time(),
+            for i, post_summary in enumerate(stock.get("posts", [])[:3]):
+                post_id = f"grok_{platform}_{ticker}_{int(time.time())}_{i}"
+                all_posts.append({
+                    "id": post_id,
+                    "subreddit": subreddit_val,
+                    "title": post_summary[:200],
+                    "selftext": "",
+                    "score": est_mentions,
+                    "num_comments": 0,
+                    "author": "",
+                    "url": url,
+                    "created_utc": time.time(),
                     "sentiment": sentiment_val,
+                    "tickers": [ticker],
                 })
 
-            print(f"  [Twitter/Grok] Found {len(stocks)} trending tickers, {len(all_posts)} posts")
+            all_mentions.append({
+                "ticker": ticker,
+                "source_type": source_type,
+                "source_id": f"grok_{platform}_{ticker}",
+                "source_title": f"[{source_label}] {company} — {narrative} (~{est_mentions} posts)",
+                "mentioned_at": time.time(),
+                "sentiment": sentiment_val,
+            })
+
+        x_count = sum(1 for s in stocks if s.get("platform", "").lower() != "reddit")
+        r_count = sum(1 for s in stocks if s.get("platform", "").lower() == "reddit")
+        print(f"  [Grok] Found {len(stocks)} tickers ({x_count} from X, {r_count} from Reddit), {len(all_posts)} posts")
 
     except Exception as e:
-        print(f"  [Twitter/Grok] Error: {e}")
+        print(f"  [Grok] Error: {e}")
 
     return all_posts, all_mentions
 
@@ -631,33 +537,32 @@ def run_all_scrapers():
     print(f"{'='*60}")
 
     try:
-        reddit_posts, reddit_mentions = scrape_all_reddit()
+        # Grok covers both Twitter/X and Reddit in one call
+        social_posts, social_mentions = scrape_social_via_grok()
+
         news_items, news_mentions = scrape_all_news()
 
+        # ApeWisdom for quantitative Reddit mention counts (no API key needed)
         apewisdom_mentions = scrape_apewisdom()
-        reddit_mentions.extend(apewisdom_mentions)
+        social_mentions.extend(apewisdom_mentions)
 
+        # StockTwits for additional social data (no API key needed)
         st_posts, st_mentions = scrape_stocktwits_trending()
-        reddit_posts.extend(st_posts)
-        reddit_mentions.extend(st_mentions)
-
-        # Twitter/X via Grok
-        x_posts, x_mentions = scrape_twitter_via_grok()
-        reddit_posts.extend(x_posts)
-        reddit_mentions.extend(x_mentions)
+        social_posts.extend(st_posts)
+        social_mentions.extend(st_mentions)
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
             loop.run_until_complete(
-                save_scrape_results(reddit_posts, reddit_mentions, news_items, news_mentions)
+                save_scrape_results(social_posts, social_mentions, news_items, news_mentions)
             )
             loop.run_until_complete(cleanup_old_data(days=7))
         finally:
             loop.close()
 
-        total_mentions = len(reddit_mentions) + len(news_mentions)
-        print(f"\n[Scraper] Complete! {len(reddit_posts)} posts, {len(news_items)} news, {total_mentions} total mentions")
+        total_mentions = len(social_mentions) + len(news_mentions)
+        print(f"\n[Scraper] Complete! {len(social_posts)} posts, {len(news_items)} news, {total_mentions} total mentions")
 
     except Exception as e:
         print(f"[Scraper] FATAL ERROR: {e}")
