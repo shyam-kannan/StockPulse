@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import random
 import hashlib
@@ -63,25 +64,28 @@ def get_sentiment(text: str) -> float:
         return 0.0
 
 
-# ── AsyncPRAW Reddit scraping (primary method) ──────────────────
+# ── Reddit scraping via AsyncPRAW (same approach as the HRL notebook) ──
 
 async def scrape_reddit_asyncpraw() -> tuple[list[dict], list[dict]]:
-    """Primary Reddit scraper using AsyncPRAW (Reddit OAuth, 100 req/min)."""
+    """Scrape Reddit using AsyncPRAW — simple, direct, works.
+    Mirrors the approach from Complete_HRL_with_NLP_Meta_data.ipynb:
+    connect, iterate subreddits, grab hot + new posts, extract tickers."""
     try:
         import asyncpraw
     except ImportError:
-        print("  [Reddit] asyncpraw not installed, skipping PRAW method")
+        print("  [Reddit] asyncpraw not installed, skipping")
         return [], []
 
     client_id = os.getenv("REDDIT_CLIENT_ID")
     client_secret = os.getenv("REDDIT_CLIENT_SECRET")
 
     if not client_id or not client_secret:
-        print("  [Reddit] REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET not set, skipping PRAW")
+        print("  [Reddit] REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET not set, skipping")
         return [], []
 
     all_posts = []
     all_mentions = []
+    seen_ids = set()
 
     try:
         reddit = asyncpraw.Reddit(
@@ -94,242 +98,220 @@ async def scrape_reddit_asyncpraw() -> tuple[list[dict], list[dict]]:
             try:
                 subreddit = await reddit.subreddit(sub_name)
                 count = 0
-                async for submission in subreddit.hot(limit=25):
-                    if submission.stickied:
-                        continue
 
-                    title = submission.title or ""
-                    selftext = (submission.selftext or "")[:2000]
-                    full_text = f"{title} {selftext}"
+                # Grab both hot and new posts (notebook uses .new with limit=500)
+                fetches = [
+                    ("hot", subreddit.hot(limit=50)),
+                    ("new", subreddit.new(limit=100)),
+                ]
 
-                    tickers = extract_tickers(full_text)
-                    if not tickers:
-                        continue
+                for label, listing in fetches:
+                    async for submission in listing:
+                        if submission.id in seen_ids or submission.stickied:
+                            continue
+                        seen_ids.add(submission.id)
 
-                    sentiment = get_sentiment(full_text)
+                        title = submission.title or ""
+                        selftext = (submission.selftext or "")[:2000]
+                        full_text = f"{title} {selftext}"
 
-                    post = {
-                        "id": submission.id,
-                        "subreddit": sub_name,
-                        "title": title,
-                        "selftext": selftext,
-                        "score": submission.score,
-                        "num_comments": submission.num_comments,
-                        "author": str(submission.author) if submission.author else "",
-                        "url": f"https://reddit.com{submission.permalink}",
-                        "created_utc": submission.created_utc,
-                        "sentiment": sentiment,
-                        "tickers": tickers,
-                    }
-                    all_posts.append(post)
-                    count += 1
+                        tickers = extract_tickers(full_text)
+                        if not tickers:
+                            continue
 
-                    for ticker in tickers:
-                        all_mentions.append({
-                            "ticker": ticker,
-                            "source_type": "reddit",
-                            "source_id": submission.id,
-                            "source_title": title[:200],
-                            "mentioned_at": submission.created_utc,
+                        sentiment = get_sentiment(full_text)
+
+                        all_posts.append({
+                            "id": submission.id,
+                            "subreddit": sub_name,
+                            "title": title,
+                            "selftext": selftext,
+                            "score": submission.score,
+                            "num_comments": submission.num_comments,
+                            "author": str(submission.author) if submission.author else "",
+                            "url": f"https://reddit.com{submission.permalink}",
+                            "created_utc": submission.created_utc,
                             "sentiment": sentiment,
+                            "tickers": tickers,
                         })
+                        count += 1
 
-                print(f"  [Reddit/PRAW] r/{sub_name}: {count} posts with ticker mentions")
+                        for ticker in tickers:
+                            all_mentions.append({
+                                "ticker": ticker,
+                                "source_type": "reddit",
+                                "source_id": submission.id,
+                                "source_title": title[:200],
+                                "mentioned_at": submission.created_utc,
+                                "sentiment": sentiment,
+                            })
+
+                print(f"  [Reddit] r/{sub_name}: {count} posts with ticker mentions")
 
             except Exception as e:
-                print(f"  [Reddit/PRAW] r/{sub_name}: Error - {e}")
+                print(f"  [Reddit] r/{sub_name}: Error - {e}")
 
         await reddit.close()
 
     except Exception as e:
-        print(f"  [Reddit/PRAW] Fatal error: {e}")
+        print(f"  [Reddit] Fatal error: {e}")
 
     return all_posts, all_mentions
 
-
-# ── PullPush API fallback (archival Reddit data, no auth) ────────
-
-def scrape_pullpush(client: httpx.Client) -> tuple[list[dict], list[dict]]:
-    """Fallback Reddit scraper using PullPush.io API (no auth needed)."""
-    all_posts = []
-    all_mentions = []
-
-    for sub_name in REDDIT_SUBREDDITS:
-        try:
-            url = f"https://api.pullpush.io/reddit/search/submission/?subreddit={sub_name}&sort=score&sort_type=desc&size=25"
-            resp = client.get(url, headers=_get_headers(), timeout=20)
-
-            if resp.status_code == 429:
-                print(f"  [PullPush] r/{sub_name}: Rate limited, skipping")
-                time.sleep(2)
-                continue
-
-            resp.raise_for_status()
-            data = resp.json()
-            posts = data.get("data", [])
-            count = 0
-
-            for post_data in posts:
-                title = post_data.get("title", "")
-                selftext = (post_data.get("selftext", "") or "")[:2000]
-                if selftext == "[removed]" or selftext == "[deleted]":
-                    selftext = ""
-                full_text = f"{title} {selftext}"
-
-                tickers = extract_tickers(full_text)
-                if not tickers:
-                    continue
-
-                sentiment = get_sentiment(full_text)
-                post_id = post_data.get("id", "")
-
-                post = {
-                    "id": f"pp_{post_id}",
-                    "subreddit": sub_name,
-                    "title": title,
-                    "selftext": selftext,
-                    "score": post_data.get("score", 0),
-                    "num_comments": post_data.get("num_comments", 0),
-                    "author": post_data.get("author", ""),
-                    "url": f"https://reddit.com{post_data.get('permalink', '')}",
-                    "created_utc": post_data.get("created_utc", time.time()),
-                    "sentiment": sentiment,
-                    "tickers": tickers,
-                }
-                all_posts.append(post)
-                count += 1
-
-                for ticker in tickers:
-                    all_mentions.append({
-                        "ticker": ticker,
-                        "source_type": "reddit",
-                        "source_id": f"pp_{post_id}",
-                        "source_title": title[:200],
-                        "mentioned_at": post_data.get("created_utc", time.time()),
-                        "sentiment": sentiment,
-                    })
-
-            print(f"  [PullPush] r/{sub_name}: {count} posts with ticker mentions")
-
-        except Exception as e:
-            print(f"  [PullPush] r/{sub_name}: Error - {e}")
-
-        time.sleep(random.uniform(1, 2))
-
-    return all_posts, all_mentions
-
-
-# ── old.reddit.com JSON (last-resort fallback) ──────────────────
-
-def scrape_reddit_json(client: httpx.Client) -> tuple[list[dict], list[dict]]:
-    """Last resort: scrape old.reddit.com JSON. Frequently rate-limited."""
-    all_posts = []
-    all_mentions = []
-
-    for subreddit in REDDIT_SUBREDDITS[:3]:
-        try:
-            url = f"https://old.reddit.com/r/{subreddit}/hot.json?limit=15"
-            resp = client.get(url, headers=_get_headers(), timeout=15)
-
-            if resp.status_code == 429:
-                print(f"  [Reddit/JSON] r/{subreddit}: Rate limited (429)")
-                continue
-
-            resp.raise_for_status()
-            data = resp.json()
-            children = data.get("data", {}).get("children", [])
-            count = 0
-
-            for child in children:
-                post_data = child.get("data", {})
-                if not post_data.get("title") or post_data.get("stickied"):
-                    continue
-
-                title = post_data.get("title", "")
-                selftext = post_data.get("selftext", "")[:2000]
-                full_text = f"{title} {selftext}"
-
-                tickers = extract_tickers(full_text)
-                if not tickers:
-                    continue
-
-                sentiment = get_sentiment(full_text)
-                pid = post_data.get("id", "")
-
-                all_posts.append({
-                    "id": pid,
-                    "subreddit": subreddit,
-                    "title": title,
-                    "selftext": selftext,
-                    "score": post_data.get("score", 0),
-                    "num_comments": post_data.get("num_comments", 0),
-                    "author": post_data.get("author", ""),
-                    "url": f"https://reddit.com{post_data.get('permalink', '')}",
-                    "created_utc": post_data.get("created_utc", time.time()),
-                    "sentiment": sentiment,
-                    "tickers": tickers,
-                })
-                count += 1
-
-                for ticker in tickers:
-                    all_mentions.append({
-                        "ticker": ticker,
-                        "source_type": "reddit",
-                        "source_id": pid,
-                        "source_title": title[:200],
-                        "mentioned_at": post_data.get("created_utc", time.time()),
-                        "sentiment": sentiment,
-                    })
-
-            print(f"  [Reddit/JSON] r/{subreddit}: {count} posts")
-
-        except Exception as e:
-            print(f"  [Reddit/JSON] r/{subreddit}: Error - {e}")
-
-        time.sleep(random.uniform(3, 6))
-
-    return all_posts, all_mentions
-
-
-# ── Reddit orchestrator (tries methods in order) ────────────────
 
 def scrape_all_reddit() -> tuple[list[dict], list[dict]]:
     print("[Scraper] Starting Reddit scrape...")
-
-    # 1. Try AsyncPRAW first (best quality, 100 req/min)
     loop = asyncio.new_event_loop()
     try:
         posts, mentions = loop.run_until_complete(scrape_reddit_asyncpraw())
     except Exception as e:
-        print(f"  [Reddit/PRAW] Failed: {e}")
+        print(f"  [Reddit] Failed: {e}")
         posts, mentions = [], []
     finally:
         loop.close()
 
-    if len(posts) >= 5:
-        print(f"[Scraper] Reddit (PRAW) complete: {len(posts)} posts, {len(mentions)} mentions")
-        return posts, mentions
-
-    # 2. Fallback to PullPush API
-    print("  [Reddit] PRAW yielded few results, trying PullPush fallback...")
-    with httpx.Client() as client:
-        pp_posts, pp_mentions = scrape_pullpush(client)
-        posts.extend(pp_posts)
-        mentions.extend(pp_mentions)
-
-    if len(posts) >= 5:
-        print(f"[Scraper] Reddit (PullPush) complete: {len(posts)} posts, {len(mentions)} mentions")
-        return posts, mentions
-
-    # 3. Last resort: old.reddit.com JSON
-    print("  [Reddit] PullPush yielded few results, trying old.reddit.com JSON...")
-    with httpx.Client() as client:
-        json_posts, json_mentions = scrape_reddit_json(client)
-        posts.extend(json_posts)
-        mentions.extend(json_mentions)
-
     print(f"[Scraper] Reddit complete: {len(posts)} posts, {len(mentions)} mentions")
     return posts, mentions
+
+
+# ── Twitter/X via Grok (xAI API has native X access) ─────────────
+
+def _parse_grok_json(text: str) -> list:
+    """Extract JSON array from Grok response, handling markdown fences."""
+    text = text.strip()
+    if "```" in text:
+        start = text.find("```")
+        end = text.rfind("```")
+        inner = text[start:end]
+        first_newline = inner.find("\n")
+        if first_newline != -1:
+            text = inner[first_newline + 1:]
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        bracket_start = text.find("[")
+        bracket_end = text.rfind("]")
+        if bracket_start != -1 and bracket_end != -1:
+            try:
+                return json.loads(text[bracket_start:bracket_end + 1])
+            except json.JSONDecodeError:
+                pass
+    return []
+
+
+def scrape_twitter_via_grok() -> tuple[list[dict], list[dict]]:
+    """Use xAI's Grok API to find trending stock discussions on X/Twitter.
+    Grok has native real-time access to X posts."""
+    print("[Scraper] Starting Twitter/X scrape via Grok...")
+
+    api_key = os.getenv("XAI_API_KEY")
+    if not api_key:
+        print("  [Twitter/Grok] XAI_API_KEY not set, skipping")
+        return [], []
+
+    all_posts = []
+    all_mentions = []
+
+    prompt = (
+        "Search X (Twitter) right now for the most popular investing and stock market "
+        "conversations from the last 24 hours. Focus on posts from financial accounts, "
+        "traders, and investing communities.\n\n"
+        "Return a JSON array of the top 20 most discussed stocks/tickers with this exact format:\n"
+        "[\n"
+        '  {\n'
+        '    "ticker": "AAPL",\n'
+        '    "company": "Apple Inc.",\n'
+        '    "mentions": 1500,\n'
+        '    "sentiment": "bullish",\n'
+        '    "narrative": "Brief description of why this stock is trending",\n'
+        '    "posts": [\n'
+        '      "Summary of a notable post or conversation about this stock",\n'
+        '      "Another notable post summary"\n'
+        '    ]\n'
+        '  }\n'
+        "]\n\n"
+        "Rules:\n"
+        "- Only include real tickers actively being discussed right now on X\n"
+        "- sentiment must be exactly: bullish, bearish, or neutral\n"
+        "- posts array should have 2-3 summaries of actual X conversations\n"
+        "- mentions is your estimate of how many X posts mention this ticker today\n"
+        "- Return ONLY the JSON array, no other text"
+    )
+
+    try:
+        with httpx.Client() as client:
+            resp = client.post(
+                "https://api.x.ai/v1/chat/completions",
+                json={
+                    "model": "grok-3-mini",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": (
+                                "You are a financial market analyst with real-time access to X/Twitter. "
+                                "Report only on stocks and tickers that are genuinely trending on X right now. "
+                                "Be accurate about sentiment and narratives."
+                            ),
+                        },
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0.2,
+                },
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                timeout=60,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+
+            content = data["choices"][0]["message"]["content"]
+            stocks = _parse_grok_json(content)
+
+            sentiment_map = {"bullish": 0.5, "bearish": -0.5, "neutral": 0.0}
+
+            for stock in stocks:
+                ticker = stock.get("ticker", "").upper()
+                if not ticker:
+                    continue
+
+                sentiment_val = sentiment_map.get(stock.get("sentiment", "neutral"), 0.0)
+                company = stock.get("company", ticker)
+                narrative = stock.get("narrative", "trending on X")
+                est_mentions = stock.get("mentions", 0)
+
+                for i, post_summary in enumerate(stock.get("posts", [])[:3]):
+                    post_id = f"xgrok_{ticker}_{int(time.time())}_{i}"
+                    all_posts.append({
+                        "id": post_id,
+                        "subreddit": "X/Twitter",
+                        "title": post_summary[:200],
+                        "selftext": "",
+                        "score": est_mentions,
+                        "num_comments": 0,
+                        "author": "",
+                        "url": f"https://x.com/search?q=%24{ticker}",
+                        "created_utc": time.time(),
+                        "sentiment": sentiment_val,
+                        "tickers": [ticker],
+                    })
+
+                all_mentions.append({
+                    "ticker": ticker,
+                    "source_type": "twitter",
+                    "source_id": f"xgrok_{ticker}",
+                    "source_title": f"[X/Twitter] {company} — {narrative} (~{est_mentions} posts)",
+                    "mentioned_at": time.time(),
+                    "sentiment": sentiment_val,
+                })
+
+            print(f"  [Twitter/Grok] Found {len(stocks)} trending tickers, {len(all_posts)} posts")
+
+    except Exception as e:
+        print(f"  [Twitter/Grok] Error: {e}")
+
+    return all_posts, all_mentions
 
 
 # ── ApeWisdom (Reddit mention tracker, free, no auth) ─────────────
@@ -652,13 +634,17 @@ def run_all_scrapers():
         reddit_posts, reddit_mentions = scrape_all_reddit()
         news_items, news_mentions = scrape_all_news()
 
-        # Additional data sources
         apewisdom_mentions = scrape_apewisdom()
         reddit_mentions.extend(apewisdom_mentions)
 
         st_posts, st_mentions = scrape_stocktwits_trending()
         reddit_posts.extend(st_posts)
         reddit_mentions.extend(st_mentions)
+
+        # Twitter/X via Grok
+        x_posts, x_mentions = scrape_twitter_via_grok()
+        reddit_posts.extend(x_posts)
+        reddit_mentions.extend(x_mentions)
 
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

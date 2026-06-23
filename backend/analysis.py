@@ -361,10 +361,19 @@ async def generate_daily_briefing() -> dict:
         for t in trending
     ]) or "No trending tickers found."
 
-    reddit_text = "\n".join([
-        f"- [r/{p['subreddit']}] (score:{p['score']}, {p['num_comments']} comments) {p['title'][:150]}"
-        for p in reddit_posts
-    ]) or "No Reddit posts found."
+    reddit_items = []
+    twitter_items = []
+    for p in reddit_posts:
+        sub = p['subreddit']
+        if sub == 'X/Twitter':
+            twitter_items.append(f"- [X] {p['title'][:150]}")
+        elif sub == 'StockTwits':
+            twitter_items.append(f"- [StockTwits] (score:{p['score']}) {p['title'][:150]}")
+        else:
+            reddit_items.append(f"- [r/{sub}] (score:{p['score']}, {p['num_comments']} comments) {p['title'][:150]}")
+
+    reddit_text = "\n".join(reddit_items) or "No Reddit posts found."
+    twitter_text = "\n".join(twitter_items) or "No Twitter/X data found."
 
     news_text = "\n".join([
         f"- [{n['source']}] {n['title'][:150]}"
@@ -379,6 +388,9 @@ TRENDING STOCKS (by social media + news mentions in last 24h):
 
 RECENT REDDIT DISCUSSIONS (from r/wallstreetbets, r/stocks, r/investing, r/StockMarket, etc.):
 {reddit_text}
+
+RECENT TWITTER/X & STOCKTWITS CONVERSATIONS:
+{twitter_text}
 
 RECENT FINANCIAL NEWS:
 {news_text}
