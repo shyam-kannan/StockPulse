@@ -289,6 +289,23 @@ async def get_education():
     ]
 
 
+@app.get("/api/daily-briefing")
+async def get_daily_briefing():
+    from analysis import generate_daily_briefing
+    try:
+        result = await generate_daily_briefing()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Briefing failed: {str(e)}")
+
+
+@app.get("/api/reddit-activity")
+async def get_reddit_activity():
+    from database import get_recent_reddit_posts
+    posts = await get_recent_reddit_posts(limit=40)
+    return posts
+
+
 @app.get("/api/stock/{ticker}")
 async def get_stock(ticker: str):
     ticker = ticker.upper().strip()

@@ -18,6 +18,8 @@ export const api = {
   getFeed: () => fetchApi('/api/feed'),
   getMarketStatus: () => fetchApi('/api/market-status'),
   getEducation: () => fetchApi('/api/education'),
+  getDailyBriefing: () => fetchApi('/api/daily-briefing'),
+  getRedditActivity: () => fetchApi('/api/reddit-activity'),
   searchTickers: (q) => fetchApi(`/api/tickers/search?q=${encodeURIComponent(q)}`),
   triggerScrape: () => fetchApi('/api/scrape', { method: 'POST' }),
 };

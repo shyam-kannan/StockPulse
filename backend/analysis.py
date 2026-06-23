@@ -12,6 +12,11 @@ from database import (
     set_cached_analysis,
     get_ticker_mentions,
     get_reddit_posts_for_ticker,
+    get_trending_tickers,
+    get_recent_reddit_posts,
+    get_recent_news,
+    get_briefing_cache,
+    set_briefing_cache,
 )
 from tickers import get_company_name
 
@@ -339,6 +344,108 @@ Use real multiples and math. Return ONLY valid JSON."""
     except Exception as e:
         print(f"[Claude] Price target analysis error for {ticker}: {e}")
         return {"error": str(e), "bear_case": {"price": 0, "reasoning": "Analysis unavailable"}}
+
+
+async def generate_daily_briefing() -> dict:
+    cached = await get_briefing_cache()
+    if cached:
+        cached["from_cache"] = True
+        return cached
+
+    trending = await get_trending_tickers(hours=24, limit=20)
+    reddit_posts = await get_recent_reddit_posts(limit=60)
+    news = await get_recent_news(limit=30)
+
+    trending_text = "\n".join([
+        f"- {t['ticker']} ({get_company_name(t['ticker'])}): {t['mention_count']} mentions, sentiment {t['avg_sentiment']:+.2f}, sources: {','.join(t['sources'])}"
+        for t in trending
+    ]) or "No trending tickers found."
+
+    reddit_text = "\n".join([
+        f"- [r/{p['subreddit']}] (score:{p['score']}, {p['num_comments']} comments) {p['title'][:150]}"
+        for p in reddit_posts
+    ]) or "No Reddit posts found."
+
+    news_text = "\n".join([
+        f"- [{n['source']}] {n['title'][:150]}"
+        for n in news
+    ]) or "No news found."
+
+    client = get_client()
+    prompt = f"""You are an AI financial advisor for retail investors. Analyze today's market data and provide actionable insights.
+
+TRENDING STOCKS (by social media + news mentions in last 24h):
+{trending_text}
+
+RECENT REDDIT DISCUSSIONS (from r/wallstreetbets, r/stocks, r/investing, r/StockMarket, etc.):
+{reddit_text}
+
+RECENT FINANCIAL NEWS:
+{news_text}
+
+Provide a comprehensive daily briefing in this exact JSON format:
+{{
+  "market_overview": "2-3 sentence summary of today's market mood, what's driving sentiment, and the overall direction",
+  "themes": [
+    {{
+      "title": "Theme name (e.g., 'AI Infrastructure Boom', 'Energy for Data Centers', 'Semiconductor Supply Chain')",
+      "description": "2-3 sentences explaining this theme - what's happening, why it matters, and the investment thesis",
+      "tickers": ["TICKER1", "TICKER2", "TICKER3"],
+      "sentiment": "bullish|bearish|mixed"
+    }}
+  ],
+  "top_picks": [
+    {{
+      "ticker": "TICKER",
+      "company": "Company Name",
+      "action": "BUY|WATCH|AVOID",
+      "conviction": "high|medium|low",
+      "reason": "2-3 sentence specific reason why - mention catalysts, valuation, momentum, or risk",
+      "risk": "1 sentence key risk"
+    }}
+  ],
+  "reddit_narrative": "2-3 sentences summarizing what retail investors on Reddit are most excited or worried about right now. What are the dominant narratives and contrarian takes?",
+  "risk_warnings": [
+    "Specific risk or warning based on current data"
+  ],
+  "tldr": "One punchy sentence summarizing today's takeaway for investors"
+}}
+
+Rules:
+- Identify 3-5 major themes from the data
+- Pick exactly 5 top stocks with actionable ratings
+- Be specific with company names and catalysts, not generic
+- If Reddit is buzzing about a sector (AI, energy, etc.), highlight it as a theme
+- Include contrarian warnings, not just hype
+- Return ONLY valid JSON"""
+
+    try:
+        response = await client.messages.create(
+            model=MODEL,
+            max_tokens=2500,
+            system="You are a senior financial advisor who provides actionable, data-driven market insights to retail investors. You analyze social sentiment, news flow, and market data to identify the best opportunities and risks. Be specific, use real numbers, and don't hedge every statement.",
+            messages=[{"role": "user", "content": prompt}],
+            timeout=60,
+        )
+        result = _parse_json_response(response.content[0].text)
+        result["generated_at"] = time.time()
+        result["from_cache"] = False
+        await set_briefing_cache(result, ttl_hours=2)
+        return result
+    except Exception as e:
+        print(f"[Claude] Daily briefing error: {e}")
+        traceback.print_exc()
+        return {
+            "error": str(e),
+            "market_overview": "Daily briefing unavailable. Make sure ANTHROPIC_API_KEY is set.",
+            "themes": [],
+            "top_picks": [],
+            "reddit_narrative": "",
+            "risk_warnings": [],
+            "tldr": "Briefing generation failed.",
+            "generated_at": time.time(),
+            "from_cache": False,
+        }
 
 
 async def get_stock_analysis(ticker: str) -> dict:

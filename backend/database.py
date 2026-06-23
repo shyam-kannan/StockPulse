@@ -328,6 +328,54 @@ async def set_cached_analysis(ticker: str, data: dict, ttl_hours: int = 4):
         await db.close()
 
 
+async def get_recent_reddit_posts(limit: int = 50):
+    db = await get_db()
+    try:
+        cursor = await db.execute(
+            """SELECT id, subreddit, title, selftext, score, num_comments, author, url, created_utc, sentiment
+               FROM reddit_posts
+               ORDER BY created_utc DESC
+               LIMIT ?""",
+            (limit,),
+        )
+        rows = await cursor.fetchall()
+        return [dict(row) for row in rows]
+    finally:
+        await db.close()
+
+
+async def get_briefing_cache():
+    db = await get_db()
+    try:
+        cursor = await db.execute(
+            "SELECT * FROM analysis_cache WHERE ticker = '__DAILY_BRIEFING__' AND expires_at > ?",
+            (time.time(),),
+        )
+        row = await cursor.fetchone()
+        if row and row["momentum_json"]:
+            return json.loads(row["momentum_json"])
+        return None
+    finally:
+        await db.close()
+
+
+async def set_briefing_cache(data: dict, ttl_hours: int = 2):
+    now = time.time()
+    db = await get_db()
+    try:
+        await db.execute(
+            """INSERT OR REPLACE INTO analysis_cache
+               (ticker, momentum_json, fundamental_json, price_target_json, yfinance_json, created_at, expires_at)
+               VALUES ('__DAILY_BRIEFING__', ?, NULL, NULL, NULL, ?, ?)""",
+            (json.dumps(data), now, now + (ttl_hours * 3600)),
+        )
+        await db.commit()
+    except Exception as e:
+        print(f"Error caching briefing: {e}")
+    finally:
+        await db.close()
+
+
 async def cleanup_old_data(days: int = 7):
     cutoff = time.time() - (days * 86400)
     db = await get_db()
