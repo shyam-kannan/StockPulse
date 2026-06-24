@@ -162,28 +162,38 @@ function AvoidCard({ stock }) {
 
 function PortfolioSkeleton() {
   return (
-    <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-      <div className="pt-8 pb-6 border-b border-border">
-        <div className="h-7 shimmer rounded w-48 mb-2" />
-        <div className="h-4 shimmer rounded w-72" />
-      </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 py-8">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="stat-card">
-            <div className="h-3 shimmer rounded w-16 mb-2 mx-auto" />
-            <div className="h-6 shimmer rounded w-20 mx-auto" />
+    <div>
+      <section className="py-16 sm:py-24">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <div className="h-12 shimmer rounded w-72 mx-auto mb-4" />
+          <div className="h-5 shimmer rounded w-96 mx-auto" />
+        </div>
+      </section>
+      <section className="alt-section py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="stat-card">
+                <div className="h-3 shimmer rounded w-16 mb-2 mx-auto" />
+                <div className="h-6 shimmer rounded w-20 mx-auto" />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="card p-5">
-            <div className="h-4 shimmer rounded w-28 mb-3" />
-            <div className="h-4 shimmer rounded w-full mb-2" />
-            <div className="h-4 shimmer rounded w-3/4" />
+        </div>
+      </section>
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="card p-5">
+                <div className="h-4 shimmer rounded w-28 mb-3" />
+                <div className="h-4 shimmer rounded w-full mb-2" />
+                <div className="h-4 shimmer rounded w-3/4" />
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
@@ -217,17 +227,23 @@ export default function PortfolioPage() {
 
   if (error) {
     return (
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-        <div className="pt-8 pb-6 border-b border-border">
-          <h1 className="text-2xl font-semibold text-text-primary tracking-tight">Portfolio Builder</h1>
-        </div>
-        <div className="bg-danger-subtle border border-danger/12 rounded-lg p-8 text-center max-w-md mx-auto mt-12">
-          <p className="text-danger font-semibold mb-2">Failed to Generate</p>
-          <p className="text-sm text-text-secondary leading-relaxed">{error}</p>
-          <button onClick={() => fetchData()} className="mt-4 px-5 py-2 text-[13px] bg-white/[0.06] rounded-lg hover:bg-white/[0.1] transition-colors text-text-primary cursor-pointer">
-            Try Again
-          </button>
-        </div>
+      <div>
+        <section className="py-16 sm:py-24">
+          <div className="max-w-5xl mx-auto px-6 text-center">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-text-primary tracking-[-0.03em]">Portfolio Builder</h1>
+          </div>
+        </section>
+        <section className="py-12">
+          <div className="max-w-md mx-auto px-6">
+            <div className="bg-danger-subtle border border-danger/12 rounded-lg p-8 text-center">
+              <p className="text-danger font-semibold mb-2">Failed to Generate</p>
+              <p className="text-sm text-text-secondary leading-relaxed">{error}</p>
+              <button onClick={() => fetchData()} className="mt-4 px-5 py-2 text-[13px] bg-white/[0.06] rounded-lg hover:bg-white/[0.1] transition-colors text-text-primary cursor-pointer">
+                Try Again
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
@@ -241,137 +257,163 @@ export default function PortfolioPage() {
   const warnings = data.warnings || [];
 
   return (
-    <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-
-      {/* Header */}
-      <FadeIn>
-        <div className="flex items-center justify-between pt-8 pb-6 border-b border-border">
-          <div>
-            <h1 className="text-2xl font-semibold text-text-primary tracking-tight">Portfolio Builder</h1>
-            <p className="text-sm text-text-muted mt-1">AI-powered recommendations based on current market conditions.</p>
-          </div>
-          <button
-            onClick={() => fetchData(true)}
-            disabled={refreshing}
-            className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium text-text-muted bg-white/[0.03] border border-border rounded-lg hover:border-border-hover hover:text-text-secondary transition-all disabled:opacity-40 cursor-pointer"
-          >
-            {refreshing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-            {refreshing ? 'Generating...' : 'Regenerate'}
-          </button>
+    <div>
+      {/* Hero */}
+      <section className="py-16 sm:py-24">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <FadeIn>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-text-primary tracking-[-0.03em] leading-[1.1]">
+              Portfolio Builder
+            </h1>
+            <p className="text-base sm:text-lg text-text-secondary mt-4 max-w-lg mx-auto">
+              AI-powered recommendations based on current market conditions.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <button
+              onClick={() => fetchData(true)}
+              disabled={refreshing}
+              className="mt-8 inline-flex items-center gap-2.5 px-6 py-3 text-sm font-medium text-text-primary bg-accent/10 border border-accent/20 rounded-full hover:bg-accent/15 transition-all disabled:opacity-40 cursor-pointer"
+            >
+              {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              {refreshing ? 'Generating...' : 'Regenerate'}
+            </button>
+          </FadeIn>
         </div>
-      </FadeIn>
+      </section>
 
-      {/* Stat cards */}
-      <FadeInView>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 py-8">
-          <StatCard
-            label="Strategy"
-            value={data.risk_level ? data.risk_level.charAt(0).toUpperCase() + data.risk_level.slice(1) : 'Balanced'}
-            sub="Risk profile"
-            icon={Shield}
-          />
-          <StatCard label="Positions" value={positions.length} sub="Recommended stocks" icon={Briefcase} />
-          <StatCard
-            label="Top Sector"
-            value={sectors[0]?.sector || '—'}
-            sub={sectors[0] ? `${sectors[0].pct}% allocation` : ''}
-            icon={TrendingUp}
-          />
-          <StatCard
-            label="Updated"
-            value={data.generated_at ? new Date(data.generated_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
-            sub={data.generated_at ? new Date(data.generated_at * 1000).toLocaleDateString() : ''}
-            icon={Clock}
-          />
-        </div>
-      </FadeInView>
-
-      {/* Strategy overview */}
-      {data.strategy && (
-        <FadeInView>
-          <div className="card p-5 mb-8">
-            <div className="flex items-center gap-2 mb-3">
-              <Target className="w-4 h-4 text-accent" />
-              <h3 className="text-sm font-semibold text-text-primary">Strategy Overview</h3>
+      {/* Stats */}
+      <section className="alt-section py-14 sm:py-16">
+        <div className="max-w-6xl mx-auto px-6">
+          <FadeInView>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <StatCard
+                label="Strategy"
+                value={data.risk_level ? data.risk_level.charAt(0).toUpperCase() + data.risk_level.slice(1) : 'Balanced'}
+                sub="Risk profile"
+                icon={Shield}
+              />
+              <StatCard label="Positions" value={positions.length} sub="Recommended stocks" icon={Briefcase} />
+              <StatCard
+                label="Top Sector"
+                value={sectors[0]?.sector || '—'}
+                sub={sectors[0] ? `${sectors[0].pct}% allocation` : ''}
+                icon={TrendingUp}
+              />
+              <StatCard
+                label="Updated"
+                value={data.generated_at ? new Date(data.generated_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                sub={data.generated_at ? new Date(data.generated_at * 1000).toLocaleDateString() : ''}
+                icon={Clock}
+              />
             </div>
-            <p className="text-sm text-text-secondary leading-[1.7]">{data.strategy}</p>
-            {data.market_outlook && (
-              <p className="text-[13px] text-text-muted leading-[1.7] mt-3 pt-3 border-t border-border">
-                {data.market_outlook}
-              </p>
-            )}
+          </FadeInView>
+        </div>
+      </section>
+
+      {/* Strategy */}
+      {data.strategy && (
+        <section className="py-16 sm:py-20">
+          <div className="max-w-3xl mx-auto px-6">
+            <FadeInView>
+              <div className="text-center mb-8">
+                <p className="section-label mb-2">AI Strategy</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.02em]">Overview</h2>
+              </div>
+            </FadeInView>
+            <FadeInView delay={0.1}>
+              <div className="card p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Target className="w-4 h-4 text-accent" />
+                  <h3 className="text-sm font-semibold text-text-primary">Strategy</h3>
+                </div>
+                <p className="text-sm text-text-secondary leading-[1.7]">{data.strategy}</p>
+                {data.market_outlook && (
+                  <p className="text-[13px] text-text-muted leading-[1.7] mt-3 pt-3 border-t border-border">
+                    {data.market_outlook}
+                  </p>
+                )}
+              </div>
+            </FadeInView>
           </div>
-        </FadeInView>
+        </section>
       )}
 
-      {/* Positions + Sidebar */}
-      <FadeInView>
-        <div className="py-8 border-t border-border">
-          <h2 className="text-lg font-semibold text-text-primary tracking-tight mb-5">Recommended Positions</h2>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Stagger className="lg:col-span-2 space-y-3">
-              {positions.map((pos) => (
-                <PositionCard key={pos.ticker} position={pos} onNavigate={navigate} />
-              ))}
-            </Stagger>
-
-            <div className="space-y-4">
-              {sectors.length > 0 && (
-                <div className="card p-4">
-                  <h3 className="text-[13px] font-semibold text-text-primary mb-3">Sector Allocation</h3>
-                  <div className="space-y-2.5">
-                    {sectors.map((s) => (
-                      <SectorBar key={s.sector} sector={s.sector} pct={s.pct} maxPct={maxSectorPct} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {data.timing_notes && (
-                <div className="card p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="w-3.5 h-3.5 text-warning" />
-                    <h3 className="text-[13px] font-semibold text-text-primary">Timing</h3>
-                  </div>
-                  <p className="text-[13px] text-text-secondary leading-[1.6]">{data.timing_notes}</p>
-                </div>
-              )}
-
-              {avoidList.length > 0 && (
-                <div>
-                  <h3 className="text-[13px] font-semibold text-text-primary mb-2 flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5 text-danger" />
-                    Stocks to Avoid
-                  </h3>
-                  <div className="space-y-2">
-                    {avoidList.map((s) => (
-                      <AvoidCard key={s.ticker} stock={s} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {warnings.length > 0 && (
-                <div className="card p-4 border-warning/12">
-                  <h3 className="text-[13px] font-semibold text-warning mb-2 flex items-center gap-2">
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                    Risk Warnings
-                  </h3>
-                  <ul className="space-y-1.5">
-                    {warnings.map((w, i) => (
-                      <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex items-start gap-1.5">
-                        <span className="text-warning mt-0.5">-</span>
-                        {w}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+      {/* Positions */}
+      <section className="alt-section py-16 sm:py-20">
+        <div className="max-w-6xl mx-auto px-6">
+          <FadeInView>
+            <div className="text-center mb-10">
+              <p className="section-label mb-2">Based on today's market</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.02em]">Recommended Positions</h2>
             </div>
-          </div>
+          </FadeInView>
+
+          <FadeInView delay={0.1}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Stagger className="lg:col-span-2 space-y-3">
+                {positions.map((pos) => (
+                  <PositionCard key={pos.ticker} position={pos} onNavigate={navigate} />
+                ))}
+              </Stagger>
+
+              <div className="space-y-4">
+                {sectors.length > 0 && (
+                  <div className="card p-4">
+                    <h3 className="text-[13px] font-semibold text-text-primary mb-3">Sector Allocation</h3>
+                    <div className="space-y-2.5">
+                      {sectors.map((s) => (
+                        <SectorBar key={s.sector} sector={s.sector} pct={s.pct} maxPct={maxSectorPct} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {data.timing_notes && (
+                  <div className="card p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Clock className="w-3.5 h-3.5 text-warning" />
+                      <h3 className="text-[13px] font-semibold text-text-primary">Timing</h3>
+                    </div>
+                    <p className="text-[13px] text-text-secondary leading-[1.6]">{data.timing_notes}</p>
+                  </div>
+                )}
+
+                {avoidList.length > 0 && (
+                  <div>
+                    <h3 className="text-[13px] font-semibold text-text-primary mb-2 flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5 text-danger" />
+                      Stocks to Avoid
+                    </h3>
+                    <div className="space-y-2">
+                      {avoidList.map((s) => (
+                        <AvoidCard key={s.ticker} stock={s} />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {warnings.length > 0 && (
+                  <div className="card p-4 border-warning/12">
+                    <h3 className="text-[13px] font-semibold text-warning mb-2 flex items-center gap-2">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      Risk Warnings
+                    </h3>
+                    <ul className="space-y-1.5">
+                      {warnings.map((w, i) => (
+                        <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex items-start gap-1.5">
+                          <span className="text-warning mt-0.5">-</span>
+                          {w}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </FadeInView>
         </div>
-      </FadeInView>
+      </section>
     </div>
   );
 }

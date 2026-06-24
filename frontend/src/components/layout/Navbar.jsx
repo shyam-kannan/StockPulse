@@ -39,54 +39,56 @@ export default function Navbar({ marketStatus }) {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-bg/90 backdrop-blur-md border-b border-border">
-      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14">
+    <nav className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-border">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
 
-          <NavLink to="/" className="flex items-center gap-2.5 shrink-0">
-            <Activity className="w-5 h-5 text-accent" />
-            <span className="text-[15px] font-semibold text-text-primary tracking-tight">
+          <NavLink to="/" className="flex items-center gap-3 shrink-0">
+            <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
+              <Activity className="w-4.5 h-4.5 text-accent" />
+            </div>
+            <span className="text-base font-bold text-text-primary tracking-tight">
               StockPulse
             </span>
           </NavLink>
 
-          <div className="hidden md:flex items-center gap-1 ml-10">
+          <div className="hidden md:flex items-center gap-1 ml-12">
             {links.map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
+                  `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                     isActive
-                      ? 'text-text-primary bg-white/[0.06]'
-                      : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
+                      ? 'text-text-primary bg-white/[0.08]'
+                      : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.04]'
                   }`
                 }
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-4 h-4" />
                 {label}
               </NavLink>
             ))}
           </div>
 
-          <div className="hidden md:flex items-center gap-4 ml-auto">
+          <div className="hidden md:flex items-center gap-5 ml-auto">
             <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
-                placeholder="Ticker..."
+                placeholder="Search ticker..."
                 maxLength={5}
-                className="w-32 focus:w-44 pl-9 pr-3 py-1.5 bg-white/[0.03] border border-border rounded-lg text-[13px] text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-accent/30 font-[family-name:var(--font-mono)] transition-all duration-200"
+                className="w-40 focus:w-52 pl-10 pr-4 py-2 bg-white/[0.04] border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-accent/30 font-[family-name:var(--font-mono)] transition-all duration-200"
               />
             </form>
 
             {marketStatus && (
-              <div className="flex items-center gap-2 text-[12px] text-text-secondary">
+              <div className="flex items-center gap-2.5 text-[13px] text-text-secondary">
                 <div
-                  className={`w-1.5 h-1.5 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'} ${
+                  className={`w-2 h-2 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'} ${
                     marketStatus.is_open ? 'animate-pulse' : ''
                   }`}
                 />
@@ -114,7 +116,7 @@ export default function Navbar({ marketStatus }) {
                 onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
                 placeholder="Search ticker..."
                 maxLength={5}
-                className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/30 font-[family-name:var(--font-mono)]"
+                className="w-full pl-10 pr-4 py-2.5 bg-white/[0.04] border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/30 font-[family-name:var(--font-mono)]"
               />
             </form>
 
@@ -126,7 +128,7 @@ export default function Navbar({ marketStatus }) {
                 className={({ isActive }) =>
                   `flex items-center gap-2.5 px-3 py-2.5 text-sm rounded-lg transition-colors ${
                     isActive
-                      ? 'text-text-primary bg-white/[0.05]'
+                      ? 'text-text-primary bg-white/[0.06]'
                       : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
                   }`
                 }
