@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, RefreshCw, Loader2, Newspaper, MessageSquare } from 'lucide-react';
+import { RefreshCw, Loader2, Newspaper, MessageSquare } from 'lucide-react';
 import { usePolling } from '../hooks/usePolling';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { api } from '../utils/api';
@@ -67,124 +67,121 @@ export default function DashboardPage() {
   return (
     <div className="fade-in">
 
-      {/* ===== HERO — centered, full viewport feel ===== */}
-      <section className="text-center pt-16 pb-20 sm:pt-24 sm:pb-28">
-        <h1 className="text-5xl sm:text-7xl font-bold text-text-primary tracking-tight leading-[1.1]">
-          {greeting()}
-        </h1>
-        <p className="text-xl sm:text-2xl text-text-muted mt-6 max-w-xl mx-auto leading-relaxed font-light">
-          Here's what's moving the market today.
-        </p>
+      {/* Hero */}
+      <section className="pt-10 pb-12 sm:pt-14 sm:pb-16">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-tight">
+            {greeting()}
+          </h1>
+          <p className="text-lg text-text-muted mt-3 font-light">
+            Here's what's moving the market today.
+          </p>
+        </div>
       </section>
 
-      {/* ===== WATCHLIST ===== */}
+      {/* Watchlist */}
       {watchlist.length > 0 && (
-        <section className="mb-24">
-          <WatchlistSection watchlist={watchlist} setWatchlist={setWatchlist} trendingData={trending} />
+        <section className="pb-10">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+            <WatchlistSection watchlist={watchlist} setWatchlist={setWatchlist} trendingData={trending} />
+          </div>
         </section>
       )}
 
-      {/* ===== AI BRIEFING — full bleed alt background ===== */}
-      <section className="full-bleed-section alt-section py-20 sm:py-28 mb-0">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+      {/* AI Briefing */}
+      <section className="alt-section py-12 sm:py-16">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
           <DailyBriefing briefing={briefing} loading={briefingLoading} />
         </div>
       </section>
 
-      {/* ===== TOP STOCKS — big centered section ===== */}
-      <section className="py-20 sm:py-28">
-        <div className="text-center mb-16">
-          <p className="section-label mb-4">Most discussed in the last 24 hours</p>
-          <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
-            Top Stocks
-          </h2>
-        </div>
-
-        <TrendingCards tickers={stocks} loading={trendingLoading} />
-
-        <div className="flex justify-center mt-10">
-          <button
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className="flex items-center gap-2.5 px-7 py-3 text-sm font-medium text-text-muted bg-white/[0.04] border border-white/[0.08] rounded-full hover:border-white/[0.15] hover:text-text-secondary hover:bg-white/[0.06] transition-all duration-300 disabled:opacity-40 cursor-pointer"
-          >
-            {refreshing
-              ? <Loader2 className="w-4 h-4 animate-spin" />
-              : <RefreshCw className="w-4 h-4" />
-            }
-            {refreshing ? 'Refreshing...' : 'Refresh Data'}
-          </button>
+      {/* Top Stocks */}
+      <section className="py-12 sm:py-16">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <p className="section-label mb-2">Most discussed in the last 24 hours</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Top Stocks</h2>
+            </div>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-text-muted bg-white/[0.04] border border-white/[0.06] rounded-xl hover:border-white/[0.12] hover:text-text-secondary transition-all disabled:opacity-40 cursor-pointer"
+            >
+              {refreshing
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <RefreshCw className="w-4 h-4" />
+              }
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+          </div>
+          <TrendingCards tickers={stocks} loading={trendingLoading} />
         </div>
       </section>
 
-      {/* ===== TOP ETFs — alt background ===== */}
+      {/* Top ETFs */}
       {(trendingLoading || etfs.length > 0) && (
-        <section className="full-bleed-section alt-section py-20 sm:py-28">
-          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
-            <div className="text-center mb-16">
-              <p className="section-label mb-4">Most discussed exchange-traded funds</p>
-              <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
-                Top ETFs
-              </h2>
+        <section className="alt-section py-12 sm:py-16">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+            <div className="mb-8">
+              <p className="section-label mb-2">Most discussed exchange-traded funds</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Top ETFs</h2>
             </div>
-
             <TrendingCards tickers={etfs} loading={trendingLoading} />
           </div>
         </section>
       )}
 
-      {/* ===== TRENDING TABLE ===== */}
-      <section className="py-20 sm:py-28">
-        <div className="text-center mb-16">
-          <p className="section-label mb-4">Full breakdown</p>
-          <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
-            Trending Tickers
-          </h2>
-        </div>
-
-        <TrendingTable
-          tickers={stocks}
-          loading={trendingLoading}
-          watchlist={watchlist}
-          setWatchlist={setWatchlist}
-          title="Trending Stocks"
-        />
-
-        {etfs.length > 0 && (
-          <div className="mt-20">
-            <TrendingTable
-              tickers={etfs}
-              loading={trendingLoading}
-              watchlist={watchlist}
-              setWatchlist={setWatchlist}
-              title="Trending ETFs"
-            />
+      {/* Trending Table */}
+      <section className="py-12 sm:py-16">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="mb-8">
+            <p className="section-label mb-2">Full breakdown</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Trending Tickers</h2>
           </div>
-        )}
+
+          <TrendingTable
+            tickers={stocks}
+            loading={trendingLoading}
+            watchlist={watchlist}
+            setWatchlist={setWatchlist}
+            title="Trending Stocks"
+          />
+
+          {etfs.length > 0 && (
+            <div className="mt-10">
+              <TrendingTable
+                tickers={etfs}
+                loading={trendingLoading}
+                watchlist={watchlist}
+                setWatchlist={setWatchlist}
+                title="Trending ETFs"
+              />
+            </div>
+          )}
+        </div>
       </section>
 
-      {/* ===== NEWS + SOCIAL — side by side, alt background ===== */}
-      <section className="full-bleed-section alt-section py-20 sm:py-28">
-        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
-          <div className="text-center mb-16">
-            <p className="section-label mb-4">What people are saying</p>
-            <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
-              News & Social
-            </h2>
+      {/* News & Social */}
+      <section className="alt-section py-12 sm:py-16">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="mb-8">
+            <p className="section-label mb-2">What people are saying</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">News & Social</h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
-              <div className="flex items-center gap-3 mb-8">
-                <MessageSquare className="w-5 h-5 text-electric" />
-                <h3 className="text-lg font-semibold text-text-primary">Reddit Buzz</h3>
+              <div className="flex items-center gap-2.5 mb-5">
+                <MessageSquare className="w-4 h-4 text-electric" />
+                <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider">Reddit Buzz</h3>
               </div>
               <RedditBuzz posts={redditPosts} loading={redditLoading} />
             </div>
             <div>
-              <div className="flex items-center gap-3 mb-8">
-                <Newspaper className="w-5 h-5 text-amber" />
-                <h3 className="text-lg font-semibold text-text-primary">Market News</h3>
+              <div className="flex items-center gap-2.5 mb-5">
+                <Newspaper className="w-4 h-4 text-amber" />
+                <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider">Market News</h3>
               </div>
               <NewsFeed items={feed} loading={feedLoading} />
             </div>
