@@ -60,14 +60,14 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-10 fade-in">
+    <div className="space-y-12 fade-in">
 
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
+        <h1 className="text-3xl font-semibold text-text-primary tracking-tight">
           {greeting()}
         </h1>
-        <p className="text-sm text-text-muted mt-1">
+        <p className="text-sm text-text-muted mt-2">
           Here is what is moving the market today.
         </p>
       </div>
@@ -80,7 +80,7 @@ export default function DashboardPage() {
 
       {/* Top Movers */}
       <section>
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-6">
           <div className="section-title" style={{ marginBottom: 0 }}>
             <div className="icon-wrapper">
               <TrendingUp />
@@ -94,11 +94,11 @@ export default function DashboardPage() {
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium text-text-muted bg-white/[0.03] border border-white/[0.06] rounded-lg hover:border-white/[0.12] hover:text-text-secondary transition-all duration-200 disabled:opacity-40 cursor-pointer"
+            className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-text-muted bg-white/[0.03] border border-white/[0.06] rounded-xl hover:border-white/[0.12] hover:text-text-secondary transition-all duration-200 disabled:opacity-40 cursor-pointer"
           >
             {refreshing
-              ? <Loader2 className="w-3 h-3 animate-spin" />
-              : <RefreshCw className="w-3 h-3" />
+              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              : <RefreshCw className="w-3.5 h-3.5" />
             }
             {refreshing ? 'Refreshing...' : 'Refresh'}
           </button>
@@ -118,7 +118,7 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           <RedditBuzz posts={redditPosts} loading={redditLoading} />
           <NewsFeed items={feed} loading={feedLoading} />
         </div>

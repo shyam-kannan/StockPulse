@@ -15,7 +15,7 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-navy-950 flex flex-col">
         <Navbar marketStatus={marketStatus} />
-        <main className="flex-1 w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <main className="flex-1 w-full max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 py-10">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/analysis" element={<AnalysisPage />} />

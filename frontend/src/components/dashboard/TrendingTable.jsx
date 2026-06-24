@@ -11,11 +11,11 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
   if (loading) {
     return (
       <div className="card overflow-hidden">
-        <div className="p-5 border-b border-border">
-          <div className="h-5 shimmer rounded-lg w-40" />
+        <div className="p-6 border-b border-border">
+          <div className="h-5 shimmer rounded-xl w-40" />
         </div>
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4 px-5 py-3.5 border-b border-border">
+          <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-border">
             <div className="h-4 shimmer rounded w-8" />
             <div className="h-4 shimmer rounded w-16" />
             <div className="h-4 shimmer rounded w-28 flex-1" />
@@ -66,8 +66,8 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
 
   return (
     <div className="card overflow-hidden">
-      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-text-primary">Trending Tickers</h3>
+      <div className="px-6 py-5 border-b border-border flex items-center justify-between">
+        <h3 className="text-[15px] font-semibold text-text-primary tracking-tight">Trending Tickers</h3>
         <span className="text-xs text-text-muted font-[family-name:var(--font-mono)]">{tickers.length} tickers</span>
       </div>
 
@@ -75,15 +75,15 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
-              <th className="text-left px-5 py-3 w-8">
+              <th className="text-left px-6 py-3.5 w-8">
                 <span className="text-xs text-text-muted">#</span>
               </th>
-              <th className="text-left px-5 py-3"><SortHeader label="Ticker" keyName="ticker" /></th>
-              <th className="text-right px-5 py-3 hidden sm:table-cell"><SortHeader label="Price" keyName="current_price" className="justify-end" /></th>
-              <th className="text-right px-5 py-3"><SortHeader label="Change" keyName="price_change_pct" className="justify-end" /></th>
-              <th className="text-right px-5 py-3"><SortHeader label="Mentions" keyName="mention_count" className="justify-end" /></th>
-              <th className="text-right px-5 py-3 hidden md:table-cell"><SortHeader label="Sentiment" keyName="avg_sentiment" className="justify-end" /></th>
-              <th className="text-center px-5 py-3 w-10"></th>
+              <th className="text-left px-6 py-3.5"><SortHeader label="Ticker" keyName="ticker" /></th>
+              <th className="text-right px-6 py-3.5 hidden sm:table-cell"><SortHeader label="Price" keyName="current_price" className="justify-end" /></th>
+              <th className="text-right px-6 py-3.5"><SortHeader label="Change" keyName="price_change_pct" className="justify-end" /></th>
+              <th className="text-right px-6 py-3.5"><SortHeader label="Mentions" keyName="mention_count" className="justify-end" /></th>
+              <th className="text-right px-6 py-3.5 hidden md:table-cell"><SortHeader label="Sentiment" keyName="avg_sentiment" className="justify-end" /></th>
+              <th className="text-center px-6 py-3.5 w-10"></th>
             </tr>
           </thead>
           <tbody>
@@ -93,24 +93,24 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
                 onClick={() => navigate(`/analysis/${t.ticker}`)}
                 className="border-b border-border hover:bg-white/[0.02] cursor-pointer transition-colors"
               >
-                <td className="px-5 py-3.5 text-xs text-text-muted font-[family-name:var(--font-mono)]">{i + 1}</td>
-                <td className="px-5 py-3.5">
+                <td className="px-6 py-4 text-xs text-text-muted font-[family-name:var(--font-mono)]">{i + 1}</td>
+                <td className="px-6 py-4">
                   <div>
                     <span className="text-sm font-semibold text-electric font-[family-name:var(--font-mono)]">{t.ticker}</span>
-                    <p className="text-xs text-text-muted truncate max-w-[140px]">{t.company_name}</p>
+                    <p className="text-xs text-text-muted truncate max-w-[160px] mt-0.5">{t.company_name}</p>
                   </div>
                 </td>
-                <td className="px-5 py-3.5 text-right text-sm font-[family-name:var(--font-mono)] text-text-primary hidden sm:table-cell">
+                <td className="px-6 py-4 text-right text-sm font-[family-name:var(--font-mono)] text-text-primary hidden sm:table-cell">
                   {formatPrice(t.current_price)}
                 </td>
-                <td className={`px-5 py-3.5 text-right text-sm font-semibold font-[family-name:var(--font-mono)] ${changeColor(t.price_change_pct)}`}>
+                <td className={`px-6 py-4 text-right text-sm font-semibold font-[family-name:var(--font-mono)] ${changeColor(t.price_change_pct)}`}>
                   {formatPercent(t.price_change_pct)}
                 </td>
-                <td className="px-5 py-3.5 text-right">
+                <td className="px-6 py-4 text-right">
                   <span className="text-sm font-[family-name:var(--font-mono)] text-amber">{t.mention_count}</span>
                 </td>
-                <td className="px-5 py-3.5 text-right hidden md:table-cell">
-                  <div className="flex items-center justify-end gap-2.5">
+                <td className="px-6 py-4 text-right hidden md:table-cell">
+                  <div className="flex items-center justify-end gap-3">
                     <div className="w-16 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full ${t.avg_sentiment > 0 ? 'bg-electric' : t.avg_sentiment < 0 ? 'bg-danger' : 'bg-amber'}`}
@@ -122,10 +122,10 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
                     </span>
                   </div>
                 </td>
-                <td className="px-5 py-3.5 text-center">
+                <td className="px-6 py-4 text-center">
                   <button
                     onClick={(e) => toggleWatchlist(e, t.ticker)}
-                    className="p-1.5 rounded-lg hover:bg-white/[0.06] transition-all"
+                    className="p-2 rounded-xl hover:bg-white/[0.06] transition-all"
                   >
                     <Star
                       className={`w-4 h-4 transition-colors ${isWatchlisted(t.ticker) ? 'text-amber fill-amber' : 'text-text-muted/40 hover:text-text-muted'}`}

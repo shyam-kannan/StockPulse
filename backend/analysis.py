@@ -358,6 +358,222 @@ def _parse_json_response(text: str) -> dict:
             return {"raw_response": text[:2000], "parse_error": True}
 
 
+def _compute_fallback_momentum(ticker: str, yf_data: dict, mentions: list, reddit_posts: list) -> dict:
+    """Generate momentum analysis from price data when Claude API is unavailable."""
+    price = yf_data.get("current_price")
+    prev = yf_data.get("previous_close")
+    high52 = yf_data.get("fifty_two_week_high")
+    low52 = yf_data.get("fifty_two_week_low")
+    history = yf_data.get("history", [])
+    name = yf_data.get("company_name", ticker)
+
+    change_pct = ((price - prev) / prev * 100) if price and prev else 0
+    from52h_pct = ((price - high52) / high52 * 100) if price and high52 else 0
+
+    if len(history) >= 5:
+        recent = [h["close"] for h in history[-5:]]
+        trend_5d = ((recent[-1] - recent[0]) / recent[0] * 100) if recent[0] else 0
+    else:
+        trend_5d = change_pct
+
+    if change_pct > 3 or trend_5d > 5:
+        rating = "Strong Bullish"
+    elif change_pct > 0.5 or trend_5d > 1:
+        rating = "Bullish"
+    elif change_pct < -3 or trend_5d < -5:
+        rating = "Strong Bearish"
+    elif change_pct < -0.5 or trend_5d < -1:
+        rating = "Bearish"
+    else:
+        rating = "Neutral"
+
+    mention_count = len(mentions)
+    reddit_count = len(reddit_posts)
+    sector = yf_data.get("sector", "the broader market")
+
+    support = round(price * 0.95, 2) if price else 0
+    resistance = prev if prev and prev > (price or 0) else round(price * 1.05, 2) if price else 0
+    if high52 and price:
+        resistance = round(min(high52, price * 1.08), 2)
+    if low52 and price:
+        support = round(max(low52, price * 0.92), 2)
+
+    direction = "higher" if change_pct > 0 else "lower"
+    one_liner = (
+        f"{name} is trading {abs(change_pct):.1f}% {direction} today "
+        f"with a 5-day trend of {trend_5d:+.1f}%, sitting {abs(from52h_pct):.0f}% "
+        f"from its 52-week high."
+    )
+
+    narrative = (
+        f"{name} ({ticker}) is currently at ${price:.2f}, "
+        f"{'up' if change_pct >= 0 else 'down'} {abs(change_pct):.1f}% from the prior close. "
+        f"The stock has {mention_count} social mentions and {reddit_count} Reddit posts in the past 48 hours. "
+        f"The 5-day trend shows a {abs(trend_5d):.1f}% move to the {'upside' if trend_5d >= 0 else 'downside'}."
+    )
+
+    catalyst = (
+        f"Trading at ${price:.2f}, the stock is {abs(from52h_pct):.1f}% below its 52-week high of "
+        f"${high52:.2f}. " if price and high52 else ""
+    ) + (
+        f"The move appears driven by {'sector-wide momentum in ' + sector if sector != 'the broader market' else 'broad market conditions'}. "
+        f"{'Social activity is elevated with ' + str(mention_count) + ' recent mentions.' if mention_count > 3 else 'Social activity is relatively quiet.'}"
+    )
+
+    return {
+        "narrative": narrative,
+        "catalyst": catalyst,
+        "institutional_view": f"Based on the current price action, {ticker} is showing {rating.lower()} momentum. Investors should watch the ${support:.2f} support and ${resistance:.2f} resistance levels for confirmation of the current trend.",
+        "sentiment_score": round(change_pct / 10, 2),
+        "momentum_rating": rating,
+        "key_levels": {"support": support, "resistance": resistance},
+        "one_liner": one_liner,
+        "computed_fallback": True,
+    }
+
+
+def _compute_fallback_fundamentals(ticker: str, yf_data: dict) -> dict:
+    """Generate fundamental snapshot from available data when Claude API is unavailable."""
+    price = yf_data.get("current_price")
+    pe = yf_data.get("pe_ratio")
+    fwd_pe = yf_data.get("forward_pe")
+    rev_growth = yf_data.get("revenue_growth")
+    cash = yf_data.get("total_cash")
+    debt = yf_data.get("total_debt")
+    name = yf_data.get("company_name", ticker)
+
+    pe_val = pe or fwd_pe
+    if pe_val and pe_val < 15:
+        val_text = f"{name} trades at a {pe_val:.1f}x P/E, below the S&P 500 average of ~22x, suggesting potentially undervalued relative to the broader market."
+        fv = "below_fair_value"
+    elif pe_val and pe_val < 25:
+        val_text = f"{name} trades at a {pe_val:.1f}x P/E, roughly in line with the S&P 500 average of ~22x."
+        fv = "at_fair_value"
+    elif pe_val and pe_val < 35:
+        val_text = f"{name} trades at a {pe_val:.1f}x P/E, above the S&P 500 average of ~22x, reflecting growth expectations."
+        fv = "above_fair_value"
+    elif pe_val:
+        val_text = f"{name} trades at a {pe_val:.1f}x P/E, well above the S&P 500 average, implying significant growth is priced in."
+        fv = "above_fair_value"
+    else:
+        val_text = f"Detailed valuation metrics are limited for {name}. Current price is ${price:.2f}." if price else f"Valuation data is limited for {name}."
+        fv = "at_fair_value"
+
+    growth_q = "Medium"
+    if rev_growth is not None:
+        if rev_growth > 0.15:
+            growth_q = "High"
+            growth_text = f"Revenue growing at {rev_growth*100:.0f}% suggests strong organic growth."
+        elif rev_growth > 0.05:
+            growth_q = "Medium"
+            growth_text = f"Revenue growing at {rev_growth*100:.0f}% — moderate but steady growth trajectory."
+        else:
+            growth_q = "Low"
+            growth_text = f"Revenue growth of {rev_growth*100:.0f}% is modest, suggesting a mature business profile."
+    else:
+        growth_text = f"Revenue growth data is not available for {name}. Monitor quarterly earnings for trajectory."
+
+    health = "Adequate"
+    if cash and debt:
+        ratio = cash / debt if debt > 0 else 999
+        if ratio > 1.5:
+            health = "Strong"
+        elif ratio < 0.5:
+            health = "Weak"
+
+    fv_reasoning = val_text
+    if pe_val and price:
+        sp500_pe = 22
+        fair_est = round(price * (sp500_pe / pe_val), 2)
+        fv_reasoning += f" At a market-average {sp500_pe}x multiple, implied fair value would be approximately ${fair_est:.2f}."
+
+    return {
+        "valuation_summary": val_text,
+        "growth_assessment": growth_text,
+        "balance_sheet": (
+            f"Cash-to-debt ratio of {cash/debt:.1f}x — {'strong' if cash/debt > 1 else 'leveraged'} balance sheet."
+            if cash and debt and debt > 0
+            else "Balance sheet details not available in current data feed."
+        ),
+        "fair_value_assessment": fv,
+        "fair_value_reasoning": fv_reasoning,
+        "key_metrics": {
+            "pe_vs_sector": f"{pe_val:.1f}x P/E" if pe_val else "P/E data unavailable",
+            "growth_quality": growth_q,
+            "financial_health": health,
+        },
+        "computed_fallback": True,
+    }
+
+
+def _compute_fallback_price_targets(ticker: str, yf_data: dict) -> dict:
+    """Generate price targets from available data when Claude API is unavailable."""
+    price = yf_data.get("current_price")
+    high52 = yf_data.get("fifty_two_week_high")
+    low52 = yf_data.get("fifty_two_week_low")
+    pe = yf_data.get("pe_ratio") or yf_data.get("forward_pe")
+    name = yf_data.get("company_name", ticker)
+
+    if not price:
+        return {"error": "No price data available", "computed_fallback": True}
+
+    bear = round(price * 0.80, 2)
+    base = round(price * 1.0, 2)
+    bull = round(price * 1.20, 2)
+    stretched = round(price * 1.40, 2)
+
+    if high52 and low52:
+        range52 = high52 - low52
+        bear = round(max(low52, price - range52 * 0.4), 2)
+        base = round(price + range52 * 0.05, 2)
+        bull = round(min(high52 * 1.05, price + range52 * 0.35), 2)
+        stretched = round(high52 * 1.15, 2)
+
+    entry_low = round(price * 0.95, 2)
+    entry_high = round(price * 0.98, 2)
+    stop = round(price * 0.88, 2)
+    trim1 = round(price * 1.15, 2)
+    trim2 = round(price * 1.25, 2)
+
+    if low52:
+        stop = round(max(low52 * 0.95, price * 0.85), 2)
+        entry_low = round(max(low52 * 1.05, price * 0.93), 2)
+
+    return {
+        "bear_case": {
+            "price": bear,
+            "timeframe": "3-6 months",
+            "reasoning": f"Bear scenario assumes a pullback to the lower end of the trading range. At ${bear:.2f}, {name} would trade near prior support levels, representing {((bear/price - 1)*100):.0f}% from current price.",
+        },
+        "base_case": {
+            "price": base,
+            "timeframe": "6-12 months",
+            "reasoning": f"Base case of ${base:.2f} assumes the stock consolidates near current levels with modest upside from mean reversion and sector tailwinds.",
+        },
+        "bull_case": {
+            "price": bull,
+            "timeframe": "12-18 months",
+            "reasoning": f"Bull target of ${bull:.2f} implies {((bull/price - 1)*100):.0f}% upside, achievable with positive earnings revisions and favorable sector rotation.",
+        },
+        "stretched_bull": {
+            "price": stretched,
+            "timeframe": "24 months",
+            "reasoning": f"Stretched bull of ${stretched:.2f} would require sustained momentum, expanding multiples, and above-consensus earnings growth to reach {((stretched/price - 1)*100):.0f}% above current levels.",
+        },
+        "entry_zone": {
+            "low": entry_low,
+            "high": entry_high,
+            "reasoning": f"Look to enter between ${entry_low:.2f} and ${entry_high:.2f} on pullbacks.",
+        },
+        "trim_levels": [trim1, trim2],
+        "hard_stop": {
+            "price": stop,
+            "reasoning": f"Stop at ${stop:.2f} — a break below this level would invalidate the technical setup.",
+        },
+        "computed_fallback": True,
+    }
+
+
 async def analyze_momentum(ticker: str, yf_data: dict, mentions: list, reddit_posts: list) -> dict:
     client = get_client()
 
@@ -415,7 +631,8 @@ Return ONLY valid JSON."""
         return _parse_json_response(response.content[0].text)
     except Exception as e:
         print(f"[Claude] Momentum analysis error for {ticker}: {e}")
-        return {"error": str(e), "narrative": "Analysis unavailable"}
+        print(f"[Fallback] Generating computed momentum for {ticker}")
+        return _compute_fallback_momentum(ticker, yf_data, mentions, reddit_posts)
 
 
 async def analyze_fundamentals(ticker: str, yf_data: dict) -> dict:
@@ -467,7 +684,8 @@ Return ONLY valid JSON."""
         return _parse_json_response(response.content[0].text)
     except Exception as e:
         print(f"[Claude] Fundamental analysis error for {ticker}: {e}")
-        return {"error": str(e), "valuation_summary": "Analysis unavailable"}
+        print(f"[Fallback] Generating computed fundamentals for {ticker}")
+        return _compute_fallback_fundamentals(ticker, yf_data)
 
 
 async def analyze_price_targets(ticker: str, yf_data: dict) -> dict:
@@ -539,7 +757,8 @@ Use real multiples and math. Return ONLY valid JSON."""
         return _parse_json_response(response.content[0].text)
     except Exception as e:
         print(f"[Claude] Price target analysis error for {ticker}: {e}")
-        return {"error": str(e), "bear_case": {"price": 0, "reasoning": "Analysis unavailable"}}
+        print(f"[Fallback] Generating computed price targets for {ticker}")
+        return _compute_fallback_price_targets(ticker, yf_data)
 
 
 async def generate_daily_briefing() -> dict:
