@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Briefcase, TrendingUp, Shield, AlertTriangle, Target, Clock, RefreshCw, Loader2, ChevronRight, XCircle } from 'lucide-react';
 import { api } from '../utils/api';
 import { formatPrice, formatPercent, changeColor } from '../utils/formatters';
+import { FadeIn, FadeInView, StaggerContainer, StaggerItem } from '../components/motion';
 
 function StatCard({ label, value, sub, icon: Icon }) {
   return (
@@ -49,7 +51,9 @@ function PositionCard({ position, onNavigate }) {
     : null;
 
   return (
-    <div
+    <motion.div
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2 }}
       className="glass-card p-6 cursor-pointer group"
       onClick={() => onNavigate(`/analysis/${position.ticker}`)}
     >
@@ -118,7 +122,7 @@ function PositionCard({ position, onNavigate }) {
           </span>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -127,9 +131,12 @@ function SectorBar({ sector, pct, maxPct }) {
     <div className="flex items-center gap-3">
       <span className="text-sm text-text-secondary w-28 shrink-0 truncate">{sector}</span>
       <div className="flex-1 h-2 bg-white/[0.04] rounded-full overflow-hidden">
-        <div
-          className="h-full bg-electric rounded-full transition-all duration-500"
-          style={{ width: `${(pct / maxPct) * 100}%` }}
+        <motion.div
+          className="h-full bg-electric rounded-full"
+          initial={{ width: 0 }}
+          whileInView={{ width: `${(pct / maxPct) * 100}%` }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
         />
       </div>
       <span className="text-sm font-medium text-text-primary font-[family-name:var(--font-mono)] w-10 text-right">
@@ -156,10 +163,12 @@ function AvoidCard({ stock }) {
 
 function PortfolioSkeleton() {
   return (
-    <div className="fade-in">
-      <div className="pt-10 pb-12 sm:pt-14 sm:pb-16 max-w-[1400px] mx-auto px-6 lg:px-10">
-        <div className="h-10 shimmer rounded-lg w-64 mb-4" />
-        <div className="h-5 shimmer rounded-lg w-80" />
+    <div>
+      <div className="pt-16 pb-14 sm:pt-24 sm:pb-20 text-center">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <div className="h-12 shimmer rounded-lg w-72 mx-auto mb-4" />
+          <div className="h-5 shimmer rounded-lg w-96 mx-auto" />
+        </div>
       </div>
       <div className="max-w-[1400px] mx-auto px-6 lg:px-10 pb-10">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
@@ -213,12 +222,14 @@ export default function PortfolioPage() {
 
   if (error) {
     return (
-      <div className="fade-in">
-        <div className="pt-10 pb-12 sm:pt-14 sm:pb-16 max-w-[1400px] mx-auto px-6 lg:px-10">
-          <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-tight">Portfolio Builder</h1>
+      <div>
+        <div className="pt-16 pb-14 sm:pt-24 sm:pb-20 text-center">
+          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+            <h1 className="text-4xl sm:text-6xl font-bold text-text-primary tracking-tight">Portfolio Builder</h1>
+          </div>
         </div>
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="bg-danger/[0.06] border border-danger/15 rounded-xl p-10 text-center max-w-lg">
+          <div className="bg-danger/[0.06] border border-danger/15 rounded-xl p-10 text-center max-w-lg mx-auto">
             <p className="text-danger font-semibold text-lg mb-2">Failed to Generate</p>
             <p className="text-text-secondary leading-relaxed text-sm">{error}</p>
             <button onClick={() => fetchData()} className="mt-5 px-6 py-2.5 text-sm bg-white/[0.06] rounded-xl hover:bg-white/[0.1] transition-colors text-text-primary cursor-pointer">
@@ -239,149 +250,173 @@ export default function PortfolioPage() {
   const warnings = data.warnings || [];
 
   return (
-    <div className="fade-in">
+    <div>
 
       {/* Hero */}
-      <section className="pt-10 pb-10 sm:pt-14 sm:pb-12">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="flex items-end justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-tight">
-                Portfolio Builder
-              </h1>
-              <p className="text-lg text-text-muted mt-3 font-light">
-                AI-powered stock recommendations based on current market conditions.
-              </p>
-            </div>
+      <section className="pt-16 pb-14 sm:pt-24 sm:pb-20">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
+          <FadeIn>
+            <h1 className="text-4xl sm:text-6xl font-bold text-text-primary tracking-tight leading-[1.1]">
+              Portfolio Builder
+            </h1>
+          </FadeIn>
+          <FadeIn delay={0.1}>
+            <p className="text-lg sm:text-xl text-text-muted mt-4 max-w-lg mx-auto font-light leading-relaxed">
+              AI-powered stock recommendations based on current market conditions.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.15}>
             <button
               onClick={() => fetchData(true)}
               disabled={refreshing}
-              className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-text-muted bg-white/[0.04] border border-white/[0.06] rounded-xl hover:border-white/[0.12] hover:text-text-secondary transition-all disabled:opacity-40 cursor-pointer"
+              className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-text-muted bg-white/[0.04] border border-white/[0.06] rounded-full hover:border-white/[0.14] hover:text-text-secondary hover:bg-white/[0.06] transition-all disabled:opacity-40 cursor-pointer"
             >
               {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
               {refreshing ? 'Generating...' : 'Regenerate'}
             </button>
-          </div>
+          </FadeIn>
+        </div>
+      </section>
 
-          {/* Stat cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-            <StatCard
-              label="Strategy"
-              value={data.risk_level ? data.risk_level.charAt(0).toUpperCase() + data.risk_level.slice(1) : 'Balanced'}
-              sub="Risk profile"
-              icon={Shield}
-            />
-            <StatCard
-              label="Positions"
-              value={positions.length}
-              sub="Recommended stocks"
-              icon={Briefcase}
-            />
-            <StatCard
-              label="Top Sector"
-              value={sectors[0]?.sector || '—'}
-              sub={sectors[0] ? `${sectors[0].pct}% allocation` : ''}
-              icon={TrendingUp}
-            />
-            <StatCard
-              label="Updated"
-              value={data.generated_at ? new Date(data.generated_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
-              sub={data.generated_at ? new Date(data.generated_at * 1000).toLocaleDateString() : ''}
-              icon={Clock}
-            />
-          </div>
+      {/* Stat cards */}
+      <section className="pb-10">
+        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
+          <StaggerContainer className="grid grid-cols-2 lg:grid-cols-4 gap-4" stagger={0.08}>
+            <StaggerItem>
+              <StatCard
+                label="Strategy"
+                value={data.risk_level ? data.risk_level.charAt(0).toUpperCase() + data.risk_level.slice(1) : 'Balanced'}
+                sub="Risk profile"
+                icon={Shield}
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Positions"
+                value={positions.length}
+                sub="Recommended stocks"
+                icon={Briefcase}
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Top Sector"
+                value={sectors[0]?.sector || '—'}
+                sub={sectors[0] ? `${sectors[0].pct}% allocation` : ''}
+                icon={TrendingUp}
+              />
+            </StaggerItem>
+            <StaggerItem>
+              <StatCard
+                label="Updated"
+                value={data.generated_at ? new Date(data.generated_at * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
+                sub={data.generated_at ? new Date(data.generated_at * 1000).toLocaleDateString() : ''}
+                icon={Clock}
+              />
+            </StaggerItem>
+          </StaggerContainer>
         </div>
       </section>
 
       {/* Strategy overview */}
       {data.strategy && (
-        <section className="alt-section py-10 sm:py-14">
+        <section className="alt-section py-14 sm:py-20">
           <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-            <div className="max-w-3xl">
-              <div className="flex items-center gap-3 mb-4">
-                <Target className="w-5 h-5 text-electric" />
-                <h2 className="text-xl font-bold text-text-primary">Strategy Overview</h2>
+            <FadeInView>
+              <div className="max-w-3xl mx-auto text-center">
+                <div className="w-12 h-12 rounded-xl bg-electric/10 flex items-center justify-center mx-auto mb-5">
+                  <Target className="w-6 h-6 text-electric" />
+                </div>
+                <h2 className="text-xl font-bold text-text-primary mb-4">Strategy Overview</h2>
+                <p className="text-[15px] text-text-secondary leading-[1.8]">{data.strategy}</p>
+                {data.market_outlook && (
+                  <p className="text-sm text-text-muted leading-[1.8] mt-4 pt-4 border-t border-white/[0.04]">
+                    {data.market_outlook}
+                  </p>
+                )}
               </div>
-              <p className="text-[15px] text-text-secondary leading-[1.8]">{data.strategy}</p>
-              {data.market_outlook && (
-                <p className="text-sm text-text-muted leading-[1.8] mt-4 pt-4 border-t border-white/[0.04]">
-                  {data.market_outlook}
-                </p>
-              )}
-            </div>
+            </FadeInView>
           </div>
         </section>
       )}
 
       {/* Positions + Sidebar */}
-      <section className="py-10 sm:py-14">
+      <section className="py-14 sm:py-20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="mb-8">
-            <p className="section-label mb-2">AI Recommendations</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
-              Recommended Positions
-            </h2>
-          </div>
+          <FadeInView>
+            <div className="text-center mb-10">
+              <p className="section-label mb-3">AI Recommendations</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">
+                Recommended Positions
+              </h2>
+            </div>
+          </FadeInView>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
-              {positions.map((pos) => (
-                <PositionCard key={pos.ticker} position={pos} onNavigate={navigate} />
-              ))}
+            <div className="lg:col-span-2">
+              <StaggerContainer className="space-y-4" stagger={0.1}>
+                {positions.map((pos) => (
+                  <StaggerItem key={pos.ticker}>
+                    <PositionCard position={pos} onNavigate={navigate} />
+                  </StaggerItem>
+                ))}
+              </StaggerContainer>
             </div>
 
             <div className="space-y-6">
-              {sectors.length > 0 && (
-                <div className="glass-card p-5">
-                  <h3 className="text-sm font-semibold text-text-primary mb-4">Sector Allocation</h3>
-                  <div className="space-y-3">
-                    {sectors.map((s) => (
-                      <SectorBar key={s.sector} sector={s.sector} pct={s.pct} maxPct={maxSectorPct} />
-                    ))}
+              <FadeInView delay={0.2}>
+                {sectors.length > 0 && (
+                  <div className="glass-card p-5">
+                    <h3 className="text-sm font-semibold text-text-primary mb-4">Sector Allocation</h3>
+                    <div className="space-y-3">
+                      {sectors.map((s) => (
+                        <SectorBar key={s.sector} sector={s.sector} pct={s.pct} maxPct={maxSectorPct} />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {data.timing_notes && (
-                <div className="glass-card p-5">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Clock className="w-4 h-4 text-amber" />
-                    <h3 className="text-sm font-semibold text-text-primary">Timing</h3>
+                {data.timing_notes && (
+                  <div className="glass-card p-5">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Clock className="w-4 h-4 text-amber" />
+                      <h3 className="text-sm font-semibold text-text-primary">Timing</h3>
+                    </div>
+                    <p className="text-sm text-text-secondary leading-[1.7]">{data.timing_notes}</p>
                   </div>
-                  <p className="text-sm text-text-secondary leading-[1.7]">{data.timing_notes}</p>
-                </div>
-              )}
+                )}
 
-              {avoidList.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-danger" />
-                    Stocks to Avoid
-                  </h3>
-                  <div className="space-y-3">
-                    {avoidList.map((s) => (
-                      <AvoidCard key={s.ticker} stock={s} />
-                    ))}
+                {avoidList.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-danger" />
+                      Stocks to Avoid
+                    </h3>
+                    <div className="space-y-3">
+                      {avoidList.map((s) => (
+                        <AvoidCard key={s.ticker} stock={s} />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {warnings.length > 0 && (
-                <div className="glass-card p-5 border-amber/15">
-                  <h3 className="text-sm font-semibold text-amber mb-3 flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4" />
-                    Risk Warnings
-                  </h3>
-                  <ul className="space-y-2">
-                    {warnings.map((w, i) => (
-                      <li key={i} className="text-sm text-text-secondary leading-relaxed flex items-start gap-2">
-                        <span className="text-amber mt-0.5">-</span>
-                        {w}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+                {warnings.length > 0 && (
+                  <div className="glass-card p-5 border-amber/15">
+                    <h3 className="text-sm font-semibold text-amber mb-3 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Risk Warnings
+                    </h3>
+                    <ul className="space-y-2">
+                      {warnings.map((w, i) => (
+                        <li key={i} className="text-sm text-text-secondary leading-relaxed flex items-start gap-2">
+                          <span className="text-amber mt-0.5">-</span>
+                          {w}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </FadeInView>
             </div>
           </div>
         </div>

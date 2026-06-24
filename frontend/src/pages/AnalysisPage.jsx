@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Target, Loader2, Zap, Building2, Cpu } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { api } from '../utils/api';
 import { formatPrice, formatPercent, formatMarketCap, changeColor } from '../utils/formatters';
+import { FadeIn, FadeInView } from '../components/motion';
 import SearchBar from '../components/analysis/SearchBar';
 import AnalysisCard from '../components/analysis/AnalysisCard';
 import PriceChart from '../components/analysis/PriceChart';
@@ -230,19 +232,19 @@ export default function AnalysisPage() {
 
   if (!ticker && !loading) {
     return (
-      <div className="fade-in max-w-[1400px] mx-auto px-6 lg:px-10">
-        <div className="pt-10">
-          <SearchBar currentTicker={ticker} />
-        </div>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 pt-10">
+        <SearchBar currentTicker={ticker} />
         <div className="text-center py-28 sm:py-36">
-          <div className="w-20 h-20 mx-auto mb-8 bg-white/[0.02] rounded-2xl flex items-center justify-center border border-border">
-            <Target className="w-10 h-10 text-electric/30" />
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4 tracking-tight">Search for a Stock</h2>
-          <p className="text-text-secondary text-lg max-w-lg mx-auto leading-relaxed font-light">
-            Enter a ticker symbol above to get AI-powered momentum analysis,
-            fundamental insights, and price target frameworks.
-          </p>
+          <FadeIn>
+            <div className="w-20 h-20 mx-auto mb-8 bg-white/[0.02] rounded-2xl flex items-center justify-center border border-border">
+              <Target className="w-10 h-10 text-electric/30" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-text-primary mb-4 tracking-tight">Search for a Stock</h2>
+            <p className="text-text-secondary text-lg max-w-lg mx-auto leading-relaxed font-light">
+              Enter a ticker symbol above to get AI-powered momentum analysis,
+              fundamental insights, and price target frameworks.
+            </p>
+          </FadeIn>
         </div>
       </div>
     );
@@ -250,12 +252,16 @@ export default function AnalysisPage() {
 
   if (loading) {
     return (
-      <div className="fade-in max-w-[1400px] mx-auto px-6 lg:px-10">
-        <div className="pt-10">
-          <SearchBar currentTicker={ticker} />
-        </div>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 pt-10">
+        <SearchBar currentTicker={ticker} />
         <div className="text-center py-28 sm:py-36">
-          <Loader2 className="w-12 h-12 text-electric animate-spin mx-auto mb-6" />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
+            className="w-12 h-12 mx-auto mb-6"
+          >
+            <Loader2 className="w-12 h-12 text-electric" />
+          </motion.div>
           <p className="text-text-secondary text-xl font-light">
             Analyzing <span className="text-electric font-[family-name:var(--font-mono)] font-semibold">{ticker}</span>
           </p>
@@ -267,10 +273,8 @@ export default function AnalysisPage() {
 
   if (error) {
     return (
-      <div className="fade-in max-w-[1400px] mx-auto px-6 lg:px-10">
-        <div className="pt-10">
-          <SearchBar currentTicker={ticker} />
-        </div>
+      <div className="max-w-[1400px] mx-auto px-6 lg:px-10 pt-10">
+        <SearchBar currentTicker={ticker} />
         <div className="bg-danger/[0.06] border border-danger/15 rounded-xl p-12 text-center max-w-lg mx-auto mt-16">
           <p className="text-danger font-semibold text-lg mb-3">Analysis Failed</p>
           <p className="text-text-secondary leading-relaxed">{error}</p>
@@ -280,114 +284,135 @@ export default function AnalysisPage() {
   }
 
   if (!data) return (
-    <div className="fade-in max-w-[1400px] mx-auto px-6 lg:px-10 pt-10">
+    <div className="max-w-[1400px] mx-auto px-6 lg:px-10 pt-10">
       <SearchBar currentTicker={ticker} />
     </div>
   );
 
   return (
-    <div className="fade-in">
+    <div>
 
-      {/* Hero — ticker + price */}
-      <section className="pt-10 pb-10 sm:pt-14 sm:pb-12">
+      {/* Hero — centered ticker + price */}
+      <section className="pt-10 pb-14 sm:pt-14 sm:pb-20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
           <SearchBar currentTicker={ticker} />
 
-          <div className="mt-8">
-            <div className="flex items-baseline gap-4 flex-wrap">
-              <h1 className="text-5xl sm:text-6xl font-bold gradient-text font-[family-name:var(--font-mono)] leading-none tracking-tighter">
+          <div className="text-center mt-10">
+            <FadeIn>
+              <h1 className="text-6xl sm:text-8xl font-bold gradient-text font-[family-name:var(--font-mono)] leading-none tracking-tighter">
                 {data.ticker}
               </h1>
-              {data.company_name && (
-                <span className="text-lg text-text-muted">{data.company_name}</span>
-              )}
-            </div>
+            </FadeIn>
+            {data.company_name && (
+              <FadeIn delay={0.05}>
+                <p className="text-base sm:text-lg text-text-muted mt-3">{data.company_name}</p>
+              </FadeIn>
+            )}
 
-            <div className="flex items-baseline gap-4 mt-4">
-              {yf?.current_price ? (
-                <>
-                  <span className="text-4xl sm:text-5xl font-semibold text-text-primary font-[family-name:var(--font-mono)] tracking-tight">
-                    {formatPrice(yf.current_price)}
-                  </span>
-                  {priceChange != null && (
-                    <span className={`text-xl sm:text-2xl font-semibold font-[family-name:var(--font-mono)] ${changeColor(priceChange)}`}>
-                      {formatPercent(priceChange)}
+            <FadeIn delay={0.1}>
+              <div className="flex items-baseline justify-center gap-4 mt-6">
+                {yf?.current_price ? (
+                  <>
+                    <span className="text-4xl sm:text-6xl font-semibold text-text-primary font-[family-name:var(--font-mono)] tracking-tight">
+                      {formatPrice(yf.current_price)}
                     </span>
-                  )}
-                </>
-              ) : (
-                <span className="text-lg text-text-muted">Price loading...</span>
-              )}
-              {data.from_cache && (
-                <span className="text-[10px] bg-amber/10 text-amber px-2.5 py-1 rounded-lg font-medium uppercase tracking-wider">Cached</span>
-              )}
-            </div>
+                    {priceChange != null && (
+                      <span className={`text-xl sm:text-2xl font-semibold font-[family-name:var(--font-mono)] ${changeColor(priceChange)}`}>
+                        {formatPercent(priceChange)}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-lg text-text-muted">Price loading...</span>
+                )}
+              </div>
+            </FadeIn>
 
-            {/* Stat row */}
-            <div className="flex flex-wrap gap-3 mt-8">
-              <MetricCard label="Market Cap" value={yf?.market_cap ? formatMarketCap(yf.market_cap) : null} />
-              <MetricCard label="P/E (TTM)" value={yf?.pe_ratio ? yf.pe_ratio.toFixed(1) : null} />
-              <MetricCard label="Fwd P/E" value={yf?.forward_pe ? yf.forward_pe.toFixed(1) : null} />
-              <MetricCard
-                label="52W Range"
-                value={yf?.fifty_two_week_low && yf?.fifty_two_week_high
-                  ? `${formatPrice(yf.fifty_two_week_low)} - ${formatPrice(yf.fifty_two_week_high)}`
-                  : null
-                }
-              />
-              <MetricCard label="Sector" value={yf?.sector || null} />
-              <MetricCard label="Beta" value={yf?.beta ? yf.beta.toFixed(2) : null} />
-            </div>
+            {data.from_cache && (
+              <span className="inline-block mt-3 text-[10px] bg-amber/10 text-amber px-2.5 py-1 rounded-lg font-medium uppercase tracking-wider">Cached</span>
+            )}
+
+            {/* Stat row — centered */}
+            <FadeIn delay={0.15}>
+              <div className="flex flex-wrap justify-center gap-3 mt-8">
+                <MetricCard label="Market Cap" value={yf?.market_cap ? formatMarketCap(yf.market_cap) : null} />
+                <MetricCard label="P/E (TTM)" value={yf?.pe_ratio ? yf.pe_ratio.toFixed(1) : null} />
+                <MetricCard label="Fwd P/E" value={yf?.forward_pe ? yf.forward_pe.toFixed(1) : null} />
+                <MetricCard
+                  label="52W Range"
+                  value={yf?.fifty_two_week_low && yf?.fifty_two_week_high
+                    ? `${formatPrice(yf.fifty_two_week_low)} - ${formatPrice(yf.fifty_two_week_high)}`
+                    : null
+                  }
+                />
+                <MetricCard label="Sector" value={yf?.sector || null} />
+                <MetricCard label="Beta" value={yf?.beta ? yf.beta.toFixed(2) : null} />
+              </div>
+            </FadeIn>
           </div>
         </div>
       </section>
 
       {/* Chart + Price Targets */}
-      <section className="alt-section py-10 sm:py-14">
+      <section className="alt-section py-12 sm:py-16">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <PriceChart history={yf?.history} loading={false} />
-            <AnalysisCard title="Price Targets" icon={Target} accentColor="electric" loading={false}>
-              <PriceTargetContent data={data.price_targets} currentPrice={yf?.current_price} />
-            </AnalysisCard>
-          </div>
+          <FadeInView>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <PriceChart history={yf?.history} loading={false} />
+              <AnalysisCard title="Price Targets" icon={Target} accentColor="electric" loading={false}>
+                <PriceTargetContent data={data.price_targets} currentPrice={yf?.current_price} />
+              </AnalysisCard>
+            </div>
+          </FadeInView>
         </div>
       </section>
 
       {/* Momentum */}
-      <section className="py-10 sm:py-14">
+      <section className="py-14 sm:py-20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="mb-6">
-            <p className="section-label mb-2">Technical Analysis</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Momentum</h2>
-          </div>
-          <AnalysisCard title="Momentum Analysis" icon={Zap} accentColor="electric" loading={false}>
-            <MomentumContent data={data.momentum} />
-          </AnalysisCard>
+          <FadeInView>
+            <div className="text-center mb-8">
+              <p className="section-label mb-3">Technical Analysis</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">Momentum</h2>
+            </div>
+          </FadeInView>
+          <FadeInView delay={0.1}>
+            <AnalysisCard title="Momentum Analysis" icon={Zap} accentColor="electric" loading={false}>
+              <MomentumContent data={data.momentum} />
+            </AnalysisCard>
+          </FadeInView>
         </div>
       </section>
 
       {/* Fundamentals */}
-      <section className="alt-section py-10 sm:py-14">
+      <section className="alt-section py-14 sm:py-20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="mb-6">
-            <p className="section-label mb-2">Financial Health</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Fundamentals</h2>
-          </div>
-          <AnalysisCard title="Fundamental Snapshot" icon={Building2} accentColor="amber" loading={false}>
-            <FundamentalsContent data={data.fundamentals} />
-          </AnalysisCard>
+          <FadeInView>
+            <div className="text-center mb-8">
+              <p className="section-label mb-3">Financial Health</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">Fundamentals</h2>
+            </div>
+          </FadeInView>
+          <FadeInView delay={0.1}>
+            <AnalysisCard title="Fundamental Snapshot" icon={Building2} accentColor="amber" loading={false}>
+              <FundamentalsContent data={data.fundamentals} />
+            </AnalysisCard>
+          </FadeInView>
         </div>
       </section>
 
       {/* Social */}
-      <section className="py-10 sm:py-14">
+      <section className="py-14 sm:py-20">
         <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <div className="mb-6">
-            <p className="section-label mb-2">What people are saying</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">Social Mentions</h2>
-          </div>
-          <RedditMentions posts={data.reddit_posts} loading={false} />
+          <FadeInView>
+            <div className="text-center mb-8">
+              <p className="section-label mb-3">What people are saying</p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">Social Mentions</h2>
+            </div>
+          </FadeInView>
+          <FadeInView delay={0.1}>
+            <RedditMentions posts={data.reddit_posts} loading={false} />
+          </FadeInView>
         </div>
       </section>
     </div>

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { MessageCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { formatPrice, formatPercent, changeColor } from '../../utils/formatters';
 
@@ -12,6 +13,19 @@ function SkeletonCard() {
     </div>
   );
 }
+
+const containerVariants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.06 } },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20, scale: 0.96 },
+  visible: {
+    opacity: 1, y: 0, scale: 1,
+    transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] },
+  },
+};
 
 export default function TrendingCards({ tickers, loading }) {
   const navigate = useNavigate();
@@ -33,16 +47,25 @@ export default function TrendingCards({ tickers, loading }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+    <motion.div
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+      variants={containerVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: '-40px' }}
+    >
       {tickers.slice(0, 8).map((t, i) => {
         const isUp = t.price_change_pct >= 0;
         return (
-          <button
+          <motion.button
             key={t.ticker}
+            variants={cardVariants}
+            whileHover={{ y: -3, transition: { duration: 0.2 } }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => navigate(`/analysis/${t.ticker}`)}
             className="glass-card p-5 sm:p-6 text-left group relative overflow-hidden"
           >
-            <div className="absolute top-4 right-5 text-text-muted/10 font-[family-name:var(--font-mono)] text-4xl font-bold leading-none select-none">
+            <div className="absolute top-4 right-5 text-text-muted/8 font-[family-name:var(--font-mono)] text-5xl font-bold leading-none select-none">
               {i + 1}
             </div>
 
@@ -71,9 +94,9 @@ export default function TrendingCards({ tickers, loading }) {
                 </span>
               </div>
             </div>
-          </button>
+          </motion.button>
         );
       })}
-    </div>
+    </motion.div>
   );
 }
