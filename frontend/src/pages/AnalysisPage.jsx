@@ -262,7 +262,7 @@ export default function AnalysisPage() {
     <div>
       {/* Hero — centered ticker + price */}
       <section className="pt-12 pb-16 sm:pt-16 sm:pb-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <div className="max-w-2xl mx-auto mb-10">
             <SearchBar currentTicker={ticker} />
           </div>
@@ -316,7 +316,7 @@ export default function AnalysisPage() {
 
       {/* Chart + Price Targets */}
       <section className="alt-section py-14 sm:py-18">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <FadeInView>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <PriceChart history={yf?.history} loading={false} />
@@ -330,7 +330,7 @@ export default function AnalysisPage() {
 
       {/* Momentum */}
       <section className="py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-6">
           <FadeInView>
             <div className="text-center mb-8">
               <p className="section-label mb-2">Technical Analysis</p>
@@ -347,7 +347,7 @@ export default function AnalysisPage() {
 
       {/* Fundamentals */}
       <section className="alt-section py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-6">
           <FadeInView>
             <div className="text-center mb-8">
               <p className="section-label mb-2">Financial Health</p>
@@ -364,7 +364,7 @@ export default function AnalysisPage() {
 
       {/* Social */}
       <section className="py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto px-6">
           <FadeInView>
             <div className="text-center mb-8">
               <p className="section-label mb-2">What people are saying</p>

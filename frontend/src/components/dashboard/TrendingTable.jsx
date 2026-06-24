@@ -65,7 +65,7 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
   );
 
   return (
-    <div className="card overflow-hidden">
+    <div className="card overflow-hidden max-w-5xl mx-auto">
       <div className="px-8 py-6 border-b border-border flex items-center justify-between">
         <h3 className="text-base font-semibold text-text-primary tracking-tight">{title}</h3>
         <span className="text-sm text-text-muted font-[family-name:var(--font-mono)]">{tickers.length} tickers</span>

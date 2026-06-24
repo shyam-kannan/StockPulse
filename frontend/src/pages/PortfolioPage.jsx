@@ -170,7 +170,7 @@ function PortfolioSkeleton() {
         </div>
       </section>
       <section className="alt-section py-16">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="stat-card">
@@ -182,7 +182,7 @@ function PortfolioSkeleton() {
         </div>
       </section>
       <section className="py-16">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="card p-5">
@@ -284,7 +284,7 @@ export default function PortfolioPage() {
 
       {/* Stats */}
       <section className="alt-section py-14 sm:py-16">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <FadeInView>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
@@ -341,7 +341,7 @@ export default function PortfolioPage() {
 
       {/* Positions */}
       <section className="alt-section py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <FadeInView>
             <div className="text-center mb-10">
               <p className="section-label mb-2">Based on today's market</p>

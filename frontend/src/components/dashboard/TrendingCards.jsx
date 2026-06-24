@@ -29,7 +29,7 @@ export default function TrendingCards({ tickers, loading }) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-5xl mx-auto">
         {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
       </div>
     );
@@ -37,7 +37,7 @@ export default function TrendingCards({ tickers, loading }) {
 
   if (!tickers || tickers.length === 0) {
     return (
-      <div className="card p-10 text-center">
+      <div className="card p-10 text-center max-w-md mx-auto">
         <p className="text-text-muted text-sm">No trending tickers yet. Data is being collected...</p>
       </div>
     );
@@ -45,7 +45,7 @@ export default function TrendingCards({ tickers, loading }) {
 
   return (
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3"
+      className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-5xl mx-auto"
       variants={stagger}
       initial="hidden"
       whileInView="visible"

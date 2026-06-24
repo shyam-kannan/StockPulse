@@ -60,7 +60,7 @@ export default function Glossary() {
   return (
     <div>
       {/* Search */}
-      <div className="relative max-w-lg mb-10">
+      <div className="relative max-w-lg mx-auto mb-10">
         <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-text-muted" />
         <input
           type="text"
@@ -72,7 +72,7 @@ export default function Glossary() {
       </div>
 
       {/* Terms grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-5xl mx-auto">
         {filtered.map((item) => (
           <div
             key={item.term}

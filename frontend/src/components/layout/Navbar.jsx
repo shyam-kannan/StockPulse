@@ -40,7 +40,7 @@ export default function Navbar({ marketStatus }) {
 
   return (
     <nav className="sticky top-0 z-50 bg-bg/80 backdrop-blur-xl border-b border-border">
-      <div className="max-w-6xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
 
           <NavLink to="/" className="flex items-center gap-3 shrink-0">

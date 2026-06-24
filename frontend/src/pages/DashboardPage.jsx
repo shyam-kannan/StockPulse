@@ -97,7 +97,7 @@ export default function DashboardPage() {
       {/* Watchlist */}
       {watchlist.length > 0 && (
         <section className="pb-12">
-          <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-5xl mx-auto px-6">
             <WatchlistSection watchlist={watchlist} setWatchlist={setWatchlist} trendingData={trending} />
           </div>
         </section>
@@ -105,7 +105,7 @@ export default function DashboardPage() {
 
       {/* AI Briefing */}
       <section className="alt-section py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <FadeInView>
             <DailyBriefing briefing={briefing} loading={briefingLoading} />
           </FadeInView>
@@ -114,7 +114,7 @@ export default function DashboardPage() {
 
       {/* Top Stocks */}
       <section className="py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <FadeInView>
             <div className="text-center mb-10">
               <p className="section-label mb-2">Most discussed in the last 24 hours</p>
@@ -128,7 +128,7 @@ export default function DashboardPage() {
       {/* Top ETFs */}
       {(trendingLoading || etfs.length > 0) && (
         <section className="alt-section py-16 sm:py-20">
-          <div className="max-w-6xl mx-auto px-6">
+          <div className="max-w-5xl mx-auto px-6">
             <FadeInView>
               <div className="text-center mb-10">
                 <p className="section-label mb-2">Most discussed exchange-traded funds</p>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
 
       {/* Trending Table */}
       <section className="py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <FadeInView>
             <div className="text-center mb-10">
               <p className="section-label mb-2">Full breakdown</p>
@@ -178,7 +178,7 @@ export default function DashboardPage() {
 
       {/* News & Social */}
       <section className="alt-section py-16 sm:py-20">
-        <div className="max-w-6xl mx-auto px-6">
+        <div className="max-w-5xl mx-auto px-6">
           <FadeInView>
             <div className="text-center mb-10">
               <p className="section-label mb-2">What people are saying</p>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
             </div>
           </FadeInView>
           <FadeInView delay={0.1}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-5xl mx-auto">
               <RedditBuzz posts={redditPosts} loading={redditLoading} />
               <NewsFeed items={feed} loading={feedLoading} />
             </div>

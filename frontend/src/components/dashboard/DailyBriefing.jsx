@@ -119,7 +119,7 @@ export default function DailyBriefing({ briefing, loading }) {
         <div className="mb-10">
           <p className="section-label text-center mb-5">Key Themes</p>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto"
             variants={stagger}
             initial="hidden"
             whileInView="visible"
