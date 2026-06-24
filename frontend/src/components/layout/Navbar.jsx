@@ -42,45 +42,45 @@ export default function Navbar({ marketStatus }) {
 
   return (
     <nav className="sticky top-0 z-50 bg-navy-950/80 backdrop-blur-2xl border-b border-white/[0.04]">
-      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+        <div className="flex items-center justify-between h-[72px]">
 
           {/* Logo */}
-          <NavLink to="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-8 h-8 rounded-xl bg-electric/10 flex items-center justify-center group-hover:bg-electric/15 transition-colors duration-200">
-              <Activity className="w-4 h-4 text-electric" />
+          <NavLink to="/" className="flex items-center gap-3.5 shrink-0 group">
+            <div className="w-9 h-9 rounded-xl bg-electric/10 flex items-center justify-center group-hover:bg-electric/15 transition-colors duration-200">
+              <Activity className="w-[18px] h-[18px] text-electric" />
             </div>
-            <span className="text-base font-semibold gradient-text font-[family-name:var(--font-mono)] tracking-tight">
+            <span className="text-lg font-semibold gradient-text font-[family-name:var(--font-mono)] tracking-tight">
               StockPulse
             </span>
           </NavLink>
 
           {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-1 ml-10">
+          <div className="hidden md:flex items-center gap-2 ml-12">
             {links.map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 px-4 py-2 rounded-xl text-[13px] font-medium transition-all duration-200 ${
+                  `flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? 'text-text-primary bg-white/[0.06]'
                       : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
                   }`
                 }
               >
-                <Icon className="w-3.5 h-3.5" />
+                <Icon className="w-4 h-4" />
                 {label}
               </NavLink>
             ))}
           </div>
 
-          {/* Desktop right side: search + market status */}
-          <div className="hidden md:flex items-center gap-4 ml-auto">
+          {/* Desktop right side */}
+          <div className="hidden md:flex items-center gap-5 ml-auto">
             <form onSubmit={handleSearch} className="relative">
               <Search
-                className={`absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 transition-colors duration-200 ${
+                className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${
                   searchFocused ? 'text-electric' : 'text-text-muted'
                 }`}
               />
@@ -92,18 +92,18 @@ export default function Navbar({ marketStatus }) {
                 onBlur={() => setSearchFocused(false)}
                 placeholder="Ticker..."
                 maxLength={5}
-                className="w-36 focus:w-48 pl-9 pr-3 py-2 bg-white/[0.03] border border-white/[0.06] rounded-xl text-xs text-text-primary placeholder:text-text-muted/70 focus:outline-none focus:border-electric/30 focus:bg-white/[0.05] font-[family-name:var(--font-mono)] transition-all duration-300"
+                className="w-40 focus:w-52 pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-muted/70 focus:outline-none focus:border-electric/30 focus:bg-white/[0.05] font-[family-name:var(--font-mono)] transition-all duration-300"
               />
             </form>
 
             {marketStatus && (
-              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/[0.025] border border-white/[0.04]">
+              <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/[0.025] border border-white/[0.04]">
                 <div
-                  className={`w-1.5 h-1.5 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'} ${
+                  className={`w-2 h-2 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'} ${
                     marketStatus.is_open ? 'animate-pulse' : ''
                   }`}
                 />
-                <span className="text-[11px] font-medium text-text-secondary tracking-wide">
+                <span className="text-xs font-medium text-text-secondary tracking-wide">
                   {statusLabel[marketStatus.status] || 'Unknown'}
                 </span>
               </div>
@@ -113,7 +113,7 @@ export default function Navbar({ marketStatus }) {
           {/* Mobile menu button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-2.5 text-text-muted hover:text-text-primary rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer"
+            className="md:hidden p-3 text-text-muted hover:text-text-primary rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer"
             aria-label="Toggle menu"
           >
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -122,16 +122,16 @@ export default function Navbar({ marketStatus }) {
 
         {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden py-4 border-t border-white/[0.04] space-y-1 fade-in">
-            <form onSubmit={handleSearch} className="relative mb-4">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
+          <div className="md:hidden py-5 border-t border-white/[0.04] space-y-2 fade-in">
+            <form onSubmit={handleSearch} className="relative mb-5">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
                 placeholder="Search ticker..."
                 maxLength={5}
-                className="w-full pl-10 pr-4 py-3 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-electric/30 font-[family-name:var(--font-mono)]"
+                className="w-full pl-11 pr-4 py-3.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-electric/30 font-[family-name:var(--font-mono)]"
               />
             </form>
 
@@ -141,7 +141,7 @@ export default function Navbar({ marketStatus }) {
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-3 text-sm rounded-xl transition-colors ${
+                  `flex items-center gap-3 px-5 py-3.5 text-sm rounded-xl transition-colors ${
                     isActive
                       ? 'text-text-primary bg-white/[0.05]'
                       : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
@@ -155,8 +155,8 @@ export default function Navbar({ marketStatus }) {
             ))}
 
             {marketStatus && (
-              <div className="flex items-center gap-2 px-4 py-3 mt-2">
-                <div className={`w-1.5 h-1.5 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'}`} />
+              <div className="flex items-center gap-2 px-5 py-3.5 mt-3">
+                <div className={`w-2 h-2 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'}`} />
                 <span className="text-xs text-text-muted">{statusLabel[marketStatus.status]}</span>
               </div>
             )}

@@ -5,13 +5,13 @@ function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   const data = payload[0].payload;
   return (
-    <div className="bg-navy-900 border border-border rounded-2xl px-5 py-3.5 shadow-2xl">
-      <p className="text-xs text-text-muted mb-1.5">{label}</p>
-      <p className="text-sm font-semibold text-electric font-[family-name:var(--font-mono)]">
+    <div className="bg-navy-900 border border-border rounded-2xl px-6 py-4 shadow-2xl">
+      <p className="text-xs text-text-muted mb-2">{label}</p>
+      <p className="text-base font-semibold text-electric font-[family-name:var(--font-mono)]">
         ${data.close?.toFixed(2)}
       </p>
       {data.volume && (
-        <p className="text-xs text-text-muted mt-1.5">
+        <p className="text-xs text-text-muted mt-2">
           Vol: {(data.volume / 1e6).toFixed(1)}M
         </p>
       )}
@@ -21,28 +21,28 @@ function CustomTooltip({ active, payload, label }) {
 
 function ChartSkeleton() {
   return (
-    <div className="card p-7">
-      <div className="flex items-center gap-3 mb-7">
+    <div className="card p-10">
+      <div className="flex items-center gap-3 mb-8">
         <div className="w-5 h-5 shimmer rounded-lg" />
-        <div className="h-4 shimmer rounded-xl w-28" />
+        <div className="h-5 shimmer rounded-xl w-32" />
       </div>
-      <div className="h-[320px] shimmer rounded-2xl" />
+      <div className="h-[380px] shimmer rounded-2xl" />
     </div>
   );
 }
 
 function ChartEmpty() {
   return (
-    <div className="card p-7">
-      <div className="flex items-center gap-3 mb-7">
-        <TrendingUp className="w-4 h-4 text-text-muted" />
-        <h3 className="text-sm font-medium text-text-secondary">Price History</h3>
+    <div className="card p-10">
+      <div className="flex items-center gap-3 mb-8">
+        <TrendingUp className="w-5 h-5 text-text-muted" />
+        <h3 className="text-base font-medium text-text-secondary">Price History</h3>
       </div>
-      <div className="h-[320px] flex flex-col items-center justify-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-white/[0.025] border border-border flex items-center justify-center">
-          <TrendingUp className="w-6 h-6 text-text-muted" />
+      <div className="h-[380px] flex flex-col items-center justify-center gap-5">
+        <div className="w-16 h-16 rounded-2xl bg-white/[0.025] border border-border flex items-center justify-center">
+          <TrendingUp className="w-7 h-7 text-text-muted" />
         </div>
-        <p className="text-sm text-text-muted">Price chart loading...</p>
+        <p className="text-base text-text-muted">Price chart loading...</p>
       </div>
     </div>
   );
@@ -54,13 +54,13 @@ export default function PriceChart({ history, loading }) {
   if (!history || history.length === 0) return <ChartEmpty />;
 
   return (
-    <div className="card p-7 fade-in">
-      <div className="flex items-center gap-3 mb-7">
-        <TrendingUp className="w-4 h-4 text-electric" />
-        <h3 className="text-sm font-medium text-text-primary">Price History</h3>
+    <div className="card p-10 fade-in">
+      <div className="flex items-center gap-3 mb-8">
+        <TrendingUp className="w-5 h-5 text-electric" />
+        <h3 className="text-base font-medium text-text-primary">Price History</h3>
       </div>
 
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={380}>
         <AreaChart data={history} margin={{ top: 4, right: 4, bottom: 0, left: -8 }}>
           <defs>
             <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
@@ -77,18 +77,18 @@ export default function PriceChart({ history, loading }) {
           <XAxis
             dataKey="date"
             stroke="transparent"
-            tick={{ fontSize: 10, fill: '#475569' }}
+            tick={{ fontSize: 11, fill: '#475569' }}
             tickFormatter={(d) => {
               const parts = d.split('-');
               return `${parts[1]}/${parts[2]}`;
             }}
             axisLine={false}
             tickLine={false}
-            dy={10}
+            dy={12}
           />
           <YAxis
             stroke="transparent"
-            tick={{ fontSize: 10, fill: '#475569' }}
+            tick={{ fontSize: 11, fill: '#475569' }}
             domain={['auto', 'auto']}
             tickFormatter={(v) => `$${v}`}
             axisLine={false}

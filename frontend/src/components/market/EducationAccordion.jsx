@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronDown, BookOpen, Lightbulb } from 'lucide-react';
+import { ChevronDown, Lightbulb } from 'lucide-react';
 import { api } from '../../utils/api';
 
 function AccordionItem({ card, isOpen, onToggle }) {
@@ -16,27 +16,27 @@ function AccordionItem({ card, isOpen, onToggle }) {
     <div className="card overflow-hidden">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 text-left hover:bg-white/[0.02] transition-colors"
+        className="w-full flex items-center justify-between p-6 text-left hover:bg-white/[0.02] transition-colors"
       >
-        <div className="flex items-center gap-3">
-          <span className={`text-[10px] font-medium px-2.5 py-0.5 rounded-lg ${categoryColor[card.category] || 'bg-white/[0.04] text-text-secondary'}`}>
+        <div className="flex items-center gap-4">
+          <span className={`text-xs font-medium px-3 py-1 rounded-lg ${categoryColor[card.category] || 'bg-white/[0.04] text-text-secondary'}`}>
             {card.category}
           </span>
-          <h4 className="text-sm font-medium text-text-primary">{card.title}</h4>
+          <h4 className="text-base font-medium text-text-primary">{card.title}</h4>
         </div>
-        <ChevronDown className={`w-4 h-4 text-text-muted shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-5 h-5 text-text-muted shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {!isOpen && (
-        <div className="px-4 pb-3 -mt-1">
-          <p className="text-xs text-text-secondary leading-relaxed">{card.summary}</p>
+        <div className="px-6 pb-5 -mt-1">
+          <p className="text-sm text-text-secondary leading-relaxed ml-[calc(3rem+1rem)]">{card.summary}</p>
         </div>
       )}
 
       <div className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'}`}>
-        <div className="px-4 pb-5 border-t border-border pt-4">
-          <p className="text-xs text-text-secondary mb-3 italic">{card.summary}</p>
-          <p className="text-sm text-text-primary leading-relaxed whitespace-pre-line">{card.details}</p>
+        <div className="px-6 pb-7 border-t border-border pt-6">
+          <p className="text-sm text-text-secondary mb-4 italic">{card.summary}</p>
+          <p className="text-[15px] text-text-primary leading-[1.8] whitespace-pre-line">{card.details}</p>
         </div>
       </div>
     </div>
@@ -57,47 +57,38 @@ export default function EducationAccordion() {
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        <div className="flex items-center gap-2.5 mb-5">
-          <BookOpen className="w-5 h-5 text-electric" />
-          <h3 className="text-lg font-semibold text-text-primary">Learn the Basics</h3>
-        </div>
+      <div className="space-y-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="card p-5">
-            <div className="h-4 shimmer rounded-lg w-3/4" />
-            <div className="h-3 shimmer rounded-lg w-full mt-3" />
+          <div key={i} className="card p-7">
+            <div className="h-5 shimmer rounded-lg w-3/4" />
+            <div className="h-4 shimmer rounded-lg w-full mt-4" />
           </div>
         ))}
       </div>
     );
   }
 
-  const tipIndex = new Date().getDate() % cards.length;
+  const tipIndex = new Date().getDate() % Math.max(cards.length, 1);
   const tipCard = cards[tipIndex];
 
   return (
     <div>
-      <div className="flex items-center gap-2.5 mb-5">
-        <BookOpen className="w-5 h-5 text-electric" />
-        <h3 className="text-lg font-semibold text-text-primary">Learn the Basics</h3>
-      </div>
-
       {tipCard && (
-        <div className="relative overflow-hidden rounded-2xl border border-electric/10 bg-gradient-to-r from-electric/[0.06] to-transparent p-5 mb-5">
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-electric/15 flex items-center justify-center shrink-0">
-              <Lightbulb className="w-4 h-4 text-electric" />
+        <div className="relative overflow-hidden rounded-2xl border border-electric/10 bg-gradient-to-r from-electric/[0.06] to-transparent p-7 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-electric/15 flex items-center justify-center shrink-0">
+              <Lightbulb className="w-5 h-5 text-electric" />
             </div>
             <div>
-              <p className="text-xs text-electric font-medium mb-1">Tip of the Day</p>
-              <p className="text-sm font-medium text-text-primary mb-1">{tipCard.title}</p>
-              <p className="text-xs text-text-secondary leading-relaxed">{tipCard.summary}</p>
+              <p className="text-xs text-electric font-medium mb-2">Tip of the Day</p>
+              <p className="text-base font-medium text-text-primary mb-2">{tipCard.title}</p>
+              <p className="text-sm text-text-secondary leading-relaxed">{tipCard.summary}</p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="space-y-2.5">
+      <div className="space-y-4">
         {cards.map((card) => (
           <AccordionItem
             key={card.id}

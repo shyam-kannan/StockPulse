@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { TrendingUp, BarChart3, Target, Loader2, Zap, Building2, Cpu } from 'lucide-react';
+import { Target, Loader2, Zap, Building2, Cpu } from 'lucide-react';
 import { api } from '../utils/api';
 import { formatPrice, formatPercent, formatMarketCap, changeColor } from '../utils/formatters';
 import SearchBar from '../components/analysis/SearchBar';
@@ -8,8 +8,6 @@ import AnalysisCard from '../components/analysis/AnalysisCard';
 import PriceChart from '../components/analysis/PriceChart';
 import PriceTargetBar from '../components/analysis/PriceTargetBar';
 import RedditMentions from '../components/analysis/RedditMentions';
-
-/* ─── Computed fallback badge ─── */
 
 function ComputedBadge() {
   return (
@@ -19,8 +17,6 @@ function ComputedBadge() {
     </span>
   );
 }
-
-/* ─── Momentum content ─── */
 
 function MomentumContent({ data }) {
   if (!data || data.error) return <p className="text-text-muted text-sm">Analysis unavailable</p>;
@@ -34,19 +30,19 @@ function MomentumContent({ data }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {data.computed_fallback && <ComputedBadge />}
 
       {data.one_liner && (
-        <div className="p-5 bg-electric/[0.04] border border-electric/15 rounded-2xl">
-          <p className="text-sm text-electric/90 italic leading-relaxed">"{data.one_liner}"</p>
+        <div className="p-6 bg-electric/[0.04] border border-electric/15 rounded-2xl">
+          <p className="text-[15px] text-electric/90 italic leading-relaxed">"{data.one_liner}"</p>
         </div>
       )}
 
       {data.momentum_rating && (
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-text-muted uppercase tracking-wider">Rating</span>
-          <span className={`inline-block text-xs font-semibold px-3.5 py-1.5 rounded-xl ${ratingColor[data.momentum_rating] || 'bg-white/[0.04] text-text-secondary'}`}>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-text-muted uppercase tracking-widest">Rating</span>
+          <span className={`inline-block text-sm font-semibold px-4 py-2 rounded-xl ${ratingColor[data.momentum_rating] || 'bg-white/[0.04] text-text-secondary'}`}>
             {data.momentum_rating}
           </span>
         </div>
@@ -54,41 +50,41 @@ function MomentumContent({ data }) {
 
       {data.narrative && (
         <div>
-          <p className="text-xs text-text-muted uppercase tracking-wider mb-2.5">Narrative</p>
-          <p className="text-sm text-text-secondary leading-relaxed">{data.narrative}</p>
+          <p className="text-xs text-text-muted uppercase tracking-widest mb-3">Narrative</p>
+          <p className="text-[15px] text-text-secondary leading-[1.8]">{data.narrative}</p>
         </div>
       )}
 
       {data.catalyst && (
         <div>
-          <p className="text-xs text-text-muted uppercase tracking-wider mb-2.5">Catalyst</p>
-          <p className="text-sm text-text-primary leading-relaxed">{data.catalyst}</p>
+          <p className="text-xs text-text-muted uppercase tracking-widest mb-3">Catalyst</p>
+          <p className="text-[15px] text-text-primary leading-[1.8]">{data.catalyst}</p>
         </div>
       )}
 
       {data.institutional_view && (
         <div>
-          <p className="text-xs text-text-muted uppercase tracking-wider mb-2.5">Institutional View</p>
-          <p className="text-sm text-text-secondary leading-relaxed">{data.institutional_view}</p>
+          <p className="text-xs text-text-muted uppercase tracking-widest mb-3">Institutional View</p>
+          <p className="text-[15px] text-text-secondary leading-[1.8]">{data.institutional_view}</p>
         </div>
       )}
 
       {data.key_levels && (data.key_levels.support > 0 || data.key_levels.resistance > 0) && (
         <div>
-          <p className="text-xs text-text-muted uppercase tracking-wider mb-3">Key Levels</p>
-          <div className="flex gap-5 text-sm font-[family-name:var(--font-mono)]">
+          <p className="text-xs text-text-muted uppercase tracking-widest mb-4">Key Levels</p>
+          <div className="flex gap-8">
             {data.key_levels.support > 0 && (
-              <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-electric" />
-                <span className="text-text-muted text-xs">Support</span>
-                <span className="text-electric font-medium">{formatPrice(data.key_levels.support)}</span>
+              <div className="flex items-center gap-3">
+                <span className="w-2.5 h-2.5 rounded-full bg-electric" />
+                <span className="text-text-muted text-sm">Support</span>
+                <span className="text-electric font-semibold text-lg font-[family-name:var(--font-mono)]">{formatPrice(data.key_levels.support)}</span>
               </div>
             )}
             {data.key_levels.resistance > 0 && (
-              <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-danger" />
-                <span className="text-text-muted text-xs">Resistance</span>
-                <span className="text-danger font-medium">{formatPrice(data.key_levels.resistance)}</span>
+              <div className="flex items-center gap-3">
+                <span className="w-2.5 h-2.5 rounded-full bg-danger" />
+                <span className="text-text-muted text-sm">Resistance</span>
+                <span className="text-danger font-semibold text-lg font-[family-name:var(--font-mono)]">{formatPrice(data.key_levels.resistance)}</span>
               </div>
             )}
           </div>
@@ -97,8 +93,6 @@ function MomentumContent({ data }) {
     </div>
   );
 }
-
-/* ─── Fundamentals content ─── */
 
 function FundamentalsContent({ data }) {
   if (!data || data.error) return <p className="text-text-muted text-sm">Analysis unavailable</p>;
@@ -110,18 +104,18 @@ function FundamentalsContent({ data }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {data.computed_fallback && <ComputedBadge />}
 
       {data.key_metrics && (
-        <div className="flex gap-2.5 flex-wrap">
+        <div className="flex gap-3 flex-wrap">
           {data.key_metrics.growth_quality && (
-            <span className="text-xs px-3.5 py-2 bg-white/[0.04] rounded-xl text-text-secondary font-medium">
+            <span className="text-sm px-4 py-2.5 bg-white/[0.04] rounded-xl text-text-secondary font-medium">
               Growth: {data.key_metrics.growth_quality}
             </span>
           )}
           {data.key_metrics.financial_health && (
-            <span className={`text-xs px-3.5 py-2 bg-white/[0.04] rounded-xl font-medium ${healthColor[data.key_metrics.financial_health] || 'text-text-secondary'}`}>
+            <span className={`text-sm px-4 py-2.5 bg-white/[0.04] rounded-xl font-medium ${healthColor[data.key_metrics.financial_health] || 'text-text-secondary'}`}>
               Health: {data.key_metrics.financial_health}
             </span>
           )}
@@ -130,40 +124,38 @@ function FundamentalsContent({ data }) {
 
       {data.valuation_summary && (
         <div>
-          <p className="text-xs text-text-muted uppercase tracking-wider mb-2.5">Valuation</p>
-          <p className="text-sm text-text-secondary leading-relaxed">{data.valuation_summary}</p>
+          <p className="text-xs text-text-muted uppercase tracking-widest mb-3">Valuation</p>
+          <p className="text-[15px] text-text-secondary leading-[1.8]">{data.valuation_summary}</p>
         </div>
       )}
 
       {data.growth_assessment && (
         <div>
-          <p className="text-xs text-text-muted uppercase tracking-wider mb-2.5">Growth</p>
-          <p className="text-sm text-text-secondary leading-relaxed">{data.growth_assessment}</p>
+          <p className="text-xs text-text-muted uppercase tracking-widest mb-3">Growth</p>
+          <p className="text-[15px] text-text-secondary leading-[1.8]">{data.growth_assessment}</p>
         </div>
       )}
 
       {data.fair_value_assessment && (
-        <div className={`p-5 rounded-2xl border ${
+        <div className={`p-6 rounded-2xl border ${
           data.fair_value_assessment === 'below_fair_value'
             ? 'bg-electric/[0.04] border-electric/15'
             : data.fair_value_assessment === 'above_fair_value'
             ? 'bg-danger/[0.04] border-danger/15'
             : 'bg-amber/[0.04] border-amber/15'
         }`}>
-          <p className="text-xs text-text-muted mb-2 uppercase tracking-wider">Fair Value Assessment</p>
-          <p className="text-sm font-semibold capitalize">
+          <p className="text-xs text-text-muted mb-2 uppercase tracking-widest">Fair Value Assessment</p>
+          <p className="text-base font-semibold capitalize">
             {data.fair_value_assessment.replace(/_/g, ' ')}
           </p>
           {data.fair_value_reasoning && (
-            <p className="text-xs text-text-secondary mt-2.5 leading-relaxed">{data.fair_value_reasoning}</p>
+            <p className="text-sm text-text-secondary mt-3 leading-[1.8]">{data.fair_value_reasoning}</p>
           )}
         </div>
       )}
     </div>
   );
 }
-
-/* ─── Price target content ─── */
 
 function PriceTargetContent({ data, currentPrice }) {
   if (!data || data.error) return <p className="text-text-muted text-sm">Analysis unavailable</p>;
@@ -176,26 +168,26 @@ function PriceTargetContent({ data, currentPrice }) {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {data.computed_fallback && <ComputedBadge />}
       <PriceTargetBar priceTargets={data} currentPrice={currentPrice} />
-      <div className="space-y-2.5">
+      <div className="space-y-3">
         {scenarios.map((s) => {
           const scenario = data[s.key];
           if (!scenario) return null;
           return (
-            <div key={s.key} className="bg-white/[0.02] rounded-2xl p-4">
+            <div key={s.key} className="bg-white/[0.02] rounded-2xl p-5">
               <div className="flex items-center justify-between mb-2">
-                <span className={`text-xs font-semibold ${s.color}`}>{s.label}</span>
+                <span className={`text-sm font-semibold ${s.color}`}>{s.label}</span>
                 <div className="flex items-center gap-3">
-                  <span className={`text-sm font-semibold font-[family-name:var(--font-mono)] ${s.color}`}>
+                  <span className={`text-base font-semibold font-[family-name:var(--font-mono)] ${s.color}`}>
                     {formatPrice(scenario.price)}
                   </span>
-                  {s.timeframe && <span className="text-[10px] text-text-muted">{s.timeframe}</span>}
+                  {s.timeframe && <span className="text-xs text-text-muted">{s.timeframe}</span>}
                 </div>
               </div>
               {scenario.reasoning && (
-                <p className="text-xs text-text-muted leading-relaxed mt-1.5">{scenario.reasoning}</p>
+                <p className="text-sm text-text-muted leading-relaxed mt-2">{scenario.reasoning}</p>
               )}
             </div>
           );
@@ -205,19 +197,15 @@ function PriceTargetContent({ data, currentPrice }) {
   );
 }
 
-/* ─── Stat card for key metrics ─── */
-
 function MetricCard({ label, value }) {
   if (!value) return null;
   return (
     <div className="stat-card">
-      <p className="text-[10px] text-text-muted uppercase tracking-widest mb-2">{label}</p>
-      <p className="text-base font-semibold text-text-primary font-[family-name:var(--font-mono)] leading-none">{value}</p>
+      <p className="text-[11px] text-text-muted uppercase tracking-widest mb-3">{label}</p>
+      <p className="text-lg font-semibold text-text-primary font-[family-name:var(--font-mono)] leading-none">{value}</p>
     </div>
   );
 }
-
-/* ─── Main page component ─── */
 
 export default function AnalysisPage() {
   const { ticker } = useParams();
@@ -226,11 +214,7 @@ export default function AnalysisPage() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!ticker) {
-      setData(null);
-      return;
-    }
-
+    if (!ticker) { setData(null); return; }
     setLoading(true);
     setError(null);
     api.getStock(ticker)
@@ -244,17 +228,16 @@ export default function AnalysisPage() {
     ? ((yf.current_price - yf.previous_close) / yf.previous_close) * 100
     : null;
 
-  /* Empty state */
   if (!ticker && !loading) {
     return (
-      <div className="space-y-10 fade-in">
+      <div className="fade-in">
         <SearchBar currentTicker={ticker} />
-        <div className="text-center py-28">
-          <div className="w-24 h-24 mx-auto mb-8 bg-white/[0.025] rounded-3xl flex items-center justify-center border border-border">
-            <Target className="w-10 h-10 text-electric/40" />
+        <div className="text-center py-40">
+          <div className="w-28 h-28 mx-auto mb-10 bg-white/[0.02] rounded-3xl flex items-center justify-center border border-border">
+            <Target className="w-12 h-12 text-electric/30" />
           </div>
-          <h2 className="text-3xl font-semibold text-text-primary mb-4 tracking-tight">Search for a Stock</h2>
-          <p className="text-text-secondary text-base max-w-lg mx-auto leading-relaxed">
+          <h2 className="text-4xl font-semibold text-text-primary mb-5 tracking-tight">Search for a Stock</h2>
+          <p className="text-text-secondary text-lg max-w-xl mx-auto leading-relaxed">
             Enter a ticker symbol above to get AI-powered momentum analysis,
             fundamental insights, and price target frameworks.
           </p>
@@ -263,78 +246,68 @@ export default function AnalysisPage() {
     );
   }
 
-  /* Loading state */
   if (loading) {
     return (
-      <div className="space-y-10 fade-in">
+      <div className="fade-in">
         <SearchBar currentTicker={ticker} />
-        <div className="text-center py-28">
-          <Loader2 className="w-10 h-10 text-electric animate-spin mx-auto mb-6" />
-          <p className="text-text-secondary text-lg">
+        <div className="text-center py-40">
+          <Loader2 className="w-12 h-12 text-electric animate-spin mx-auto mb-8" />
+          <p className="text-text-secondary text-xl">
             Analyzing <span className="text-electric font-[family-name:var(--font-mono)] font-semibold">{ticker}</span>
           </p>
-          <p className="text-text-muted text-sm mt-3">This may take 10-15 seconds</p>
+          <p className="text-text-muted text-sm mt-4">This may take 10-15 seconds</p>
         </div>
       </div>
     );
   }
 
-  /* Error state */
   if (error) {
     return (
-      <div className="space-y-10 fade-in">
+      <div className="fade-in">
         <SearchBar currentTicker={ticker} />
-        <div className="bg-danger/[0.06] border border-danger/15 rounded-2xl p-12 text-center max-w-lg mx-auto">
-          <p className="text-danger font-semibold text-lg mb-3">Analysis Failed</p>
-          <p className="text-text-secondary text-sm leading-relaxed">{error}</p>
+        <div className="bg-danger/[0.06] border border-danger/15 rounded-2xl p-16 text-center max-w-lg mx-auto mt-20">
+          <p className="text-danger font-semibold text-xl mb-4">Analysis Failed</p>
+          <p className="text-text-secondary leading-relaxed">{error}</p>
         </div>
       </div>
     );
   }
 
-  if (!data) {
-    return (
-      <div className="space-y-10 fade-in">
-        <SearchBar currentTicker={ticker} />
-      </div>
-    );
-  }
+  if (!data) return <div className="fade-in"><SearchBar currentTicker={ticker} /></div>;
 
-  /* Full analysis layout */
   return (
-    <div className="space-y-10 fade-in">
+    <div className="fade-in">
 
-      {/* Search bar */}
       <SearchBar currentTicker={ticker} />
 
-      {/* Stock header — big ticker, price, change */}
-      <div className="space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-8">
-          <div className="flex items-baseline gap-4">
-            <h1 className="text-5xl sm:text-7xl font-bold gradient-text font-[family-name:var(--font-mono)] leading-none tracking-tighter">
+      {/* Stock header */}
+      <div className="mt-12 mb-16">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-8">
+            <h1 className="text-6xl sm:text-8xl font-bold gradient-text font-[family-name:var(--font-mono)] leading-none tracking-tighter">
               {data.ticker}
             </h1>
             {data.company_name && (
-              <span className="text-base sm:text-lg text-text-secondary truncate max-w-[300px]">
+              <span className="text-lg sm:text-xl text-text-muted pb-2">
                 {data.company_name}
               </span>
             )}
           </div>
 
-          <div className="flex items-baseline gap-5 sm:ml-auto">
+          <div className="flex items-baseline gap-6">
             {yf?.current_price ? (
               <>
-                <span className="text-3xl sm:text-5xl font-semibold text-text-primary font-[family-name:var(--font-mono)] tracking-tight">
+                <span className="text-4xl sm:text-6xl font-semibold text-text-primary font-[family-name:var(--font-mono)] tracking-tight">
                   {formatPrice(yf.current_price)}
                 </span>
                 {priceChange != null && (
-                  <span className={`text-xl font-semibold font-[family-name:var(--font-mono)] ${changeColor(priceChange)}`}>
+                  <span className={`text-2xl font-semibold font-[family-name:var(--font-mono)] ${changeColor(priceChange)}`}>
                     {formatPercent(priceChange)}
                   </span>
                 )}
               </>
             ) : (
-              <span className="text-lg text-text-muted">Price loading...</span>
+              <span className="text-xl text-text-muted">Price loading...</span>
             )}
             {data.from_cache && (
               <span className="text-[10px] bg-amber/10 text-amber px-3 py-1.5 rounded-xl font-medium uppercase tracking-wider">Cached</span>
@@ -342,8 +315,8 @@ export default function AnalysisPage() {
           </div>
         </div>
 
-        {/* Key metrics grid — stat cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+        {/* Stat cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5 mt-12">
           <MetricCard label="Market Cap" value={yf?.market_cap ? formatMarketCap(yf.market_cap) : null} />
           <MetricCard label="P/E (TTM)" value={yf?.pe_ratio ? yf.pe_ratio.toFixed(1) : null} />
           <MetricCard label="Fwd P/E" value={yf?.forward_pe ? yf.forward_pe.toFixed(1) : null} />
@@ -359,31 +332,35 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      {/* Chart + Price Targets row */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-3">
-          <PriceChart history={yf?.history} loading={false} />
-        </div>
-        <div className="lg:col-span-2">
-          <AnalysisCard title="Price Targets" icon={Target} accentColor="electric" loading={false}>
-            <PriceTargetContent data={data.price_targets} currentPrice={yf?.current_price} />
-          </AnalysisCard>
-        </div>
+      <div className="section-divider" />
+
+      {/* Chart + Price Targets */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+        <PriceChart history={yf?.history} loading={false} />
+        <AnalysisCard title="Price Targets" icon={Target} accentColor="electric" loading={false}>
+          <PriceTargetContent data={data.price_targets} currentPrice={yf?.current_price} />
+        </AnalysisCard>
       </div>
 
-      {/* Momentum + Fundamentals row */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        <div className="lg:col-span-3">
-          <AnalysisCard title="Momentum Analysis" icon={Zap} accentColor="electric" loading={false}>
-            <MomentumContent data={data.momentum} />
-          </AnalysisCard>
-        </div>
-        <div className="lg:col-span-2">
-          <AnalysisCard title="Fundamental Snapshot" icon={Building2} accentColor="amber" loading={false}>
-            <FundamentalsContent data={data.fundamentals} />
-          </AnalysisCard>
-        </div>
+      <div className="section-divider" />
+
+      {/* Momentum — full width */}
+      <div className="mb-16">
+        <AnalysisCard title="Momentum Analysis" icon={Zap} accentColor="electric" loading={false}>
+          <MomentumContent data={data.momentum} />
+        </AnalysisCard>
       </div>
+
+      <div className="section-divider" />
+
+      {/* Fundamentals — full width */}
+      <div className="mb-16">
+        <AnalysisCard title="Fundamental Snapshot" icon={Building2} accentColor="amber" loading={false}>
+          <FundamentalsContent data={data.fundamentals} />
+        </AnalysisCard>
+      </div>
+
+      <div className="section-divider" />
 
       {/* Social Mentions — full width */}
       <RedditMentions posts={data.reddit_posts} loading={false} />

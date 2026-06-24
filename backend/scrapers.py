@@ -125,15 +125,22 @@ def scrape_social_via_grok() -> tuple[list[dict], list[dict]]:
     system = (
         "You are a financial market analyst with real-time access to X/Twitter "
         "and public Reddit communities (r/wallstreetbets, r/stocks, r/investing, "
-        "r/StockMarket, r/options). Report only on stocks and tickers that are "
-        "genuinely being discussed right now. Be accurate about sentiment."
+        "r/StockMarket, r/options, r/pennystocks, r/RobinHoodPennyStocks, "
+        "r/energy_stocks, r/Daytrading, r/smallstreetbets). Report only on stocks "
+        "and tickers that are genuinely being discussed right now. Be accurate about sentiment."
     )
 
     prompt = (
         "Search BOTH X (Twitter) AND Reddit right now for the most popular investing "
         "and stock market conversations from the last 24 hours.\n\n"
         "For X/Twitter: focus on posts from FinTwit accounts, traders, analysts.\n"
-        "For Reddit: focus on r/wallstreetbets, r/stocks, r/investing, r/StockMarket, r/options.\n\n"
+        "For Reddit: focus on r/wallstreetbets, r/stocks, r/investing, r/StockMarket, "
+        "r/options, r/pennystocks, r/RobinHoodPennyStocks, r/energy_stocks, r/Daytrading.\n\n"
+        "IMPORTANT: Include a mix of:\n"
+        "- Large-cap tech/growth stocks people are discussing\n"
+        "- Penny stocks and micro-caps that are trending on Reddit\n"
+        "- Energy sector stocks (oil, gas, solar, nuclear)\n"
+        "- Any other lowkey or under-the-radar stocks getting attention\n\n"
         "Return a JSON array of the top 25 most discussed stocks/tickers:\n"
         "[\n"
         '  {\n'
@@ -304,7 +311,10 @@ def scrape_apewisdom() -> list[dict]:
     print("[Scraper] Starting ApeWisdom scrape...")
     all_mentions = []
 
-    filters = ["all-stocks", "wallstreetbets", "stocks"]
+    filters = [
+        "all-stocks", "wallstreetbets", "stocks", "pennystocks",
+        "investing", "StockMarket", "options", "Daytrading",
+    ]
     seen_tickers = set()
 
     with httpx.Client() as client:
@@ -385,7 +395,11 @@ def scrape_stocktwits_trending() -> tuple[list[dict], list[dict]]:
 
         time.sleep(random.uniform(1, 2))
 
-        top_tickers = ["AAPL", "TSLA", "NVDA", "AMD", "SPY", "QQQ", "AMZN", "MSFT", "META", "GOOGL"]
+        top_tickers = [
+            "AAPL", "TSLA", "NVDA", "AMD", "SPY", "QQQ", "AMZN", "MSFT", "META", "GOOGL",
+            "XOM", "CVX", "OXY", "NEE", "FSLR", "ENPH", "SMR", "CEG", "VST",
+            "PLTR", "SOFI", "MARA", "RIOT", "COIN",
+        ]
         for ticker in top_tickers:
             try:
                 resp = client.get(
@@ -455,7 +469,10 @@ def scrape_finviz_news(client: httpx.Client) -> tuple[list[dict], list[dict]]:
     all_items = []
     all_mentions = []
 
-    top_tickers = ["AAPL", "TSLA", "NVDA", "AMD", "MSFT", "AMZN", "META", "GOOGL"]
+    top_tickers = [
+        "AAPL", "TSLA", "NVDA", "AMD", "MSFT", "AMZN", "META", "GOOGL",
+        "XOM", "CVX", "OXY", "NEE", "FSLR", "CEG", "VST", "PLTR", "SOFI",
+    ]
 
     for ticker in top_tickers:
         try:

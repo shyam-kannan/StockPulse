@@ -14,12 +14,12 @@ export default function NewsFeed({ items, loading }) {
   if (loading) {
     return (
       <div className="card overflow-hidden">
-        <div className="p-5 border-b border-border">
-          <div className="h-5 shimmer rounded-lg w-28" />
+        <div className="p-7 border-b border-border">
+          <div className="h-5 shimmer rounded-lg w-32" />
         </div>
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="px-5 py-3.5 border-b border-border">
-            <div className="h-4 shimmer rounded-lg w-full mb-2" />
+          <div key={i} className="px-7 py-5 border-b border-border">
+            <div className="h-4 shimmer rounded-lg w-full mb-3" />
             <div className="h-3 shimmer rounded-lg w-1/3" />
           </div>
         ))}
@@ -29,17 +29,17 @@ export default function NewsFeed({ items, loading }) {
 
   return (
     <div className="card overflow-hidden">
-      <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <Newspaper className="w-4 h-4 text-text-muted" />
-          <h3 className="text-sm font-semibold text-text-primary">Market News</h3>
+      <div className="px-7 py-5 border-b border-border flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Newspaper className="w-5 h-5 text-text-muted" />
+          <h3 className="text-base font-semibold text-text-primary">Market News</h3>
         </div>
-        <span className="text-xs text-text-muted font-[family-name:var(--font-mono)]">{items?.length || 0}</span>
+        <span className="text-sm text-text-muted font-[family-name:var(--font-mono)]">{items?.length || 0}</span>
       </div>
 
       <div className="max-h-[600px] overflow-y-auto divide-y divide-border">
         {(!items || items.length === 0) ? (
-          <div className="p-8 text-center text-text-muted text-sm">
+          <div className="p-12 text-center text-text-muted text-base">
             No news yet. Data is being collected...
           </div>
         ) : (
@@ -56,17 +56,17 @@ export default function NewsFeed({ items, loading }) {
                 href={item.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block px-5 py-3.5 hover:bg-white/[0.02] transition-colors group"
+                className="block px-7 py-5 hover:bg-white/[0.02] transition-colors group"
               >
-                <div className="flex items-start gap-3">
-                  <span className={`text-[10px] font-medium px-2 py-0.5 rounded-md shrink-0 mt-0.5 ${displayBadge.color}`}>
+                <div className="flex items-start gap-4">
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-lg shrink-0 mt-0.5 ${displayBadge.color}`}>
                     {displayBadge.label}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-text-primary group-hover:text-electric transition-colors line-clamp-2 leading-snug">
+                    <p className="text-[15px] text-text-primary group-hover:text-electric transition-colors line-clamp-2 leading-snug">
                       {item.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-1.5">
+                    <div className="flex items-center gap-3 mt-2.5">
                       <span className="text-xs text-text-muted">
                         {timeAgo(item.published_at || item.scraped_at)}
                       </span>

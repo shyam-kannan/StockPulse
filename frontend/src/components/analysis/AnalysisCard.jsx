@@ -2,12 +2,12 @@ import { AlertCircle } from 'lucide-react';
 
 function SkeletonContent() {
   return (
-    <div className="space-y-3.5">
-      <div className="h-4 shimmer rounded-xl w-full" />
-      <div className="h-4 shimmer rounded-xl w-5/6" />
-      <div className="h-4 shimmer rounded-xl w-4/6" />
-      <div className="h-3 shimmer rounded-xl w-full mt-5" />
-      <div className="h-3 shimmer rounded-xl w-3/4" />
+    <div className="space-y-5">
+      <div className="h-5 shimmer rounded-xl w-full" />
+      <div className="h-5 shimmer rounded-xl w-5/6" />
+      <div className="h-5 shimmer rounded-xl w-4/6" />
+      <div className="h-4 shimmer rounded-xl w-full mt-6" />
+      <div className="h-4 shimmer rounded-xl w-3/4" />
     </div>
   );
 }
@@ -23,23 +23,23 @@ export default function AnalysisCard({ title, icon: Icon, accentColor = 'electri
 
   return (
     <div className={`card overflow-hidden border-l-2 ${accent.border}`}>
-      <div className="px-7 pt-6 pb-5 flex items-center gap-3.5">
+      <div className="px-10 pt-8 pb-6 flex items-center gap-4">
         {Icon && (
-          <div className={`w-9 h-9 rounded-xl ${accent.bg} flex items-center justify-center shrink-0`}>
-            <Icon className={`w-4.5 h-4.5 ${accent.text}`} />
+          <div className={`w-11 h-11 rounded-xl ${accent.bg} flex items-center justify-center shrink-0`}>
+            <Icon className={`w-5 h-5 ${accent.text}`} />
           </div>
         )}
-        <h3 className="text-[15px] font-semibold text-text-primary tracking-tight">{title}</h3>
+        <h3 className="text-lg font-semibold text-text-primary tracking-tight">{title}</h3>
       </div>
 
-      <div className="px-7 pb-7">
+      <div className="px-10 pb-10">
         {loading ? (
           <SkeletonContent />
         ) : error ? (
-          <div className="flex flex-col items-center justify-center py-10 gap-2.5">
-            <AlertCircle className="w-5 h-5 text-amber" />
-            <p className="text-sm text-text-secondary">Analysis unavailable</p>
-            <p className="text-xs text-text-muted mt-0.5">{error}</p>
+          <div className="flex flex-col items-center justify-center py-14 gap-3">
+            <AlertCircle className="w-6 h-6 text-amber" />
+            <p className="text-base text-text-secondary">Analysis unavailable</p>
+            <p className="text-sm text-text-muted mt-1">{error}</p>
           </div>
         ) : (
           <div className="fade-in">{children}</div>

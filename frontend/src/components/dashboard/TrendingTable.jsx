@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Star, ArrowUpDown } from 'lucide-react';
 import { formatPrice, formatPercent, changeColor, sentimentColor } from '../../utils/formatters';
 
-export default function TrendingTable({ tickers, loading, watchlist, setWatchlist }) {
+export default function TrendingTable({ tickers, loading, watchlist, setWatchlist, title = 'Trending Tickers' }) {
   const navigate = useNavigate();
   const [sortKey, setSortKey] = useState('mention_count');
   const [sortDir, setSortDir] = useState('desc');
@@ -11,15 +11,15 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
   if (loading) {
     return (
       <div className="card overflow-hidden">
-        <div className="p-6 border-b border-border">
-          <div className="h-5 shimmer rounded-xl w-40" />
+        <div className="p-8 border-b border-border">
+          <div className="h-6 shimmer rounded-xl w-48" />
         </div>
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-border">
-            <div className="h-4 shimmer rounded w-8" />
-            <div className="h-4 shimmer rounded w-16" />
-            <div className="h-4 shimmer rounded w-28 flex-1" />
-            <div className="h-4 shimmer rounded w-16" />
+          <div key={i} className="flex items-center gap-5 px-8 py-5 border-b border-border">
+            <div className="h-4 shimmer rounded w-10" />
+            <div className="h-4 shimmer rounded w-20" />
+            <div className="h-4 shimmer rounded w-32 flex-1" />
+            <div className="h-4 shimmer rounded w-20" />
           </div>
         ))}
       </div>
@@ -57,7 +57,7 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
   const SortHeader = ({ label, keyName, className = '' }) => (
     <button
       onClick={() => toggleSort(keyName)}
-      className={`flex items-center gap-1.5 text-xs font-medium text-text-muted hover:text-text-secondary uppercase tracking-wider transition-colors ${className}`}
+      className={`flex items-center gap-2 text-xs font-medium text-text-muted hover:text-text-secondary uppercase tracking-wider transition-colors ${className}`}
     >
       {label}
       <ArrowUpDown className="w-3 h-3 opacity-50" />
@@ -66,24 +66,24 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
 
   return (
     <div className="card overflow-hidden">
-      <div className="px-6 py-5 border-b border-border flex items-center justify-between">
-        <h3 className="text-[15px] font-semibold text-text-primary tracking-tight">Trending Tickers</h3>
-        <span className="text-xs text-text-muted font-[family-name:var(--font-mono)]">{tickers.length} tickers</span>
+      <div className="px-8 py-6 border-b border-border flex items-center justify-between">
+        <h3 className="text-base font-semibold text-text-primary tracking-tight">{title}</h3>
+        <span className="text-sm text-text-muted font-[family-name:var(--font-mono)]">{tickers.length} tickers</span>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border">
-              <th className="text-left px-6 py-3.5 w-8">
+              <th className="text-left px-8 py-4 w-10">
                 <span className="text-xs text-text-muted">#</span>
               </th>
-              <th className="text-left px-6 py-3.5"><SortHeader label="Ticker" keyName="ticker" /></th>
-              <th className="text-right px-6 py-3.5 hidden sm:table-cell"><SortHeader label="Price" keyName="current_price" className="justify-end" /></th>
-              <th className="text-right px-6 py-3.5"><SortHeader label="Change" keyName="price_change_pct" className="justify-end" /></th>
-              <th className="text-right px-6 py-3.5"><SortHeader label="Mentions" keyName="mention_count" className="justify-end" /></th>
-              <th className="text-right px-6 py-3.5 hidden md:table-cell"><SortHeader label="Sentiment" keyName="avg_sentiment" className="justify-end" /></th>
-              <th className="text-center px-6 py-3.5 w-10"></th>
+              <th className="text-left px-8 py-4"><SortHeader label="Ticker" keyName="ticker" /></th>
+              <th className="text-right px-8 py-4 hidden sm:table-cell"><SortHeader label="Price" keyName="current_price" className="justify-end" /></th>
+              <th className="text-right px-8 py-4"><SortHeader label="Change" keyName="price_change_pct" className="justify-end" /></th>
+              <th className="text-right px-8 py-4"><SortHeader label="Mentions" keyName="mention_count" className="justify-end" /></th>
+              <th className="text-right px-8 py-4 hidden md:table-cell"><SortHeader label="Sentiment" keyName="avg_sentiment" className="justify-end" /></th>
+              <th className="text-center px-8 py-4 w-12"></th>
             </tr>
           </thead>
           <tbody>
@@ -93,25 +93,25 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
                 onClick={() => navigate(`/analysis/${t.ticker}`)}
                 className="border-b border-border hover:bg-white/[0.02] cursor-pointer transition-colors"
               >
-                <td className="px-6 py-4 text-xs text-text-muted font-[family-name:var(--font-mono)]">{i + 1}</td>
-                <td className="px-6 py-4">
+                <td className="px-8 py-5 text-sm text-text-muted font-[family-name:var(--font-mono)]">{i + 1}</td>
+                <td className="px-8 py-5">
                   <div>
-                    <span className="text-sm font-semibold text-electric font-[family-name:var(--font-mono)]">{t.ticker}</span>
-                    <p className="text-xs text-text-muted truncate max-w-[160px] mt-0.5">{t.company_name}</p>
+                    <span className="text-base font-semibold text-electric font-[family-name:var(--font-mono)]">{t.ticker}</span>
+                    <p className="text-xs text-text-muted truncate max-w-[200px] mt-1">{t.company_name}</p>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-right text-sm font-[family-name:var(--font-mono)] text-text-primary hidden sm:table-cell">
+                <td className="px-8 py-5 text-right text-sm font-[family-name:var(--font-mono)] text-text-primary hidden sm:table-cell">
                   {formatPrice(t.current_price)}
                 </td>
-                <td className={`px-6 py-4 text-right text-sm font-semibold font-[family-name:var(--font-mono)] ${changeColor(t.price_change_pct)}`}>
+                <td className={`px-8 py-5 text-right text-sm font-semibold font-[family-name:var(--font-mono)] ${changeColor(t.price_change_pct)}`}>
                   {formatPercent(t.price_change_pct)}
                 </td>
-                <td className="px-6 py-4 text-right">
+                <td className="px-8 py-5 text-right">
                   <span className="text-sm font-[family-name:var(--font-mono)] text-amber">{t.mention_count}</span>
                 </td>
-                <td className="px-6 py-4 text-right hidden md:table-cell">
+                <td className="px-8 py-5 text-right hidden md:table-cell">
                   <div className="flex items-center justify-end gap-3">
-                    <div className="w-16 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                    <div className="w-20 h-2 bg-white/[0.06] rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full ${t.avg_sentiment > 0 ? 'bg-electric' : t.avg_sentiment < 0 ? 'bg-danger' : 'bg-amber'}`}
                         style={{ width: `${Math.min(100, Math.abs(t.avg_sentiment) * 100 + 50)}%` }}
@@ -122,10 +122,10 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
                     </span>
                   </div>
                 </td>
-                <td className="px-6 py-4 text-center">
+                <td className="px-8 py-5 text-center">
                   <button
                     onClick={(e) => toggleWatchlist(e, t.ticker)}
-                    className="p-2 rounded-xl hover:bg-white/[0.06] transition-all"
+                    className="p-2.5 rounded-xl hover:bg-white/[0.06] transition-all"
                   >
                     <Star
                       className={`w-4 h-4 transition-colors ${isWatchlisted(t.ticker) ? 'text-amber fill-amber' : 'text-text-muted/40 hover:text-text-muted'}`}

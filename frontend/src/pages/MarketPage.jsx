@@ -1,46 +1,69 @@
-import { BarChart2, GraduationCap } from 'lucide-react';
+import { BarChart2, GraduationCap, BookOpen } from 'lucide-react';
 import MarketStatus from '../components/market/MarketStatus';
 import EducationAccordion from '../components/market/EducationAccordion';
+import Glossary from '../components/market/Glossary';
 
 export default function MarketPage() {
   return (
-    <div className="space-y-10 fade-in">
+    <div className="fade-in">
 
       {/* Page header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
-          Market & Education
+      <div className="pt-4 pb-16">
+        <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-tight leading-tight">
+          Learn & Market
         </h1>
-        <p className="text-sm text-text-muted mt-1">
-          Real-time market status and trading fundamentals
+        <p className="text-lg text-text-muted mt-4 max-w-2xl leading-relaxed">
+          Real-time market status, trading fundamentals, and key terminology every investor should know.
         </p>
       </div>
 
-      {/* Two-column layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        {/* Market Status */}
-        <div>
-          <div className="section-title">
-            <div className="icon-wrapper">
-              <BarChart2 />
-            </div>
-            <h2>Market Status</h2>
+      {/* Market Status — full width */}
+      <section className="mb-20">
+        <div className="section-title">
+          <div className="icon-wrapper">
+            <BarChart2 />
           </div>
+          <div>
+            <h2 className="!text-xl">Market Status</h2>
+            <p className="!text-sm mt-1">Live US market hours and session info</p>
+          </div>
+        </div>
+        <div className="max-w-2xl">
           <MarketStatus />
         </div>
+      </section>
 
-        {/* Education */}
-        <div>
-          <div className="section-title">
-            <div className="icon-wrapper">
-              <GraduationCap />
-            </div>
-            <h2>Trading Fundamentals</h2>
+      <div className="section-divider" />
+
+      {/* Glossary — full width */}
+      <section className="py-16">
+        <div className="section-title">
+          <div className="icon-wrapper" style={{ background: 'rgba(251, 191, 36, 0.10)' }}>
+            <BookOpen style={{ color: '#fbbf24' }} />
           </div>
-          <EducationAccordion />
+          <div>
+            <h2 className="!text-xl">Glossary</h2>
+            <p className="!text-sm mt-1">Key terms and definitions every investor should know</p>
+          </div>
         </div>
-      </div>
+        <Glossary />
+      </section>
+
+      <div className="section-divider" />
+
+      {/* Education — full width */}
+      <section className="py-16">
+        <div className="section-title">
+          <div className="icon-wrapper">
+            <GraduationCap />
+          </div>
+          <div>
+            <h2 className="!text-xl">Trading Fundamentals</h2>
+            <p className="!text-sm mt-1">Expand your knowledge with in-depth lessons</p>
+          </div>
+        </div>
+        <EducationAccordion />
+      </section>
     </div>
   );
 }

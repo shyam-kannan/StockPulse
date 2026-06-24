@@ -46,42 +46,13 @@ body {
 
 /* ---- Scrollbar ---- */
 
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.10); border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.20); }
+* { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, 0.10) transparent; }
 
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.10);
-  border-radius: 100px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.20);
-}
-
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.10) transparent;
-}
-
-/* ---- Glass / Surface ---- */
-
-.glass {
-  background: rgba(255, 255, 255, 0.015);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(148, 163, 184, 0.06);
-}
-
-.glass-hover:hover {
-  background: rgba(255, 255, 255, 0.035);
-  border-color: rgba(148, 163, 184, 0.12);
-}
+/* ---- Card system ---- */
 
 .card {
   background: rgba(255, 255, 255, 0.02);
@@ -91,37 +62,30 @@ body {
 }
 
 .card:hover {
-  border-color: rgba(148, 163, 184, 0.13);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(148, 163, 184, 0.04);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(148, 163, 184, 0.12);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.028);
 }
 
 .stat-card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(148, 163, 184, 0.07);
   border-radius: 16px;
-  padding: 1.5rem 1.75rem;
-  transition: border-color 0.3s ease, background 0.3s ease;
+  padding: 1.75rem 2rem;
+  transition: border-color 0.3s ease;
 }
 
 .stat-card:hover {
-  border-color: rgba(148, 163, 184, 0.13);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(148, 163, 184, 0.12);
 }
 
 /* ---- Loading shimmer ---- */
 
 .shimmer {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.02) 25%,
-    rgba(255, 255, 255, 0.045) 50%,
-    rgba(255, 255, 255, 0.02) 75%
-  );
+  background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.045) 50%, rgba(255,255,255,0.02) 75%);
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
 }
-
 @keyframes shimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -130,13 +94,10 @@ body {
 /* ---- Fade in ---- */
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-.fade-in {
-  animation: fadeIn 0.4s ease-out;
-}
+.fade-in { animation: fadeIn 0.4s ease-out; }
 
 /* ---- Gradient text ---- */
 
@@ -152,14 +113,14 @@ body {
 .section-title {
   display: flex;
   align-items: center;
-  gap: 0.875rem;
-  margin-bottom: 1.5rem;
+  gap: 1rem;
+  margin-bottom: 2rem;
 }
 
 .section-title .icon-wrapper {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.625rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
   background: var(--color-electric-glow);
   display: flex;
   align-items: center;
@@ -168,17 +129,17 @@ body {
 }
 
 .section-title .icon-wrapper svg {
-  width: 1.125rem;
-  height: 1.125rem;
+  width: 1.25rem;
+  height: 1.25rem;
   color: var(--color-electric);
 }
 
 .section-title h2 {
-  font-size: 1.05rem;
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--color-text-primary);
   line-height: 1.3;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 .section-title p {
@@ -194,21 +155,14 @@ body {
   color: var(--color-text-primary);
 }
 
-/* ---- Focus ring ---- */
-
 :focus-visible {
   outline: 2px solid rgba(52, 211, 153, 0.40);
   outline-offset: 2px;
 }
 
-/* ---- Links ---- */
+a { text-decoration: none; color: inherit; }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-/* ---- Fallback badge ---- */
+/* ---- Computed fallback badge ---- */
 
 .badge-computed {
   display: inline-flex;
@@ -222,4 +176,11 @@ a {
   border-radius: 0.5rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+/* ---- Full-bleed section ---- */
+
+.section-divider {
+  border-top: 1px solid rgba(148, 163, 184, 0.06);
+  margin: 3rem 0;
 }
