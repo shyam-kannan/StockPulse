@@ -82,6 +82,68 @@ def _fetch_price_via_grok(ticker: str, company_name: str) -> dict:
         return {}
 
 
+def _fetch_yahoo_direct(ticker: str) -> dict:
+    """Direct Yahoo Finance chart API call — bypasses yfinance library entirely."""
+    try:
+        with httpx.Client() as client:
+            client.headers.update({
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+            })
+            resp = client.get(
+                f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}",
+                params={"interval": "1d", "range": "1mo", "includePrePost": "false"},
+                timeout=15,
+            )
+            if resp.status_code != 200:
+                print(f"[yahoo-direct] {ticker} status {resp.status_code}")
+                return {}
+            body = resp.json()
+            chart = body.get("chart", {}).get("result", [{}])[0]
+            meta = chart.get("meta", {})
+            ts = chart.get("timestamp", [])
+            quotes = chart.get("indicators", {}).get("quote", [{}])[0]
+
+            price = meta.get("regularMarketPrice")
+            prev = meta.get("chartPreviousClose") or meta.get("previousClose")
+
+            history = []
+            closes = quotes.get("close", [])
+            opens = quotes.get("open", [])
+            highs = quotes.get("high", [])
+            lows = quotes.get("low", [])
+            vols = quotes.get("volume", [])
+            from datetime import datetime, timezone
+            for i, t in enumerate(ts):
+                if i < len(closes) and closes[i] is not None:
+                    dt = datetime.fromtimestamp(t, tz=timezone.utc)
+                    history.append({
+                        "date": dt.strftime("%Y-%m-%d"),
+                        "open": round(float(opens[i] or 0), 2),
+                        "high": round(float(highs[i] or 0), 2),
+                        "low": round(float(lows[i] or 0), 2),
+                        "close": round(float(closes[i]), 2),
+                        "volume": int(vols[i] or 0),
+                    })
+
+            result = {}
+            if price:
+                result["current_price"] = round(float(price), 2)
+            if prev:
+                result["previous_close"] = round(float(prev), 2)
+            if history:
+                result["history"] = history
+            result["company_name"] = meta.get("longName") or meta.get("shortName")
+            result["currency"] = meta.get("currency")
+            result["fifty_two_week_high"] = meta.get("fiftyTwoWeekHigh")
+            result["fifty_two_week_low"] = meta.get("fiftyTwoWeekLow")
+            if result.get("current_price"):
+                print(f"[yahoo-direct] {ticker}: ${result['current_price']}, {len(history)} days")
+            return result
+    except Exception as e:
+        print(f"[yahoo-direct] {ticker} failed: {e}")
+        return {}
+
+
 def _download_with_retry(ticker: str, period: str = "1mo", retries: int = 2):
     """Download price data with retry on rate limit."""
     import pandas as pd
@@ -145,24 +207,39 @@ def fetch_yfinance_data(ticker: str) -> dict:
         "history": [],
     }
 
-    # Step 1: yf.download() — uses chart API, most reliable and least rate-limited
-    dl = _download_with_retry(ticker, period="1mo")
-    if dl is not None and not dl.empty:
-        result["history"] = _parse_download_history(dl)
-        closes = dl["Close"].dropna()
-        if len(closes) >= 1:
-            result["current_price"] = round(float(closes.iloc[-1]), 2)
-        if len(closes) >= 2:
-            result["previous_close"] = round(float(closes.iloc[-2]), 2)
-        highs = dl["High"].dropna()
-        lows = dl["Low"].dropna()
-        if len(highs) > 0:
-            result["fifty_two_week_high"] = round(float(highs.max()), 2)
-        if len(lows) > 0:
-            result["fifty_two_week_low"] = round(float(lows.min()), 2)
-        print(f"[yfinance] {ticker} download OK: {len(dl)} days, price=${result['current_price']}")
+    # Step 1: Direct Yahoo Finance API — single HTTP call, bypasses yfinance library
+    direct = _fetch_yahoo_direct(ticker)
+    if direct.get("current_price"):
+        result["current_price"] = direct["current_price"]
+        result["previous_close"] = direct.get("previous_close") or result["previous_close"]
+        if direct.get("history"):
+            result["history"] = direct["history"]
+        if direct.get("company_name"):
+            result["company_name"] = direct["company_name"]
+        if direct.get("fifty_two_week_high"):
+            result["fifty_two_week_high"] = direct["fifty_two_week_high"]
+        if direct.get("fifty_two_week_low"):
+            result["fifty_two_week_low"] = direct["fifty_two_week_low"]
 
-    # Step 2: Try t.info for fundamentals (separate API path, may rate-limit independently)
+    # Step 2: yf.download() as fallback if direct API failed
+    if result["current_price"] is None:
+        dl = _download_with_retry(ticker, period="1mo")
+        if dl is not None and not dl.empty:
+            result["history"] = _parse_download_history(dl)
+            closes = dl["Close"].dropna()
+            if len(closes) >= 1:
+                result["current_price"] = round(float(closes.iloc[-1]), 2)
+            if len(closes) >= 2:
+                result["previous_close"] = round(float(closes.iloc[-2]), 2)
+            highs = dl["High"].dropna()
+            lows = dl["Low"].dropna()
+            if len(highs) > 0:
+                result["fifty_two_week_high"] = round(float(highs.max()), 2)
+            if len(lows) > 0:
+                result["fifty_two_week_low"] = round(float(lows.min()), 2)
+            print(f"[yfinance] {ticker} download OK: {len(dl)} days, price=${result['current_price']}")
+
+    # Step 3: Try t.info for fundamentals (separate API path, may rate-limit independently)
     time.sleep(1)
     try:
         t = yf.Ticker(ticker)
@@ -205,7 +282,7 @@ def fetch_yfinance_data(ticker: str) -> dict:
     except Exception as e:
         print(f"[yfinance] {ticker} info failed (non-fatal): {e}")
 
-    # Step 3: If download also failed, try Ticker.history as last resort
+    # Step 4: If all above failed, try Ticker.history as last resort
     if result["current_price"] is None:
         time.sleep(2)
         try:
@@ -221,7 +298,7 @@ def fetch_yfinance_data(ticker: str) -> dict:
         except Exception as e:
             print(f"[yfinance] {ticker} history fallback failed: {e}")
 
-    # Step 4: Grok fallback — always returns data when yfinance is rate-limited
+    # Step 5: Grok fallback — always returns data when yfinance is rate-limited
     if result["current_price"] is None:
         grok_data = _fetch_price_via_grok(ticker, result["company_name"])
         if grok_data:
@@ -755,7 +832,7 @@ Rules:
     try:
         response = await client.messages.create(
             model=MODEL,
-            max_tokens=3000,
+            max_tokens=6000,
             system=(
                 "You are a senior portfolio strategist at a top investment bank. "
                 "Build actionable, diversified portfolios for retail investors. "
@@ -763,9 +840,38 @@ Rules:
                 "No generic advice — every recommendation must have a specific catalyst."
             ),
             messages=[{"role": "user", "content": prompt}],
-            timeout=60,
+            timeout=120,
         )
-        result = _parse_json_response(response.content[0].text)
+        raw = response.content[0].text
+        result = _parse_json_response(raw)
+        if result.get("parse_error"):
+            # Try fixing truncated JSON by finding the last complete position
+            try:
+                text = raw.strip()
+                if text.startswith("```"):
+                    lines = text.split("\n")
+                    text = "\n".join(l for l in lines if not l.strip().startswith("```"))
+                # Find the positions array start and try to close it
+                pos_idx = text.find('"positions"')
+                if pos_idx >= 0:
+                    # Find opening bracket of positions array
+                    bracket = text.find("[", pos_idx)
+                    if bracket >= 0:
+                        # Try progressively shorter substrings
+                        for end_idx in range(len(text), bracket + 10, -1):
+                            chunk = text[:end_idx]
+                            # Count open/close brackets to close properly
+                            opens = chunk.count("{") - chunk.count("}")
+                            open_arr = chunk.count("[") - chunk.count("]")
+                            suffix = "]" * open_arr + "}" * opens
+                            try:
+                                result = json.loads(chunk + suffix)
+                                print(f"[Portfolio] Recovered truncated JSON (cut at {end_idx}/{len(text)})")
+                                break
+                            except json.JSONDecodeError:
+                                continue
+            except Exception as repair_err:
+                print(f"[Portfolio] JSON repair failed: {repair_err}")
         result["generated_at"] = time.time()
         result["from_cache"] = False
         return result

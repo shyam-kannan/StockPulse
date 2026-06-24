@@ -97,50 +97,29 @@ async def get_trending():
 
 
 def _fetch_batch_prices(tickers: list[str]) -> dict:
-    import yfinance as yf
+    import httpx
 
     prices = {}
-    try:
-        data = yf.download(
-            " ".join(tickers),
-            period="2d",
-            group_by="ticker",
-            progress=False,
-            threads=True,
-        )
-
-        for ticker in tickers:
+    # Primary: direct Yahoo Finance chart API — fast, reliable, no library overhead
+    with httpx.Client() as hc:
+        hc.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+        for ticker in tickers[:20]:
             try:
-                if len(tickers) == 1:
-                    ticker_data = data
-                else:
-                    ticker_data = data[ticker]
-
-                if ticker_data.empty:
-                    continue
-
-                closes = ticker_data["Close"].dropna()
-                if len(closes) >= 2:
-                    current = float(closes.iloc[-1])
-                    previous = float(closes.iloc[-2])
-                    change = round(((current - previous) / previous) * 100, 2)
-                    prices[ticker] = {"price": round(current, 2), "change_pct": change}
-                elif len(closes) == 1:
-                    prices[ticker] = {"price": round(float(closes.iloc[-1]), 2), "change_pct": 0.0}
+                resp = hc.get(
+                    f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}",
+                    params={"interval": "1d", "range": "5d"},
+                    timeout=10,
+                )
+                if resp.status_code == 200:
+                    chart = resp.json().get("chart", {}).get("result", [{}])[0]
+                    meta = chart.get("meta", {})
+                    price = meta.get("regularMarketPrice")
+                    prev = meta.get("chartPreviousClose")
+                    if price and prev:
+                        change = round(((price - prev) / prev) * 100, 2)
+                        prices[ticker] = {"price": round(price, 2), "change_pct": change}
             except Exception:
                 continue
-
-    except Exception as e:
-        print(f"yfinance batch download error: {e}")
-
-    # Fetch market caps individually for available tickers
-    for ticker in tickers[:10]:
-        try:
-            if ticker in prices:
-                info = yf.Ticker(ticker).fast_info
-                prices[ticker]["market_cap"] = getattr(info, "market_cap", None)
-        except Exception:
-            pass
 
     return prices
 
