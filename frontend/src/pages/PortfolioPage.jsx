@@ -6,8 +6,8 @@ import { formatPrice, formatPercent, changeColor } from '../utils/formatters';
 
 function StatCard({ label, value, sub, icon: Icon }) {
   return (
-    <div className="stat-card">
-      <div className="flex items-center gap-2.5 mb-4">
+    <div className="stat-card text-center">
+      <div className="flex items-center justify-center gap-2.5 mb-4">
         {Icon && <Icon className="w-4 h-4 text-text-muted" />}
         <span className="text-xs text-text-muted uppercase tracking-widest font-medium">{label}</span>
       </div>
@@ -50,7 +50,7 @@ function PositionCard({ position, onNavigate }) {
 
   return (
     <div
-      className="card p-8 cursor-pointer group"
+      className="glass-card p-8 sm:p-10 cursor-pointer group"
       onClick={() => onNavigate(`/analysis/${position.ticker}`)}
     >
       <div className="flex items-start justify-between mb-6">
@@ -158,21 +158,21 @@ function AvoidCard({ stock }) {
 function PortfolioSkeleton() {
   return (
     <div className="fade-in">
-      <div className="pt-4 pb-16">
-        <div className="h-10 shimmer rounded-lg w-56 mb-4" />
-        <div className="h-5 shimmer rounded-lg w-96" />
+      <div className="text-center pt-16 pb-20 sm:pt-24 sm:pb-28">
+        <div className="h-12 shimmer rounded-lg w-72 mx-auto mb-6" />
+        <div className="h-6 shimmer rounded-lg w-96 mx-auto" />
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16 max-w-4xl mx-auto">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="stat-card">
-            <div className="h-4 shimmer rounded w-20 mb-4" />
-            <div className="h-8 shimmer rounded w-28" />
+            <div className="h-4 shimmer rounded w-20 mb-4 mx-auto" />
+            <div className="h-8 shimmer rounded w-28 mx-auto" />
           </div>
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="card p-8">
+          <div key={i} className="glass-card p-10">
             <div className="h-6 shimmer rounded w-36 mb-6" />
             <div className="h-5 shimmer rounded w-full mb-3" />
             <div className="h-5 shimmer rounded w-3/4" />
@@ -213,13 +213,13 @@ export default function PortfolioPage() {
   if (error) {
     return (
       <div className="fade-in">
-        <div className="pt-4 pb-16">
-          <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-tight">Portfolio Builder</h1>
+        <div className="text-center pt-16 pb-20 sm:pt-24 sm:pb-28">
+          <h1 className="text-5xl sm:text-7xl font-bold text-text-primary tracking-tight">Portfolio Builder</h1>
         </div>
         <div className="bg-danger/[0.06] border border-danger/15 rounded-2xl p-14 text-center max-w-lg mx-auto">
           <p className="text-danger font-semibold text-xl mb-3">Failed to Generate</p>
           <p className="text-text-secondary leading-relaxed">{error}</p>
-          <button onClick={() => fetchData()} className="mt-6 px-5 py-2.5 text-sm bg-white/[0.06] rounded-xl hover:bg-white/[0.1] transition-colors text-text-primary cursor-pointer">
+          <button onClick={() => fetchData()} className="mt-6 px-7 py-3 text-sm bg-white/[0.06] rounded-full hover:bg-white/[0.1] transition-colors text-text-primary cursor-pointer">
             Try Again
           </button>
         </div>
@@ -238,28 +238,26 @@ export default function PortfolioPage() {
   return (
     <div className="fade-in">
 
-      {/* Header */}
-      <div className="pt-4 pb-16 flex items-start justify-between">
-        <div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-tight leading-tight">
-            Portfolio Builder
-          </h1>
-          <p className="text-lg text-text-muted mt-4 max-w-2xl leading-relaxed">
-            AI-powered stock recommendations based on current market conditions
-          </p>
-        </div>
+      {/* ===== HERO ===== */}
+      <section className="text-center pt-16 pb-20 sm:pt-24 sm:pb-28">
+        <h1 className="text-5xl sm:text-7xl font-bold text-text-primary tracking-tight leading-[1.1]">
+          Portfolio Builder
+        </h1>
+        <p className="text-xl sm:text-2xl text-text-muted mt-6 max-w-xl mx-auto leading-relaxed font-light">
+          AI-powered stock recommendations based on current market conditions.
+        </p>
         <button
           onClick={() => fetchData(true)}
           disabled={refreshing}
-          className="flex items-center gap-2.5 px-5 py-2.5 text-sm font-medium text-text-muted bg-white/[0.03] border border-white/[0.06] rounded-xl hover:border-white/[0.12] hover:text-text-secondary transition-all duration-200 disabled:opacity-40 cursor-pointer mt-2"
+          className="mt-8 inline-flex items-center gap-2.5 px-7 py-3 text-sm font-medium text-text-muted bg-white/[0.04] border border-white/[0.08] rounded-full hover:border-white/[0.15] hover:text-text-secondary hover:bg-white/[0.06] transition-all duration-300 disabled:opacity-40 cursor-pointer"
         >
           {refreshing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
           {refreshing ? 'Generating...' : 'Regenerate'}
         </button>
-      </div>
+      </section>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20 max-w-4xl mx-auto">
         <StatCard
           label="Strategy"
           value={data.risk_level ? data.risk_level.charAt(0).toUpperCase() + data.risk_level.slice(1) : 'Balanced'}
@@ -288,93 +286,97 @@ export default function PortfolioPage() {
 
       {/* Strategy overview */}
       {data.strategy && (
-        <div className="card p-10 mb-16">
-          <div className="flex items-center gap-3 mb-5">
-            <Target className="w-5 h-5 text-electric" />
-            <h2 className="text-lg font-semibold text-text-primary">Strategy Overview</h2>
+        <section className="full-bleed-section alt-section py-20 sm:py-28">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="w-14 h-14 rounded-2xl bg-electric/10 flex items-center justify-center mx-auto mb-6">
+                <Target className="w-7 h-7 text-electric" />
+              </div>
+              <h2 className="text-2xl font-bold text-text-primary mb-6">Strategy Overview</h2>
+              <p className="text-lg text-text-secondary leading-[1.8]">{data.strategy}</p>
+              {data.market_outlook && (
+                <p className="text-base text-text-muted leading-[1.8] mt-6 pt-6 border-t border-white/[0.04]">
+                  {data.market_outlook}
+                </p>
+              )}
+            </div>
           </div>
-          <p className="text-[15px] text-text-secondary leading-[1.8]">{data.strategy}</p>
-          {data.market_outlook && (
-            <p className="text-[15px] text-text-muted leading-[1.8] mt-5 pt-5 border-t border-white/[0.04]">
-              {data.market_outlook}
-            </p>
-          )}
-        </div>
+        </section>
       )}
 
-      <div className="section-divider" />
-
-      {/* Main grid */}
-      <div className="py-16 grid grid-cols-1 lg:grid-cols-3 gap-12">
-
-        {/* Positions */}
-        <div className="lg:col-span-2 space-y-8">
-          <h2 className="text-sm font-semibold text-text-primary uppercase tracking-widest">
-            Recommended Positions ({positions.length})
+      {/* Positions + Sidebar */}
+      <section className="py-20 sm:py-28">
+        <div className="text-center mb-16">
+          <p className="section-label mb-4">AI Recommendations</p>
+          <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
+            Recommended Positions
           </h2>
-          <div className="grid grid-cols-1 gap-6">
-            {positions.map((pos) => (
-              <PositionCard key={pos.ticker} position={pos} onNavigate={navigate} />
-            ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2 space-y-8">
+            <div className="grid grid-cols-1 gap-6">
+              {positions.map((pos) => (
+                <PositionCard key={pos.ticker} position={pos} onNavigate={navigate} />
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-10">
+            {sectors.length > 0 && (
+              <div className="glass-card p-8">
+                <h3 className="text-base font-semibold text-text-primary mb-6">Sector Allocation</h3>
+                <div className="space-y-4">
+                  {sectors.map((s) => (
+                    <SectorBar key={s.sector} sector={s.sector} pct={s.pct} maxPct={maxSectorPct} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {data.timing_notes && (
+              <div className="glass-card p-8">
+                <div className="flex items-center gap-3 mb-4">
+                  <Clock className="w-5 h-5 text-amber" />
+                  <h3 className="text-base font-semibold text-text-primary">Timing</h3>
+                </div>
+                <p className="text-sm text-text-secondary leading-[1.8]">{data.timing_notes}</p>
+              </div>
+            )}
+
+            {avoidList.length > 0 && (
+              <div>
+                <h3 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-3">
+                  <AlertTriangle className="w-5 h-5 text-danger" />
+                  Stocks to Avoid
+                </h3>
+                <div className="space-y-4">
+                  {avoidList.map((s) => (
+                    <AvoidCard key={s.ticker} stock={s} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {warnings.length > 0 && (
+              <div className="glass-card p-8 border-amber/15">
+                <h3 className="text-base font-semibold text-amber mb-5 flex items-center gap-3">
+                  <AlertTriangle className="w-5 h-5" />
+                  Risk Warnings
+                </h3>
+                <ul className="space-y-3">
+                  {warnings.map((w, i) => (
+                    <li key={i} className="text-sm text-text-secondary leading-relaxed flex items-start gap-3">
+                      <span className="text-amber mt-0.5">-</span>
+                      {w}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Sidebar */}
-        <div className="space-y-10">
-
-          {sectors.length > 0 && (
-            <div className="card p-8">
-              <h3 className="text-base font-semibold text-text-primary mb-6">Sector Allocation</h3>
-              <div className="space-y-4">
-                {sectors.map((s) => (
-                  <SectorBar key={s.sector} sector={s.sector} pct={s.pct} maxPct={maxSectorPct} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {data.timing_notes && (
-            <div className="card p-8">
-              <div className="flex items-center gap-3 mb-4">
-                <Clock className="w-5 h-5 text-amber" />
-                <h3 className="text-base font-semibold text-text-primary">Timing</h3>
-              </div>
-              <p className="text-sm text-text-secondary leading-[1.8]">{data.timing_notes}</p>
-            </div>
-          )}
-
-          {avoidList.length > 0 && (
-            <div>
-              <h3 className="text-base font-semibold text-text-primary mb-5 flex items-center gap-3">
-                <AlertTriangle className="w-5 h-5 text-danger" />
-                Stocks to Avoid
-              </h3>
-              <div className="space-y-4">
-                {avoidList.map((s) => (
-                  <AvoidCard key={s.ticker} stock={s} />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {warnings.length > 0 && (
-            <div className="card p-8 border-amber/15">
-              <h3 className="text-base font-semibold text-amber mb-5 flex items-center gap-3">
-                <AlertTriangle className="w-5 h-5" />
-                Risk Warnings
-              </h3>
-              <ul className="space-y-3">
-                {warnings.map((w, i) => (
-                  <li key={i} className="text-sm text-text-secondary leading-relaxed flex items-start gap-3">
-                    <span className="text-amber mt-0.5">-</span>
-                    {w}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

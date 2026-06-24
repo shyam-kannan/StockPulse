@@ -1,4 +1,3 @@
-import { BarChart2, GraduationCap, BookOpen } from 'lucide-react';
 import MarketStatus from '../components/market/MarketStatus';
 import EducationAccordion from '../components/market/EducationAccordion';
 import Glossary from '../components/market/Glossary';
@@ -7,62 +6,50 @@ export default function MarketPage() {
   return (
     <div className="fade-in">
 
-      {/* Page header */}
-      <div className="pt-4 pb-16">
-        <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-tight leading-tight">
+      {/* ===== HERO ===== */}
+      <section className="text-center pt-16 pb-20 sm:pt-24 sm:pb-28">
+        <h1 className="text-5xl sm:text-7xl font-bold text-text-primary tracking-tight leading-[1.1]">
           Learn & Market
         </h1>
-        <p className="text-lg text-text-muted mt-4 max-w-2xl leading-relaxed">
+        <p className="text-xl sm:text-2xl text-text-muted mt-6 max-w-2xl mx-auto leading-relaxed font-light">
           Real-time market status, trading fundamentals, and key terminology every investor should know.
         </p>
-      </div>
+      </section>
 
-      {/* Market Status — full width */}
-      <section className="mb-20">
-        <div className="section-title">
-          <div className="icon-wrapper">
-            <BarChart2 />
+      {/* ===== MARKET STATUS ===== */}
+      <section className="full-bleed-section alt-section py-20 sm:py-28">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="text-center mb-14">
+            <p className="section-label mb-4">Live Data</p>
+            <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">Market Status</h2>
           </div>
-          <div>
-            <h2 className="!text-xl">Market Status</h2>
-            <p className="!text-sm mt-1">Live US market hours and session info</p>
+          <div className="max-w-2xl mx-auto">
+            <MarketStatus />
           </div>
-        </div>
-        <div className="max-w-2xl">
-          <MarketStatus />
         </div>
       </section>
 
-      <div className="section-divider" />
-
-      {/* Glossary — full width */}
-      <section className="py-16">
-        <div className="section-title">
-          <div className="icon-wrapper" style={{ background: 'rgba(251, 191, 36, 0.10)' }}>
-            <BookOpen style={{ color: '#fbbf24' }} />
-          </div>
-          <div>
-            <h2 className="!text-xl">Glossary</h2>
-            <p className="!text-sm mt-1">Key terms and definitions every investor should know</p>
-          </div>
+      {/* ===== GLOSSARY ===== */}
+      <section className="py-20 sm:py-28">
+        <div className="text-center mb-14">
+          <p className="section-label mb-4">Key Terminology</p>
+          <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">Glossary</h2>
+          <p className="text-lg text-text-muted mt-4 max-w-lg mx-auto">Every term you need to know, from bullish to short squeeze.</p>
         </div>
         <Glossary />
       </section>
 
-      <div className="section-divider" />
-
-      {/* Education — full width */}
-      <section className="py-16">
-        <div className="section-title">
-          <div className="icon-wrapper">
-            <GraduationCap />
+      {/* ===== TRADING FUNDAMENTALS ===== */}
+      <section className="full-bleed-section alt-section py-20 sm:py-28">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="text-center mb-14">
+            <p className="section-label mb-4">In-Depth Lessons</p>
+            <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">Trading Fundamentals</h2>
           </div>
-          <div>
-            <h2 className="!text-xl">Trading Fundamentals</h2>
-            <p className="!text-sm mt-1">Expand your knowledge with in-depth lessons</p>
+          <div className="max-w-3xl mx-auto">
+            <EducationAccordion />
           </div>
         </div>
-        <EducationAccordion />
       </section>
     </div>
   );

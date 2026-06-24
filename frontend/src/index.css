@@ -57,26 +57,44 @@ body {
 .card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(148, 163, 184, 0.07);
-  border-radius: 20px;
+  border-radius: 24px;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
 }
 
 .card:hover {
   border-color: rgba(148, 163, 184, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
   background: rgba(255, 255, 255, 0.028);
 }
 
 .stat-card {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(148, 163, 184, 0.07);
-  border-radius: 16px;
-  padding: 1.75rem 2rem;
+  border-radius: 20px;
+  padding: 2rem 2.25rem;
   transition: border-color 0.3s ease;
 }
 
 .stat-card:hover {
   border-color: rgba(148, 163, 184, 0.12);
+}
+
+/* ---- Glass card ---- */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 28px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(148, 163, 184, 0.15);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
 }
 
 /* ---- Loading shimmer ---- */
@@ -94,10 +112,16 @@ body {
 /* ---- Fade in ---- */
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.fade-in { animation: fadeIn 0.4s ease-out; }
+.fade-in { animation: fadeIn 0.5s ease-out; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(32px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fadeInUp 0.7s ease-out; }
 
 /* ---- Gradient text ---- */
 
@@ -109,6 +133,14 @@ body {
 }
 
 /* ---- Section titles ---- */
+
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
 
 .section-title {
   display: flex;
@@ -148,6 +180,22 @@ body {
   line-height: 1.4;
 }
 
+/* ---- Full-bleed section ---- */
+
+.full-bleed-section {
+  position: relative;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding-left: calc(50vw - 50%);
+  padding-right: calc(50vw - 50%);
+}
+
+.alt-section {
+  background: rgba(255, 255, 255, 0.015);
+  border-top: 1px solid rgba(148, 163, 184, 0.04);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.04);
+}
+
 /* ---- Selection ---- */
 
 ::selection {
@@ -178,9 +226,9 @@ a { text-decoration: none; color: inherit; }
   text-transform: uppercase;
 }
 
-/* ---- Full-bleed section ---- */
+/* ---- Section divider ---- */
 
 .section-divider {
   border-top: 1px solid rgba(148, 163, 184, 0.06);
-  margin: 3rem 0;
+  margin: 0;
 }

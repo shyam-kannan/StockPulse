@@ -200,7 +200,7 @@ function PriceTargetContent({ data, currentPrice }) {
 function MetricCard({ label, value }) {
   if (!value) return null;
   return (
-    <div className="stat-card">
+    <div className="stat-card text-center">
       <p className="text-[11px] text-text-muted uppercase tracking-widest mb-3">{label}</p>
       <p className="text-lg font-semibold text-text-primary font-[family-name:var(--font-mono)] leading-none">{value}</p>
     </div>
@@ -232,12 +232,12 @@ export default function AnalysisPage() {
     return (
       <div className="fade-in">
         <SearchBar currentTicker={ticker} />
-        <div className="text-center py-40">
+        <div className="text-center py-40 sm:py-52">
           <div className="w-28 h-28 mx-auto mb-10 bg-white/[0.02] rounded-3xl flex items-center justify-center border border-border">
             <Target className="w-12 h-12 text-electric/30" />
           </div>
-          <h2 className="text-4xl font-semibold text-text-primary mb-5 tracking-tight">Search for a Stock</h2>
-          <p className="text-text-secondary text-lg max-w-xl mx-auto leading-relaxed">
+          <h2 className="text-4xl sm:text-5xl font-bold text-text-primary mb-5 tracking-tight">Search for a Stock</h2>
+          <p className="text-text-secondary text-xl max-w-xl mx-auto leading-relaxed font-light">
             Enter a ticker symbol above to get AI-powered momentum analysis,
             fundamental insights, and price target frameworks.
           </p>
@@ -250,9 +250,9 @@ export default function AnalysisPage() {
     return (
       <div className="fade-in">
         <SearchBar currentTicker={ticker} />
-        <div className="text-center py-40">
-          <Loader2 className="w-12 h-12 text-electric animate-spin mx-auto mb-8" />
-          <p className="text-text-secondary text-xl">
+        <div className="text-center py-40 sm:py-52">
+          <Loader2 className="w-14 h-14 text-electric animate-spin mx-auto mb-8" />
+          <p className="text-text-secondary text-2xl font-light">
             Analyzing <span className="text-electric font-[family-name:var(--font-mono)] font-semibold">{ticker}</span>
           </p>
           <p className="text-text-muted text-sm mt-4">This may take 10-15 seconds</p>
@@ -280,43 +280,38 @@ export default function AnalysisPage() {
 
       <SearchBar currentTicker={ticker} />
 
-      {/* Stock header */}
-      <div className="mt-12 mb-16">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-4 sm:gap-8">
-            <h1 className="text-6xl sm:text-8xl font-bold gradient-text font-[family-name:var(--font-mono)] leading-none tracking-tighter">
-              {data.ticker}
-            </h1>
-            {data.company_name && (
-              <span className="text-lg sm:text-xl text-text-muted pb-2">
-                {data.company_name}
-              </span>
-            )}
-          </div>
+      {/* ===== HERO — centered ticker + price ===== */}
+      <section className="text-center pt-12 pb-20 sm:pt-16 sm:pb-28">
+        <h1 className="text-7xl sm:text-9xl font-bold gradient-text font-[family-name:var(--font-mono)] leading-none tracking-tighter">
+          {data.ticker}
+        </h1>
+        {data.company_name && (
+          <p className="text-lg sm:text-xl text-text-muted mt-4">{data.company_name}</p>
+        )}
 
-          <div className="flex items-baseline gap-6">
-            {yf?.current_price ? (
-              <>
-                <span className="text-4xl sm:text-6xl font-semibold text-text-primary font-[family-name:var(--font-mono)] tracking-tight">
-                  {formatPrice(yf.current_price)}
+        <div className="flex items-baseline justify-center gap-5 mt-8">
+          {yf?.current_price ? (
+            <>
+              <span className="text-5xl sm:text-7xl font-semibold text-text-primary font-[family-name:var(--font-mono)] tracking-tight">
+                {formatPrice(yf.current_price)}
+              </span>
+              {priceChange != null && (
+                <span className={`text-2xl sm:text-3xl font-semibold font-[family-name:var(--font-mono)] ${changeColor(priceChange)}`}>
+                  {formatPercent(priceChange)}
                 </span>
-                {priceChange != null && (
-                  <span className={`text-2xl font-semibold font-[family-name:var(--font-mono)] ${changeColor(priceChange)}`}>
-                    {formatPercent(priceChange)}
-                  </span>
-                )}
-              </>
-            ) : (
-              <span className="text-xl text-text-muted">Price loading...</span>
-            )}
-            {data.from_cache && (
-              <span className="text-[10px] bg-amber/10 text-amber px-3 py-1.5 rounded-xl font-medium uppercase tracking-wider">Cached</span>
-            )}
-          </div>
+              )}
+            </>
+          ) : (
+            <span className="text-xl text-text-muted">Price loading...</span>
+          )}
         </div>
 
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-5 mt-12">
+        {data.from_cache && (
+          <span className="inline-block mt-4 text-[10px] bg-amber/10 text-amber px-3 py-1.5 rounded-xl font-medium uppercase tracking-wider">Cached</span>
+        )}
+
+        {/* Stat row */}
+        <div className="flex flex-wrap justify-center gap-4 mt-12 max-w-4xl mx-auto">
           <MetricCard label="Market Cap" value={yf?.market_cap ? formatMarketCap(yf.market_cap) : null} />
           <MetricCard label="P/E (TTM)" value={yf?.pe_ratio ? yf.pe_ratio.toFixed(1) : null} />
           <MetricCard label="Fwd P/E" value={yf?.forward_pe ? yf.forward_pe.toFixed(1) : null} />
@@ -330,40 +325,52 @@ export default function AnalysisPage() {
           <MetricCard label="Sector" value={yf?.sector || null} />
           <MetricCard label="Beta" value={yf?.beta ? yf.beta.toFixed(2) : null} />
         </div>
-      </div>
+      </section>
 
-      <div className="section-divider" />
+      {/* ===== CHART + PRICE TARGETS — alt background ===== */}
+      <section className="full-bleed-section alt-section py-20 sm:py-28">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <PriceChart history={yf?.history} loading={false} />
+            <AnalysisCard title="Price Targets" icon={Target} accentColor="electric" loading={false}>
+              <PriceTargetContent data={data.price_targets} currentPrice={yf?.current_price} />
+            </AnalysisCard>
+          </div>
+        </div>
+      </section>
 
-      {/* Chart + Price Targets */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
-        <PriceChart history={yf?.history} loading={false} />
-        <AnalysisCard title="Price Targets" icon={Target} accentColor="electric" loading={false}>
-          <PriceTargetContent data={data.price_targets} currentPrice={yf?.current_price} />
-        </AnalysisCard>
-      </div>
-
-      <div className="section-divider" />
-
-      {/* Momentum — full width */}
-      <div className="mb-16">
+      {/* ===== MOMENTUM ===== */}
+      <section className="py-20 sm:py-28">
+        <div className="text-center mb-14">
+          <p className="section-label mb-4">Technical Analysis</p>
+          <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">Momentum</h2>
+        </div>
         <AnalysisCard title="Momentum Analysis" icon={Zap} accentColor="electric" loading={false}>
           <MomentumContent data={data.momentum} />
         </AnalysisCard>
-      </div>
+      </section>
 
-      <div className="section-divider" />
+      {/* ===== FUNDAMENTALS — alt background ===== */}
+      <section className="full-bleed-section alt-section py-20 sm:py-28">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="text-center mb-14">
+            <p className="section-label mb-4">Financial Health</p>
+            <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">Fundamentals</h2>
+          </div>
+          <AnalysisCard title="Fundamental Snapshot" icon={Building2} accentColor="amber" loading={false}>
+            <FundamentalsContent data={data.fundamentals} />
+          </AnalysisCard>
+        </div>
+      </section>
 
-      {/* Fundamentals — full width */}
-      <div className="mb-16">
-        <AnalysisCard title="Fundamental Snapshot" icon={Building2} accentColor="amber" loading={false}>
-          <FundamentalsContent data={data.fundamentals} />
-        </AnalysisCard>
-      </div>
-
-      <div className="section-divider" />
-
-      {/* Social Mentions — full width */}
-      <RedditMentions posts={data.reddit_posts} loading={false} />
+      {/* ===== SOCIAL ===== */}
+      <section className="py-20 sm:py-28">
+        <div className="text-center mb-14">
+          <p className="section-label mb-4">What people are saying</p>
+          <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">Social Mentions</h2>
+        </div>
+        <RedditMentions posts={data.reddit_posts} loading={false} />
+      </section>
     </div>
   );
 }

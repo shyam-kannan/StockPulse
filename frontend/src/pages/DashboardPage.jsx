@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TrendingUp, RefreshCw, Loader2 } from 'lucide-react';
+import { TrendingUp, RefreshCw, Loader2, Newspaper, MessageSquare } from 'lucide-react';
 import { usePolling } from '../hooks/usePolling';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { api } from '../utils/api';
@@ -67,91 +67,91 @@ export default function DashboardPage() {
   return (
     <div className="fade-in">
 
-      {/* Hero header */}
-      <div className="pt-4 pb-16">
-        <h1 className="text-4xl sm:text-5xl font-bold text-text-primary tracking-tight leading-tight">
+      {/* ===== HERO — centered, full viewport feel ===== */}
+      <section className="text-center pt-16 pb-20 sm:pt-24 sm:pb-28">
+        <h1 className="text-5xl sm:text-7xl font-bold text-text-primary tracking-tight leading-[1.1]">
           {greeting()}
         </h1>
-        <p className="text-lg text-text-muted mt-4 max-w-2xl leading-relaxed">
-          Here is what is moving the market today.
+        <p className="text-xl sm:text-2xl text-text-muted mt-6 max-w-xl mx-auto leading-relaxed font-light">
+          Here's what's moving the market today.
         </p>
-      </div>
+      </section>
 
-      {/* Watchlist */}
+      {/* ===== WATCHLIST ===== */}
       {watchlist.length > 0 && (
-        <div className="mb-20">
+        <section className="mb-24">
           <WatchlistSection watchlist={watchlist} setWatchlist={setWatchlist} trendingData={trending} />
-        </div>
+        </section>
       )}
 
-      {/* Daily Briefing */}
-      <div className="mb-20">
-        <DailyBriefing briefing={briefing} loading={briefingLoading} />
-      </div>
+      {/* ===== AI BRIEFING — full bleed alt background ===== */}
+      <section className="full-bleed-section alt-section py-20 sm:py-28 mb-0">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+          <DailyBriefing briefing={briefing} loading={briefingLoading} />
+        </div>
+      </section>
 
-      <div className="section-divider" />
+      {/* ===== TOP STOCKS — big centered section ===== */}
+      <section className="py-20 sm:py-28">
+        <div className="text-center mb-16">
+          <p className="section-label mb-4">Most discussed in the last 24 hours</p>
+          <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
+            Top Stocks
+          </h2>
+        </div>
 
-      {/* Top Movers — Stocks */}
-      <section className="py-16">
-        <div className="flex items-center justify-between mb-10">
-          <div className="section-title" style={{ marginBottom: 0 }}>
-            <div className="icon-wrapper">
-              <TrendingUp />
-            </div>
-            <div>
-              <h2 className="!text-xl">Top Stocks</h2>
-              <p className="!text-sm mt-1">Most discussed individual stocks in the last 24 hours</p>
-            </div>
-          </div>
+        <TrendingCards tickers={stocks} loading={trendingLoading} />
 
+        <div className="flex justify-center mt-10">
           <button
             onClick={handleRefresh}
             disabled={refreshing}
-            className="flex items-center gap-2.5 px-5 py-2.5 text-sm font-medium text-text-muted bg-white/[0.03] border border-white/[0.06] rounded-xl hover:border-white/[0.12] hover:text-text-secondary transition-all duration-200 disabled:opacity-40 cursor-pointer"
+            className="flex items-center gap-2.5 px-7 py-3 text-sm font-medium text-text-muted bg-white/[0.04] border border-white/[0.08] rounded-full hover:border-white/[0.15] hover:text-text-secondary hover:bg-white/[0.06] transition-all duration-300 disabled:opacity-40 cursor-pointer"
           >
             {refreshing
               ? <Loader2 className="w-4 h-4 animate-spin" />
               : <RefreshCw className="w-4 h-4" />
             }
-            {refreshing ? 'Refreshing...' : 'Refresh'}
+            {refreshing ? 'Refreshing...' : 'Refresh Data'}
           </button>
         </div>
-
-        <TrendingCards tickers={stocks} loading={trendingLoading} />
       </section>
 
-      {/* Top Movers — ETFs */}
+      {/* ===== TOP ETFs — alt background ===== */}
       {(trendingLoading || etfs.length > 0) && (
-        <section className="pb-16">
-          <div className="mb-10">
-            <div className="section-title" style={{ marginBottom: 0 }}>
-              <div className="icon-wrapper" style={{ background: 'rgba(251, 191, 36, 0.10)' }}>
-                <TrendingUp style={{ color: '#fbbf24' }} />
-              </div>
-              <div>
-                <h2 className="!text-xl">Top ETFs</h2>
-                <p className="!text-sm mt-1">Most discussed exchange-traded funds</p>
-              </div>
+        <section className="full-bleed-section alt-section py-20 sm:py-28">
+          <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+            <div className="text-center mb-16">
+              <p className="section-label mb-4">Most discussed exchange-traded funds</p>
+              <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
+                Top ETFs
+              </h2>
             </div>
-          </div>
 
-          <TrendingCards tickers={etfs} loading={trendingLoading} />
+            <TrendingCards tickers={etfs} loading={trendingLoading} />
+          </div>
         </section>
       )}
 
-      <div className="section-divider" />
+      {/* ===== TRENDING TABLE ===== */}
+      <section className="py-20 sm:py-28">
+        <div className="text-center mb-16">
+          <p className="section-label mb-4">Full breakdown</p>
+          <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
+            Trending Tickers
+          </h2>
+        </div>
 
-      {/* Main content grid */}
-      <div className="py-16 grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-16">
-          <TrendingTable
-            tickers={stocks}
-            loading={trendingLoading}
-            watchlist={watchlist}
-            setWatchlist={setWatchlist}
-            title="Trending Stocks"
-          />
-          {etfs.length > 0 && (
+        <TrendingTable
+          tickers={stocks}
+          loading={trendingLoading}
+          watchlist={watchlist}
+          setWatchlist={setWatchlist}
+          title="Trending Stocks"
+        />
+
+        {etfs.length > 0 && (
+          <div className="mt-20">
             <TrendingTable
               tickers={etfs}
               loading={trendingLoading}
@@ -159,14 +159,38 @@ export default function DashboardPage() {
               setWatchlist={setWatchlist}
               title="Trending ETFs"
             />
-          )}
-        </div>
+          </div>
+        )}
+      </section>
 
-        <div className="space-y-12">
-          <RedditBuzz posts={redditPosts} loading={redditLoading} />
-          <NewsFeed items={feed} loading={feedLoading} />
+      {/* ===== NEWS + SOCIAL — side by side, alt background ===== */}
+      <section className="full-bleed-section alt-section py-20 sm:py-28">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
+          <div className="text-center mb-16">
+            <p className="section-label mb-4">What people are saying</p>
+            <h2 className="text-3xl sm:text-5xl font-bold text-text-primary tracking-tight">
+              News & Social
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div>
+              <div className="flex items-center gap-3 mb-8">
+                <MessageSquare className="w-5 h-5 text-electric" />
+                <h3 className="text-lg font-semibold text-text-primary">Reddit Buzz</h3>
+              </div>
+              <RedditBuzz posts={redditPosts} loading={redditLoading} />
+            </div>
+            <div>
+              <div className="flex items-center gap-3 mb-8">
+                <Newspaper className="w-5 h-5 text-amber" />
+                <h3 className="text-lg font-semibold text-text-primary">Market News</h3>
+              </div>
+              <NewsFeed items={feed} loading={feedLoading} />
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
