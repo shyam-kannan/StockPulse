@@ -3,7 +3,7 @@ import { usePolling } from '../../hooks/usePolling';
 import { api } from '../../utils/api';
 
 const statusConfig = {
-  open: { label: 'Market Open', color: 'text-electric', bg: 'bg-electric/10', icon: Sun, pulse: true },
+  open: { label: 'Market Open', color: 'text-accent', bg: 'bg-accent/10', icon: Sun, pulse: true },
   pre_market: { label: 'Pre-Market', color: 'text-amber', bg: 'bg-amber/10', icon: Sunrise, pulse: false },
   after_hours: { label: 'After Hours', color: 'text-amber', bg: 'bg-amber/10', icon: Moon, pulse: false },
   closed: { label: 'Market Closed', color: 'text-danger', bg: 'bg-danger/10', icon: Moon, pulse: false },
@@ -12,7 +12,7 @@ const statusConfig = {
 function TimelineBar({ status }) {
   const segments = [
     { label: 'Pre', start: 4, end: 9.5, color: 'bg-amber/20' },
-    { label: 'Regular', start: 9.5, end: 16, color: 'bg-electric/30' },
+    { label: 'Regular', start: 9.5, end: 16, color: 'bg-accent/30' },
     { label: 'After', start: 16, end: 20, color: 'bg-amber/20' },
   ];
 
@@ -89,12 +89,12 @@ export default function MarketStatus() {
     <div className="card overflow-hidden">
       <div className="p-8">
         <div className="flex items-center gap-5 mb-7">
-          <div className={`w-14 h-14 rounded-2xl ${config.bg} flex items-center justify-center`}>
+          <div className={`w-14 h-14 rounded-lg ${config.bg} flex items-center justify-center`}>
             <StatusIcon className={`w-7 h-7 ${config.color}`} />
           </div>
           <div>
             <div className="flex items-center gap-3">
-              <div className={`w-2.5 h-2.5 rounded-full ${config.color === 'text-electric' ? 'bg-electric' : config.color === 'text-amber' ? 'bg-amber' : 'bg-danger'} ${config.pulse ? 'animate-pulse' : ''}`} />
+              <div className={`w-2.5 h-2.5 rounded-full ${config.color === 'text-accent' ? 'bg-accent' : config.color === 'text-amber' ? 'bg-amber' : 'bg-danger'} ${config.pulse ? 'animate-pulse' : ''}`} />
               <h3 className={`text-2xl font-semibold ${config.color}`}>{config.label}</h3>
             </div>
             <p className="text-sm text-text-muted mt-1.5">
@@ -111,7 +111,7 @@ export default function MarketStatus() {
 
         {data.next_open && (
           <p className="text-base text-text-secondary mb-1">
-            Opens at <span className="text-electric font-[family-name:var(--font-mono)] font-medium">{formatTime(data.next_open)}</span>
+            Opens at <span className="text-accent font-[family-name:var(--font-mono)] font-medium">{formatTime(data.next_open)}</span>
           </p>
         )}
         {data.next_close && (
@@ -131,7 +131,7 @@ export default function MarketStatus() {
             { label: 'Regular', time: data.market_hours.regular.start + ' - ' + data.market_hours.regular.end, color: 'border-l-electric' },
             { label: 'After Hours', time: data.market_hours.after_hours.start + ' - ' + data.market_hours.after_hours.end, color: 'border-l-amber' },
           ].map((h) => (
-            <div key={h.label} className={`bg-white/[0.02] rounded-xl px-5 py-3.5 border-l-2 ${h.color}`}>
+            <div key={h.label} className={`bg-white/[0.02] rounded-lg px-5 py-3.5 border-l-2 ${h.color}`}>
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-text-primary">{h.label}</span>
                 <span className="text-sm font-[family-name:var(--font-mono)] text-text-secondary">{h.time}</span>
@@ -143,13 +143,13 @@ export default function MarketStatus() {
         {data.guide && (
           <div className="space-y-3 mt-5">
             {data.guide.best_times && (
-              <div className="bg-electric/[0.04] border border-electric/10 rounded-xl p-5">
-                <p className="text-sm font-medium text-electric mb-2">Best Times to Trade</p>
+              <div className="bg-accent/[0.04] border border-electric/10 rounded-lg p-5">
+                <p className="text-sm font-medium text-accent mb-2">Best Times to Trade</p>
                 <p className="text-sm text-text-secondary leading-relaxed">{data.guide.best_times}</p>
               </div>
             )}
             {data.guide.settlement && (
-              <div className="bg-white/[0.02] rounded-xl p-5">
+              <div className="bg-white/[0.02] rounded-lg p-5">
                 <p className="text-sm font-medium text-amber mb-2">Settlement (T+1)</p>
                 <p className="text-sm text-text-secondary leading-relaxed">{data.guide.settlement}</p>
               </div>

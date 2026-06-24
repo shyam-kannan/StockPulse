@@ -67,7 +67,7 @@ export default function Glossary() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search terms..."
-          className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-border rounded-2xl text-base text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-electric/25 transition-colors"
+          className="w-full pl-14 pr-6 py-4 bg-white/[0.03] border border-border rounded-lg text-base text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-accent/25 transition-colors"
         />
       </div>
 
@@ -76,9 +76,9 @@ export default function Glossary() {
         {filtered.map((item) => (
           <div
             key={item.term}
-            className="card p-7 hover:border-electric/15 transition-colors"
+            className="card p-7 hover:border-accent/15 transition-colors"
           >
-            <h4 className="text-base font-semibold text-electric mb-3 tracking-tight">
+            <h4 className="text-base font-semibold text-accent mb-3 tracking-tight">
               {item.term}
             </h4>
             <p className="text-[15px] text-text-secondary leading-[1.8]">

@@ -4,7 +4,7 @@ import { api } from '../../utils/api';
 
 function AccordionItem({ card, isOpen, onToggle }) {
   const categoryColor = {
-    'Timing': 'bg-electric/10 text-electric',
+    'Timing': 'bg-accent/10 text-accent',
     'Execution': 'bg-amber/10 text-amber',
     'Analysis': 'bg-purple-500/10 text-purple-400',
     'Fundamentals': 'bg-blue-500/10 text-blue-400',
@@ -74,13 +74,13 @@ export default function EducationAccordion() {
   return (
     <div>
       {tipCard && (
-        <div className="relative overflow-hidden rounded-2xl border border-electric/10 bg-gradient-to-r from-electric/[0.06] to-transparent p-7 mb-8">
+        <div className="relative overflow-hidden rounded-lg border border-electric/10 bg-gradient-to-r from-electric/[0.06] to-transparent p-7 mb-8">
           <div className="flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-electric/15 flex items-center justify-center shrink-0">
-              <Lightbulb className="w-5 h-5 text-electric" />
+            <div className="w-10 h-10 rounded-lg bg-accent/15 flex items-center justify-center shrink-0">
+              <Lightbulb className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <p className="text-xs text-electric font-medium mb-2">Tip of the Day</p>
+              <p className="text-xs text-accent font-medium mb-2">Tip of the Day</p>
               <p className="text-base font-medium text-text-primary mb-2">{tipCard.title}</p>
               <p className="text-sm text-text-secondary leading-relaxed">{tipCard.summary}</p>
             </div>

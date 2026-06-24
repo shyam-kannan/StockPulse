@@ -63,7 +63,7 @@ export default function NewsFeed({ items, loading }) {
                     {displayBadge.label}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-[15px] text-text-primary group-hover:text-electric transition-colors line-clamp-2 leading-snug">
+                    <p className="text-[15px] text-text-primary group-hover:text-accent transition-colors line-clamp-2 leading-snug">
                       {item.title}
                     </p>
                     <div className="flex items-center gap-3 mt-2.5">

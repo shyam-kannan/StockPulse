@@ -80,7 +80,7 @@ export default function SearchBar({ currentTicker }) {
         <div className="relative">
           <Search
             className={`absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 ${
-              focused ? 'text-electric' : 'text-text-muted'
+              focused ? 'text-accent' : 'text-text-muted'
             }`}
           />
           <input
@@ -103,9 +103,9 @@ export default function SearchBar({ currentTicker }) {
                 : 'Search any stock ticker (e.g. AAPL, TSLA, NVDA)'
             }
             maxLength={5}
-            className={`w-full pl-14 pr-12 py-4.5 bg-white/[0.04] border rounded-2xl text-text-primary text-lg placeholder:text-text-muted/50 focus:outline-none font-[family-name:var(--font-mono)] tracking-wide transition-all duration-200 ${
+            className={`w-full pl-14 pr-12 py-4.5 bg-white/[0.04] border rounded-lg text-text-primary text-lg placeholder:text-text-muted/50 focus:outline-none font-[family-name:var(--font-mono)] tracking-wide transition-all duration-200 ${
               focused
-                ? 'border-electric/30 bg-white/[0.06] shadow-[0_0_0_4px_rgba(16,185,129,0.06),0_0_24px_rgba(16,185,129,0.04)]'
+                ? 'border-accent/30 bg-white/[0.06]'
                 : 'border-border hover:border-border-hover'
             }`}
           />
@@ -127,7 +127,7 @@ export default function SearchBar({ currentTicker }) {
       </form>
 
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-50 w-full mt-2 bg-navy-800 border border-border rounded-2xl shadow-[0_16px_48px_rgba(0,0,0,0.4)] overflow-hidden fade-in">
+        <div className="absolute z-50 w-full mt-2 bg-bg-hover border border-border rounded-lg shadow-[0_16px_48px_rgba(0,0,0,0.4)] overflow-hidden ">
           {suggestions.map((s, i) => (
             <button
               key={s.ticker}
@@ -139,7 +139,7 @@ export default function SearchBar({ currentTicker }) {
                   : 'hover:bg-white/[0.03]'
               }`}
             >
-              <span className="text-sm font-semibold text-electric font-[family-name:var(--font-mono)] w-16 shrink-0">
+              <span className="text-sm font-semibold text-accent font-[family-name:var(--font-mono)] w-16 shrink-0">
                 {s.ticker}
               </span>
               <span className="text-sm text-text-secondary truncate">{s.name}</span>

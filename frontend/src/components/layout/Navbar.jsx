@@ -5,7 +5,6 @@ import { Activity, Menu, X, Search, BarChart3, BookOpen, LayoutDashboard, Briefc
 export default function Navbar({ marketStatus }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e) => {
@@ -15,14 +14,13 @@ export default function Navbar({ marketStatus }) {
       navigate(`/analysis/${ticker}`);
       setSearchInput('');
       setMenuOpen(false);
-      setSearchFocused(false);
     }
   };
 
   const statusColor = {
-    open: 'bg-electric',
-    pre_market: 'bg-amber',
-    after_hours: 'bg-amber',
+    open: 'bg-accent',
+    pre_market: 'bg-warning',
+    after_hours: 'bg-warning',
     closed: 'bg-danger',
   };
 
@@ -41,97 +39,82 @@ export default function Navbar({ marketStatus }) {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 bg-navy-950/80 backdrop-blur-2xl border-b border-white/[0.04]">
-      <div className="max-w-[1440px] mx-auto px-6 sm:px-10 lg:px-16">
-        <div className="flex items-center justify-between h-[72px]">
+    <nav className="sticky top-0 z-50 bg-bg/90 backdrop-blur-md border-b border-border">
+      <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14">
 
-          {/* Logo */}
-          <NavLink to="/" className="flex items-center gap-3.5 shrink-0 group">
-            <div className="w-9 h-9 rounded-xl bg-electric/10 flex items-center justify-center group-hover:bg-electric/15 transition-colors duration-200">
-              <Activity className="w-[18px] h-[18px] text-electric" />
-            </div>
-            <span className="text-lg font-semibold gradient-text font-[family-name:var(--font-mono)] tracking-tight">
+          <NavLink to="/" className="flex items-center gap-2.5 shrink-0">
+            <Activity className="w-5 h-5 text-accent" />
+            <span className="text-[15px] font-semibold text-text-primary tracking-tight">
               StockPulse
             </span>
           </NavLink>
 
-          {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-2 ml-12">
+          <div className="hidden md:flex items-center gap-1 ml-10">
             {links.map(({ to, label, icon: Icon, end }) => (
               <NavLink
                 key={to}
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  `flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  `flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
                     isActive
                       ? 'text-text-primary bg-white/[0.06]'
                       : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
                   }`
                 }
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5" />
                 {label}
               </NavLink>
             ))}
           </div>
 
-          {/* Desktop right side */}
-          <div className="hidden md:flex items-center gap-5 ml-auto">
+          <div className="hidden md:flex items-center gap-4 ml-auto">
             <form onSubmit={handleSearch} className="relative">
-              <Search
-                className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${
-                  searchFocused ? 'text-electric' : 'text-text-muted'
-                }`}
-              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => setSearchFocused(false)}
                 placeholder="Ticker..."
                 maxLength={5}
-                className="w-40 focus:w-52 pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-muted/70 focus:outline-none focus:border-electric/30 focus:bg-white/[0.05] font-[family-name:var(--font-mono)] transition-all duration-300"
+                className="w-32 focus:w-44 pl-9 pr-3 py-1.5 bg-white/[0.03] border border-border rounded-lg text-[13px] text-text-primary placeholder:text-text-muted/60 focus:outline-none focus:border-accent/30 font-[family-name:var(--font-mono)] transition-all duration-200"
               />
             </form>
 
             {marketStatus && (
-              <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white/[0.025] border border-white/[0.04]">
+              <div className="flex items-center gap-2 text-[12px] text-text-secondary">
                 <div
-                  className={`w-2 h-2 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'} ${
+                  className={`w-1.5 h-1.5 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'} ${
                     marketStatus.is_open ? 'animate-pulse' : ''
                   }`}
                 />
-                <span className="text-xs font-medium text-text-secondary tracking-wide">
-                  {statusLabel[marketStatus.status] || 'Unknown'}
-                </span>
+                {statusLabel[marketStatus.status] || 'Unknown'}
               </div>
             )}
           </div>
 
-          {/* Mobile menu button */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="md:hidden p-3 text-text-muted hover:text-text-primary rounded-xl hover:bg-white/[0.04] transition-colors cursor-pointer"
+            className="md:hidden p-2 text-text-muted hover:text-text-primary rounded-lg hover:bg-white/[0.04] transition-colors cursor-pointer"
             aria-label="Toggle menu"
           >
             {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* Mobile menu */}
         {menuOpen && (
-          <div className="md:hidden py-5 border-t border-white/[0.04] space-y-2 fade-in">
-            <form onSubmit={handleSearch} className="relative mb-5">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+          <div className="md:hidden py-3 border-t border-border space-y-1">
+            <form onSubmit={handleSearch} className="relative mb-3">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value.toUpperCase())}
                 placeholder="Search ticker..."
                 maxLength={5}
-                className="w-full pl-11 pr-4 py-3.5 bg-white/[0.03] border border-white/[0.06] rounded-xl text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-electric/30 font-[family-name:var(--font-mono)]"
+                className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-border rounded-lg text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent/30 font-[family-name:var(--font-mono)]"
               />
             </form>
 
@@ -141,7 +124,7 @@ export default function Navbar({ marketStatus }) {
                 to={to}
                 end={end}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-5 py-3.5 text-sm rounded-xl transition-colors ${
+                  `flex items-center gap-2.5 px-3 py-2.5 text-sm rounded-lg transition-colors ${
                     isActive
                       ? 'text-text-primary bg-white/[0.05]'
                       : 'text-text-muted hover:text-text-secondary hover:bg-white/[0.03]'
@@ -155,9 +138,9 @@ export default function Navbar({ marketStatus }) {
             ))}
 
             {marketStatus && (
-              <div className="flex items-center gap-2 px-5 py-3.5 mt-3">
-                <div className={`w-2 h-2 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'}`} />
-                <span className="text-xs text-text-muted">{statusLabel[marketStatus.status]}</span>
+              <div className="flex items-center gap-2 px-3 py-2 text-xs text-text-muted">
+                <div className={`w-1.5 h-1.5 rounded-full ${statusColor[marketStatus.status] || 'bg-text-muted'}`} />
+                {statusLabel[marketStatus.status]}
               </div>
             )}
           </div>

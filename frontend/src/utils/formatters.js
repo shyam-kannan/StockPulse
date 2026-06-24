@@ -36,13 +36,13 @@ export function timeAgo(timestamp) {
 }
 
 export function sentimentColor(score) {
-  if (score > 0.2) return 'text-electric';
+  if (score > 0.2) return 'text-accent';
   if (score < -0.2) return 'text-danger';
   return 'text-amber';
 }
 
 export function changeColor(pct) {
-  if (pct > 0) return 'text-electric';
+  if (pct > 0) return 'text-accent';
   if (pct < 0) return 'text-danger';
   return 'text-text-secondary';
 }

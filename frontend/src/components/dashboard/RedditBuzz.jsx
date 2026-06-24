@@ -40,7 +40,7 @@ export default function RedditBuzz({ posts, loading }) {
   if (!posts || posts.length === 0) {
     return (
       <div className="card p-12 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 rounded-lg bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
           <MessageSquare className="w-6 h-6 text-text-muted" />
         </div>
         <p className="text-text-muted text-base">No posts yet. Collecting data...</p>
@@ -75,7 +75,7 @@ export default function RedditBuzz({ posts, loading }) {
                   <span className="text-sm font-[family-name:var(--font-mono)] font-medium text-text-secondary">{post.score}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[15px] text-text-primary group-hover:text-electric transition-colors line-clamp-2 leading-snug">
+                  <p className="text-[15px] text-text-primary group-hover:text-accent transition-colors line-clamp-2 leading-snug">
                     {post.title}
                   </p>
                   <div className="flex items-center gap-3 mt-3 flex-wrap">

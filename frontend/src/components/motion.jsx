@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
 
-export function FadeIn({ children, delay = 0, className = '', y = 24 }) {
+const ease = [0.25, 0.1, 0.25, 1];
+
+export function FadeIn({ children, delay = 0, className = '' }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 0.4, delay, ease }}
       className={className}
     >
       {children}
@@ -13,13 +15,13 @@ export function FadeIn({ children, delay = 0, className = '', y = 24 }) {
   );
 }
 
-export function FadeInView({ children, delay = 0, className = '', y = 30 }) {
+export function FadeInView({ children, delay = 0, className = '' }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y }}
+      initial={{ opacity: 0, y: 12 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-60px' }}
-      transition={{ duration: 0.6, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{ duration: 0.5, delay, ease }}
       className={className}
     >
       {children}
@@ -27,16 +29,13 @@ export function FadeInView({ children, delay = 0, className = '', y = 30 }) {
   );
 }
 
-export function StaggerContainer({ children, className = '', stagger = 0.08 }) {
+export function Stagger({ children, className = '' }) {
   return (
     <motion.div
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: '-40px' }}
-      variants={{
-        hidden: {},
-        visible: { transition: { staggerChildren: stagger } },
-      }}
+      variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.04 } } }}
       className={className}
     >
       {children}
@@ -44,32 +43,7 @@ export function StaggerContainer({ children, className = '', stagger = 0.08 }) {
   );
 }
 
-export function StaggerItem({ children, className = '' }) {
-  return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 20, scale: 0.97 },
-        visible: {
-          opacity: 1, y: 0, scale: 1,
-          transition: { duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] },
-        },
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-export function ScaleOnHover({ children, className = '', scale = 1.02 }) {
-  return (
-    <motion.div
-      whileHover={{ scale, y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
-}
+export const staggerChild = {
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease } },
+};

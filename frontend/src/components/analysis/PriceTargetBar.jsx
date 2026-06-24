@@ -53,7 +53,7 @@ export default function PriceTargetBar({ priceTargets, currentPrice }) {
             <span className={`text-[10px] font-medium ${m.textColor}`} style={{ position: 'absolute', top: '-24px' }}>
               {m.label}
             </span>
-            <div className={`w-3 h-3 ${m.color} rounded-full border-2 border-navy-800 shadow-sm`} style={{ position: 'absolute', top: '0px', marginTop: '-2px' }} />
+            <div className={`w-3 h-3 ${m.color} rounded-full border-2 border-bg-elevated shadow-sm`} style={{ position: 'absolute', top: '0px', marginTop: '-2px' }} />
             <span className="text-[10px] font-[family-name:var(--font-mono)] text-text-muted" style={{ position: 'absolute', top: '18px' }}>
               {formatPrice(m.price)}
             </span>
@@ -66,7 +66,7 @@ export default function PriceTargetBar({ priceTargets, currentPrice }) {
             style={{ left: `${pct(currentPrice)}%`, transform: 'translateX(-50%)' }}
           >
             <div className="w-0.5 h-6 bg-text-primary" style={{ position: 'absolute', top: '-4px' }} />
-            <span className="text-[10px] font-semibold text-text-primary font-[family-name:var(--font-mono)] bg-navy-800 px-1.5 rounded-md" style={{ position: 'absolute', top: '22px' }}>
+            <span className="text-[10px] font-semibold text-text-primary font-[family-name:var(--font-mono)] bg-bg-elevated px-1.5 rounded-md" style={{ position: 'absolute', top: '22px' }}>
               NOW {formatPrice(currentPrice)}
             </span>
           </div>
@@ -75,7 +75,7 @@ export default function PriceTargetBar({ priceTargets, currentPrice }) {
 
       <div className="grid grid-cols-3 gap-3 text-center">
         {entryLow && entryHigh && (
-          <div className="bg-white/[0.03] rounded-xl p-3">
+          <div className="bg-white/[0.03] rounded-lg p-3">
             <p className="text-[10px] uppercase text-text-muted mb-1 tracking-wider">Entry Zone</p>
             <p className="text-xs font-[family-name:var(--font-mono)] text-electric font-medium">
               {formatPrice(entryLow)} - {formatPrice(entryHigh)}
@@ -83,7 +83,7 @@ export default function PriceTargetBar({ priceTargets, currentPrice }) {
           </div>
         )}
         {priceTargets.trim_levels?.length > 0 && (
-          <div className="bg-white/[0.03] rounded-xl p-3">
+          <div className="bg-white/[0.03] rounded-lg p-3">
             <p className="text-[10px] uppercase text-text-muted mb-1 tracking-wider">Trim Levels</p>
             <p className="text-xs font-[family-name:var(--font-mono)] text-amber font-medium">
               {priceTargets.trim_levels.map((p) => formatPrice(p)).join(' / ')}
@@ -91,7 +91,7 @@ export default function PriceTargetBar({ priceTargets, currentPrice }) {
           </div>
         )}
         {hardStop && (
-          <div className="bg-white/[0.03] rounded-xl p-3">
+          <div className="bg-white/[0.03] rounded-lg p-3">
             <p className="text-[10px] uppercase text-text-muted mb-1 tracking-wider">Hard Stop</p>
             <p className="text-xs font-[family-name:var(--font-mono)] text-danger font-medium">
               {formatPrice(hardStop)}

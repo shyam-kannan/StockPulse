@@ -4,39 +4,39 @@ import { motion } from 'framer-motion';
 import { Brain, AlertTriangle, Sparkles, Target, MessageSquare, ChevronDown } from 'lucide-react';
 
 const actionColors = {
-  BUY: 'bg-electric/15 text-electric border-electric/20',
-  WATCH: 'bg-amber/15 text-amber border-amber/20',
-  AVOID: 'bg-danger/15 text-danger border-danger/20',
+  BUY: 'bg-accent/12 text-accent border-accent/20',
+  WATCH: 'bg-warning/12 text-warning border-warning/20',
+  AVOID: 'bg-danger/12 text-danger border-danger/20',
 };
 
 const sentimentBadge = {
-  bullish: 'bg-electric/10 text-electric',
+  bullish: 'bg-accent/10 text-accent',
   bearish: 'bg-danger/10 text-danger',
-  mixed: 'bg-amber/10 text-amber',
+  mixed: 'bg-warning/10 text-warning',
 };
 
 const stagger = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.07 } },
+  visible: { transition: { staggerChildren: 0.04 } },
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] } },
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] } },
 };
 
 function BriefingSkeleton() {
   return (
-    <div className="text-center">
-      <div className="h-7 shimmer rounded-lg w-56 mx-auto mb-4" />
-      <div className="h-4 shimmer rounded-lg w-full max-w-xl mx-auto mb-2" />
-      <div className="h-4 shimmer rounded-lg w-3/4 max-w-md mx-auto mb-10" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div>
+      <div className="h-6 shimmer rounded w-48 mb-3" />
+      <div className="h-4 shimmer rounded w-full max-w-lg mb-2" />
+      <div className="h-4 shimmer rounded w-3/4 max-w-md mb-8" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {[1, 2, 3].map(i => (
-          <div key={i} className="glass-card p-6">
-            <div className="h-5 shimmer rounded-lg w-32 mb-3" />
-            <div className="h-4 shimmer rounded-lg w-full mb-2" />
-            <div className="h-4 shimmer rounded-lg w-2/3" />
+          <div key={i} className="card p-5">
+            <div className="h-4 shimmer rounded w-28 mb-3" />
+            <div className="h-4 shimmer rounded w-full mb-2" />
+            <div className="h-4 shimmer rounded w-2/3" />
           </div>
         ))}
       </div>
@@ -52,11 +52,12 @@ export default function DailyBriefing({ briefing, loading }) {
   if (loading) return <BriefingSkeleton />;
   if (!briefing || briefing.error) {
     return (
-      <div className="text-center py-8">
-        <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-border flex items-center justify-center mx-auto mb-4">
-          <Brain className="w-8 h-8 text-text-muted/40" />
+      <div className="card p-8">
+        <div className="flex items-center gap-3 mb-3">
+          <Brain className="w-5 h-5 text-text-muted/40" />
+          <h3 className="text-sm font-semibold text-text-primary">AI Market Briefing</h3>
         </div>
-        <p className="text-text-muted text-sm max-w-md mx-auto">
+        <p className="text-sm text-text-muted">
           {briefing?.market_overview || 'AI briefing unavailable. Ensure your API key is configured.'}
         </p>
       </div>
@@ -64,37 +65,35 @@ export default function DailyBriefing({ briefing, loading }) {
   }
 
   const overviewText = briefing.market_overview || '';
-  const truncatedOverview = overviewText.length > 280 ? overviewText.slice(0, 280) + '...' : overviewText;
+  const truncatedOverview = overviewText.length > 300 ? overviewText.slice(0, 300) + '...' : overviewText;
 
   return (
     <div>
-      {/* Centered header */}
-      <div className="text-center mb-10">
-        <p className="section-label mb-3">Powered by Claude AI</p>
-        <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">AI Market Briefing</h2>
+      <div className="flex items-center gap-2 mb-1">
+        <Brain className="w-4 h-4 text-accent" />
+        <h2 className="text-lg font-semibold text-text-primary tracking-tight">AI Market Briefing</h2>
       </div>
+      <p className="section-label mb-5">Powered by Claude AI</p>
 
-      {/* TLDR banner */}
+      {/* TLDR */}
       {briefing.tldr && (
-        <div className="max-w-3xl mx-auto mb-8">
-          <div className="relative overflow-hidden rounded-xl border border-electric/15 bg-gradient-to-r from-electric/[0.08] via-electric/[0.03] to-transparent px-6 py-4">
-            <div className="flex items-start gap-3">
-              <Sparkles className="w-5 h-5 text-electric shrink-0 mt-0.5" />
-              <p className="text-sm font-medium text-electric/90 leading-relaxed">{briefing.tldr}</p>
-            </div>
+        <div className="rounded-lg border border-accent/15 bg-accent-subtle px-4 py-3 mb-5">
+          <div className="flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+            <p className="text-[13px] font-medium text-accent/90 leading-relaxed">{briefing.tldr}</p>
           </div>
         </div>
       )}
 
-      {/* Market overview */}
-      <div className="max-w-3xl mx-auto text-center mb-12">
-        <p className="text-[15px] text-text-secondary leading-[1.8]">
+      {/* Overview */}
+      <div className="mb-6">
+        <p className="text-sm text-text-secondary leading-[1.7]">
           {showFullOverview ? overviewText : truncatedOverview}
         </p>
-        {overviewText.length > 280 && (
+        {overviewText.length > 300 && (
           <button
             onClick={() => setShowFullOverview(!showFullOverview)}
-            className="mt-3 text-sm text-electric hover:text-electric-dim transition-colors cursor-pointer inline-flex items-center gap-1 mx-auto"
+            className="mt-2 text-[13px] text-accent hover:text-accent-dim transition-colors cursor-pointer inline-flex items-center gap-1"
           >
             {showFullOverview ? 'Show less' : 'Read more'}
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showFullOverview ? 'rotate-180' : ''}`} />
@@ -104,23 +103,21 @@ export default function DailyBriefing({ briefing, loading }) {
 
       {/* Social sentiment */}
       {briefing.reddit_narrative && (
-        <div className="max-w-3xl mx-auto mb-12">
-          <div className="glass-card p-6">
-            <div className="flex items-center gap-2.5 mb-3">
-              <MessageSquare className="w-4 h-4 text-amber" />
-              <span className="text-xs font-semibold text-amber uppercase tracking-wider">Social Sentiment</span>
-            </div>
-            <p className="text-sm text-text-secondary leading-[1.8]">{briefing.reddit_narrative}</p>
+        <div className="card p-4 mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            <MessageSquare className="w-3.5 h-3.5 text-warning" />
+            <span className="text-[12px] font-semibold text-warning uppercase tracking-wider">Social Sentiment</span>
           </div>
+          <p className="text-sm text-text-secondary leading-[1.7]">{briefing.reddit_narrative}</p>
         </div>
       )}
 
       {/* Key themes */}
       {briefing.themes && briefing.themes.length > 0 && (
-        <div className="mb-12">
-          <p className="text-xs font-semibold text-text-muted uppercase tracking-wider text-center mb-6">Key Themes</p>
+        <div className="mb-6">
+          <p className="section-label mb-4">Key Themes</p>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
             variants={stagger}
             initial="hidden"
             whileInView="visible"
@@ -130,28 +127,27 @@ export default function DailyBriefing({ briefing, loading }) {
               <motion.button
                 key={i}
                 variants={fadeUp}
-                whileHover={{ y: -2 }}
                 onClick={() => setExpandedTheme(expandedTheme === i ? null : i)}
-                className="glass-card p-5 text-left"
+                className="card p-4 text-left cursor-pointer"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <h4 className="text-sm font-semibold text-text-primary leading-snug flex-1">{theme.title}</h4>
+                <div className="flex items-start justify-between mb-2">
+                  <h4 className="text-[13px] font-semibold text-text-primary leading-snug flex-1">{theme.title}</h4>
                   {theme.sentiment && (
-                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ml-2 shrink-0 ${sentimentBadge[theme.sentiment] || sentimentBadge.mixed}`}>
+                    <span className={`text-[10px] font-medium px-2 py-0.5 rounded ml-2 shrink-0 ${sentimentBadge[theme.sentiment] || sentimentBadge.mixed}`}>
                       {theme.sentiment}
                     </span>
                   )}
                 </div>
-                <p className={`text-sm text-text-secondary leading-relaxed ${expandedTheme === i ? '' : 'line-clamp-3'}`}>
+                <p className={`text-[13px] text-text-secondary leading-relaxed ${expandedTheme === i ? '' : 'line-clamp-3'}`}>
                   {theme.description}
                 </p>
                 {theme.tickers && theme.tickers.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-4">
+                  <div className="flex flex-wrap gap-1 mt-3">
                     {theme.tickers.map(t => (
                       <span
                         key={t}
                         onClick={(e) => { e.stopPropagation(); navigate(`/analysis/${t}`); }}
-                        className="text-xs font-[family-name:var(--font-mono)] font-medium text-electric bg-electric/10 px-2 py-1 rounded-md cursor-pointer hover:bg-electric/20 transition-colors"
+                        className="text-[11px] font-[family-name:var(--font-mono)] font-medium text-accent bg-accent/10 px-1.5 py-0.5 rounded cursor-pointer hover:bg-accent/20 transition-colors"
                       >
                         ${t}
                       </span>
@@ -166,15 +162,13 @@ export default function DailyBriefing({ briefing, loading }) {
 
       {/* Top Picks */}
       {briefing.top_picks && briefing.top_picks.length > 0 && (
-        <div className="mb-12">
-          <div className="text-center mb-6">
-            <div className="flex items-center justify-center gap-2.5">
-              <Target className="w-4 h-4 text-amber" />
-              <p className="text-xs font-semibold text-text-muted uppercase tracking-wider">Today's Top Picks</p>
-            </div>
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Target className="w-3.5 h-3.5 text-warning" />
+            <p className="section-label">Today's Top Picks</p>
           </div>
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"
             variants={stagger}
             initial="hidden"
             whileInView="visible"
@@ -184,20 +178,19 @@ export default function DailyBriefing({ briefing, loading }) {
               <motion.button
                 key={i}
                 variants={fadeUp}
-                whileHover={{ y: -2 }}
                 onClick={() => navigate(`/analysis/${pick.ticker}`)}
-                className="glass-card p-5 text-left"
+                className="card p-4 text-left cursor-pointer"
               >
-                <div className="flex items-center gap-2.5 mb-3">
-                  <span className={`text-xs font-bold px-3 py-1.5 rounded-lg border ${actionColors[pick.action] || actionColors.WATCH}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className={`text-[11px] font-bold px-2 py-1 rounded border ${actionColors[pick.action] || actionColors.WATCH}`}>
                     {pick.action}
                   </span>
-                  <span className="text-base font-bold text-electric font-[family-name:var(--font-mono)]">{pick.ticker}</span>
+                  <span className="text-sm font-semibold text-accent font-[family-name:var(--font-mono)]">{pick.ticker}</span>
                 </div>
-                {pick.company && <p className="text-xs text-text-muted mb-2">{pick.company}</p>}
-                <p className="text-sm text-text-secondary leading-relaxed line-clamp-3">{pick.reason}</p>
+                {pick.company && <p className="text-[12px] text-text-muted mb-1.5">{pick.company}</p>}
+                <p className="text-[13px] text-text-secondary leading-relaxed line-clamp-3">{pick.reason}</p>
                 {pick.conviction && (
-                  <p className="text-xs text-text-muted mt-3 uppercase tracking-wider">{pick.conviction} conviction</p>
+                  <p className="text-[11px] text-text-muted mt-2 uppercase tracking-wider">{pick.conviction} conviction</p>
                 )}
               </motion.button>
             ))}
@@ -207,21 +200,19 @@ export default function DailyBriefing({ briefing, loading }) {
 
       {/* Risk Warnings */}
       {briefing.risk_warnings && briefing.risk_warnings.length > 0 && (
-        <div className="max-w-3xl mx-auto">
-          <div className="rounded-xl border border-danger/15 bg-danger/[0.04] p-5">
-            <div className="flex items-center gap-2.5 mb-4">
-              <AlertTriangle className="w-4 h-4 text-danger" />
-              <span className="text-xs font-semibold text-danger uppercase tracking-wider">Risk Warnings</span>
-            </div>
-            <ul className="space-y-2">
-              {briefing.risk_warnings.map((warning, i) => (
-                <li key={i} className="text-sm text-text-secondary flex items-start gap-2 leading-relaxed">
-                  <span className="text-danger/60 mt-0.5 shrink-0">&bull;</span>
-                  {warning}
-                </li>
-              ))}
-            </ul>
+        <div className="rounded-lg border border-danger/15 bg-danger-subtle p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-3.5 h-3.5 text-danger" />
+            <span className="text-[12px] font-semibold text-danger uppercase tracking-wider">Risk Warnings</span>
           </div>
+          <ul className="space-y-1.5">
+            {briefing.risk_warnings.map((warning, i) => (
+              <li key={i} className="text-[13px] text-text-secondary flex items-start gap-2 leading-relaxed">
+                <span className="text-danger/60 mt-0.5 shrink-0">&bull;</span>
+                {warning}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

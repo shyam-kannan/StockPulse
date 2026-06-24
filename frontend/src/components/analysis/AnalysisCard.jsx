@@ -3,11 +3,11 @@ import { AlertCircle } from 'lucide-react';
 function SkeletonContent() {
   return (
     <div className="space-y-5">
-      <div className="h-5 shimmer rounded-xl w-full" />
-      <div className="h-5 shimmer rounded-xl w-5/6" />
-      <div className="h-5 shimmer rounded-xl w-4/6" />
-      <div className="h-4 shimmer rounded-xl w-full mt-6" />
-      <div className="h-4 shimmer rounded-xl w-3/4" />
+      <div className="h-5 shimmer rounded-lg w-full" />
+      <div className="h-5 shimmer rounded-lg w-5/6" />
+      <div className="h-5 shimmer rounded-lg w-4/6" />
+      <div className="h-4 shimmer rounded-lg w-full mt-6" />
+      <div className="h-4 shimmer rounded-lg w-3/4" />
     </div>
   );
 }
@@ -25,7 +25,7 @@ export default function AnalysisCard({ title, icon: Icon, accentColor = 'electri
     <div className={`card overflow-hidden border-l-2 ${accent.border}`}>
       <div className="px-10 pt-8 pb-6 flex items-center gap-4">
         {Icon && (
-          <div className={`w-11 h-11 rounded-xl ${accent.bg} flex items-center justify-center shrink-0`}>
+          <div className={`w-11 h-11 rounded-lg ${accent.bg} flex items-center justify-center shrink-0`}>
             <Icon className={`w-5 h-5 ${accent.text}`} />
           </div>
         )}
@@ -42,7 +42,7 @@ export default function AnalysisCard({ title, icon: Icon, accentColor = 'electri
             <p className="text-sm text-text-muted mt-1">{error}</p>
           </div>
         ) : (
-          <div className="fade-in">{children}</div>
+          <div className="">{children}</div>
         )}
       </div>
     </div>

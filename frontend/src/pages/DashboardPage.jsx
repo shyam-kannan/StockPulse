@@ -66,154 +66,112 @@ export default function DashboardPage() {
   const etfs = trending?.filter(t => ETF_TICKERS.has(t.ticker)) || [];
 
   return (
-    <div>
+    <div className="max-w-[1280px] mx-auto px-6 lg:px-8">
 
-      {/* Hero */}
-      <section className="pt-16 pb-14 sm:pt-24 sm:pb-20">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10 text-center">
-          <FadeIn>
-            <h1 className="text-4xl sm:text-6xl font-bold text-text-primary tracking-tight leading-[1.1]">
+      {/* Header */}
+      <FadeIn>
+        <div className="flex items-center justify-between pt-8 pb-6 border-b border-border">
+          <div>
+            <h1 className="text-2xl font-semibold text-text-primary tracking-tight">
               {greeting()}
             </h1>
-          </FadeIn>
-          <FadeIn delay={0.1}>
-            <p className="text-lg sm:text-xl text-text-muted mt-4 max-w-lg mx-auto font-light leading-relaxed">
-              Here's what's moving the market today.
-            </p>
-          </FadeIn>
+            <p className="text-sm text-text-muted mt-1">Here's what's moving the market today.</p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="flex items-center gap-2 px-4 py-2 text-[13px] font-medium text-text-muted bg-white/[0.03] border border-border rounded-lg hover:border-border-hover hover:text-text-secondary transition-all disabled:opacity-40 cursor-pointer"
+          >
+            {refreshing
+              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              : <RefreshCw className="w-3.5 h-3.5" />
+            }
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
         </div>
-      </section>
+      </FadeIn>
 
       {/* Watchlist */}
       {watchlist.length > 0 && (
-        <section className="pb-8">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-            <WatchlistSection watchlist={watchlist} setWatchlist={setWatchlist} trendingData={trending} />
-          </div>
-        </section>
+        <div className="pt-6">
+          <WatchlistSection watchlist={watchlist} setWatchlist={setWatchlist} trendingData={trending} />
+        </div>
       )}
 
       {/* AI Briefing */}
-      <section className="alt-section py-14 sm:py-20">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <FadeInView>
-            <DailyBriefing briefing={briefing} loading={briefingLoading} />
-          </FadeInView>
+      <FadeInView>
+        <div className="pt-10 pb-8">
+          <DailyBriefing briefing={briefing} loading={briefingLoading} />
         </div>
-      </section>
+      </FadeInView>
 
       {/* Top Stocks */}
-      <section className="py-14 sm:py-20">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <FadeInView>
-            <div className="text-center mb-10">
-              <p className="section-label mb-3">Most discussed in the last 24 hours</p>
-              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">Top Stocks</h2>
+      <FadeInView>
+        <div className="py-8">
+          <div className="flex items-baseline justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-semibold text-text-primary tracking-tight">Top Stocks</h2>
+              <p className="text-[13px] text-text-muted mt-0.5">Most discussed in the last 24 hours</p>
             </div>
-          </FadeInView>
-
+          </div>
           <TrendingCards tickers={stocks} loading={trendingLoading} />
-
-          <FadeInView delay={0.2}>
-            <div className="flex justify-center mt-8">
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="flex items-center gap-2 px-6 py-2.5 text-sm font-medium text-text-muted bg-white/[0.04] border border-white/[0.06] rounded-full hover:border-white/[0.14] hover:text-text-secondary hover:bg-white/[0.06] transition-all disabled:opacity-40 cursor-pointer"
-              >
-                {refreshing
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : <RefreshCw className="w-4 h-4" />
-                }
-                {refreshing ? 'Refreshing...' : 'Refresh Data'}
-              </button>
-            </div>
-          </FadeInView>
         </div>
-      </section>
+      </FadeInView>
 
       {/* Top ETFs */}
       {(trendingLoading || etfs.length > 0) && (
-        <section className="alt-section py-14 sm:py-20">
-          <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-            <FadeInView>
-              <div className="text-center mb-10">
-                <p className="section-label mb-3">Most discussed exchange-traded funds</p>
-                <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">Top ETFs</h2>
-              </div>
-            </FadeInView>
-
+        <FadeInView>
+          <div className="py-8 border-t border-border">
+            <div className="mb-5">
+              <h2 className="text-lg font-semibold text-text-primary tracking-tight">Top ETFs</h2>
+              <p className="text-[13px] text-text-muted mt-0.5">Most discussed exchange-traded funds</p>
+            </div>
             <TrendingCards tickers={etfs} loading={trendingLoading} />
           </div>
-        </section>
+        </FadeInView>
       )}
 
       {/* Trending Table */}
-      <section className="py-14 sm:py-20">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <FadeInView>
-            <div className="text-center mb-10">
-              <p className="section-label mb-3">Full breakdown</p>
-              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">Trending Tickers</h2>
-            </div>
-          </FadeInView>
+      <FadeInView>
+        <div className="py-8 border-t border-border">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold text-text-primary tracking-tight">All Trending</h2>
+          </div>
 
-          <FadeInView delay={0.1}>
-            <TrendingTable
-              tickers={stocks}
-              loading={trendingLoading}
-              watchlist={watchlist}
-              setWatchlist={setWatchlist}
-              title="Trending Stocks"
-            />
-          </FadeInView>
+          <TrendingTable
+            tickers={stocks}
+            loading={trendingLoading}
+            watchlist={watchlist}
+            setWatchlist={setWatchlist}
+            title="Stocks"
+          />
 
           {etfs.length > 0 && (
-            <FadeInView delay={0.15}>
-              <div className="mt-10">
-                <TrendingTable
-                  tickers={etfs}
-                  loading={trendingLoading}
-                  watchlist={watchlist}
-                  setWatchlist={setWatchlist}
-                  title="Trending ETFs"
-                />
-              </div>
-            </FadeInView>
+            <div className="mt-6">
+              <TrendingTable
+                tickers={etfs}
+                loading={trendingLoading}
+                watchlist={watchlist}
+                setWatchlist={setWatchlist}
+                title="ETFs"
+              />
+            </div>
           )}
         </div>
-      </section>
+      </FadeInView>
 
       {/* News & Social */}
-      <section className="alt-section py-14 sm:py-20">
-        <div className="max-w-[1400px] mx-auto px-6 lg:px-10">
-          <FadeInView>
-            <div className="text-center mb-10">
-              <p className="section-label mb-3">What people are saying</p>
-              <h2 className="text-3xl sm:text-4xl font-bold text-text-primary tracking-tight">News & Social</h2>
-            </div>
-          </FadeInView>
-
-          <FadeInView delay={0.1}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div>
-                <div className="flex items-center gap-2.5 mb-5">
-                  <MessageSquare className="w-4 h-4 text-electric" />
-                  <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider">Reddit Buzz</h3>
-                </div>
-                <RedditBuzz posts={redditPosts} loading={redditLoading} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2.5 mb-5">
-                  <Newspaper className="w-4 h-4 text-amber" />
-                  <h3 className="text-sm font-semibold text-text-primary uppercase tracking-wider">Market News</h3>
-                </div>
-                <NewsFeed items={feed} loading={feedLoading} />
-              </div>
-            </div>
-          </FadeInView>
+      <FadeInView>
+        <div className="py-8 border-t border-border pb-16">
+          <div className="mb-5">
+            <h2 className="text-lg font-semibold text-text-primary tracking-tight">News & Social</h2>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <RedditBuzz posts={redditPosts} loading={redditLoading} />
+            <NewsFeed items={feed} loading={feedLoading} />
+          </div>
         </div>
-      </section>
+      </FadeInView>
     </div>
   );
 }

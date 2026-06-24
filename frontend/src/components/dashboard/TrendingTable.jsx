@@ -12,7 +12,7 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
     return (
       <div className="card overflow-hidden">
         <div className="p-8 border-b border-border">
-          <div className="h-6 shimmer rounded-xl w-48" />
+          <div className="h-6 shimmer rounded-lg w-48" />
         </div>
         {[...Array(8)].map((_, i) => (
           <div key={i} className="flex items-center gap-5 px-8 py-5 border-b border-border">
@@ -96,7 +96,7 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
                 <td className="px-8 py-5 text-sm text-text-muted font-[family-name:var(--font-mono)]">{i + 1}</td>
                 <td className="px-8 py-5">
                   <div>
-                    <span className="text-base font-semibold text-electric font-[family-name:var(--font-mono)]">{t.ticker}</span>
+                    <span className="text-base font-semibold text-accent font-[family-name:var(--font-mono)]">{t.ticker}</span>
                     <p className="text-xs text-text-muted truncate max-w-[200px] mt-1">{t.company_name}</p>
                   </div>
                 </td>
@@ -125,7 +125,7 @@ export default function TrendingTable({ tickers, loading, watchlist, setWatchlis
                 <td className="px-8 py-5 text-center">
                   <button
                     onClick={(e) => toggleWatchlist(e, t.ticker)}
-                    className="p-2.5 rounded-xl hover:bg-white/[0.06] transition-all"
+                    className="p-2.5 rounded-lg hover:bg-white/[0.06] transition-all"
                   >
                     <Star
                       className={`w-4 h-4 transition-colors ${isWatchlisted(t.ticker) ? 'text-amber fill-amber' : 'text-text-muted/40 hover:text-text-muted'}`}

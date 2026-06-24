@@ -5,9 +5,9 @@ function CustomTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   const data = payload[0].payload;
   return (
-    <div className="bg-navy-900 border border-border rounded-2xl px-6 py-4 shadow-2xl">
+    <div className="bg-bg-elevated border border-border rounded-lg px-6 py-4 shadow-2xl">
       <p className="text-xs text-text-muted mb-2">{label}</p>
-      <p className="text-base font-semibold text-electric font-[family-name:var(--font-mono)]">
+      <p className="text-base font-semibold text-accent font-[family-name:var(--font-mono)]">
         ${data.close?.toFixed(2)}
       </p>
       {data.volume && (
@@ -26,7 +26,7 @@ function ChartSkeleton() {
         <div className="w-5 h-5 shimmer rounded-lg" />
         <div className="h-5 shimmer rounded-xl w-32" />
       </div>
-      <div className="h-[380px] shimmer rounded-2xl" />
+      <div className="h-[380px] shimmer rounded-lg" />
     </div>
   );
 }
@@ -39,7 +39,7 @@ function ChartEmpty() {
         <h3 className="text-base font-medium text-text-secondary">Price History</h3>
       </div>
       <div className="h-[380px] flex flex-col items-center justify-center gap-5">
-        <div className="w-16 h-16 rounded-2xl bg-white/[0.025] border border-border flex items-center justify-center">
+        <div className="w-16 h-16 rounded-lg bg-white/[0.025] border border-border flex items-center justify-center">
           <TrendingUp className="w-7 h-7 text-text-muted" />
         </div>
         <p className="text-base text-text-muted">Price chart loading...</p>
@@ -54,9 +54,9 @@ export default function PriceChart({ history, loading }) {
   if (!history || history.length === 0) return <ChartEmpty />;
 
   return (
-    <div className="card p-10 fade-in">
+    <div className="card p-10 ">
       <div className="flex items-center gap-3 mb-8">
-        <TrendingUp className="w-5 h-5 text-electric" />
+        <TrendingUp className="w-5 h-5 text-accent" />
         <h3 className="text-base font-medium text-text-primary">Price History</h3>
       </div>
 

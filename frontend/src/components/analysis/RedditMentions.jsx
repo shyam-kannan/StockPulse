@@ -63,7 +63,7 @@ function MentionsEmpty() {
         <h3 className="text-base font-medium text-text-secondary">Social Mentions</h3>
       </div>
       <div className="flex flex-col items-center justify-center py-14 gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-white/[0.03] border border-border flex items-center justify-center">
+        <div className="w-14 h-14 rounded-lg bg-white/[0.03] border border-border flex items-center justify-center">
           <MessageCircle className="w-6 h-6 text-text-muted" />
         </div>
         <p className="text-base text-text-muted">No social mentions yet for this ticker</p>
@@ -78,7 +78,7 @@ export default function RedditMentions({ posts, loading }) {
   if (!posts || posts.length === 0) return <MentionsEmpty />;
 
   return (
-    <div className="card p-10 fade-in">
+    <div className="card p-10 ">
       <div className="flex items-center gap-3 mb-8">
         <MessageCircle className="w-5 h-5 text-amber" />
         <h3 className="text-base font-medium text-text-primary">Social Mentions</h3>
@@ -97,14 +97,14 @@ export default function RedditMentions({ posts, loading }) {
             className="flex items-start gap-4 px-4 py-4 rounded-xl hover:bg-white/[0.03] transition-colors group"
           >
             <div className="flex flex-col items-center gap-1 shrink-0 min-w-[40px] pt-0.5">
-              <ArrowUp className="w-3.5 h-3.5 text-text-muted group-hover:text-electric transition-colors" />
+              <ArrowUp className="w-3.5 h-3.5 text-text-muted group-hover:text-accent transition-colors" />
               <span className="text-sm font-[family-name:var(--font-mono)] text-text-secondary">
                 {post.score}
               </span>
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] text-text-primary leading-snug line-clamp-2 group-hover:text-electric transition-colors">
+              <p className="text-[15px] text-text-primary leading-snug line-clamp-2 group-hover:text-accent transition-colors">
                 {post.title}
               </p>
               <div className="flex items-center gap-3 mt-3 flex-wrap">

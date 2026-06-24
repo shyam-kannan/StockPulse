@@ -13,9 +13,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-navy-950 flex flex-col">
+      <div className="min-h-screen bg-bg flex flex-col">
         <Navbar marketStatus={marketStatus} />
-        <main className="flex-1 w-full">
+        <main className="flex-1">
           <Routes>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/analysis" element={<AnalysisPage />} />
@@ -25,8 +25,8 @@ function App() {
             <Route path="*" element={
               <div className="flex items-center justify-center h-[60vh]">
                 <div className="text-center">
-                  <h2 className="text-6xl font-bold text-text-muted/30 font-[family-name:var(--font-mono)]">404</h2>
-                  <p className="text-text-secondary mt-3 text-lg">Page not found</p>
+                  <h2 className="text-5xl font-bold text-text-muted/30 font-[family-name:var(--font-mono)]">404</h2>
+                  <p className="text-text-secondary mt-3">Page not found</p>
                 </div>
               </div>
             } />
