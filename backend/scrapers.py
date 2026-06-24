@@ -220,6 +220,84 @@ def scrape_social_via_grok() -> tuple[list[dict], list[dict]]:
     return all_posts, all_mentions
 
 
+def search_social_for_ticker(ticker: str, company_name: str) -> list:
+    """Search Twitter/X and Reddit for real-time discussions about a specific stock."""
+    api_key = os.getenv("XAI_API_KEY")
+    if not api_key:
+        return []
+
+    print(f"[Grok] Searching social for ${ticker} ({company_name})...")
+
+    system = (
+        "You are a financial social media analyst with real-time access to X/Twitter "
+        "and public Reddit. Search for real, current discussions about specific stocks. "
+        "Report what people are actually saying right now."
+    )
+
+    prompt = (
+        f"Search X (Twitter) and Reddit for the most recent discussions about "
+        f"${ticker} ({company_name}) from the last 48 hours.\n\n"
+        "Find real posts, tweets, and threads discussing this stock.\n\n"
+        "Return a JSON array of 10-12 posts:\n"
+        "[\n"
+        '  {\n'
+        '    "platform": "twitter",\n'
+        '    "subreddit": "X/Twitter",\n'
+        '    "author": "@username or u/username",\n'
+        '    "content": "Summary of the post (max 200 chars)",\n'
+        '    "engagement": 150,\n'
+        '    "sentiment": "bullish"\n'
+        '  }\n'
+        "]\n\n"
+        "Rules:\n"
+        '- platform: "twitter" or "reddit"\n'
+        '- subreddit: "X/Twitter" for tweets, actual subreddit name for Reddit '
+        '(e.g. "wallstreetbets", "stocks", "investing")\n'
+        '- sentiment: "bullish", "bearish", or "neutral"\n'
+        "- engagement: estimated likes/upvotes\n"
+        "- Include posts from BOTH platforms\n"
+        "- Focus on substantive analysis, not just ticker mentions\n"
+        "- Return ONLY the JSON array"
+    )
+
+    try:
+        posts = _grok_request(api_key, system, prompt)
+        formatted = []
+        sentiment_map = {"bullish": 0.5, "bearish": -0.5, "neutral": 0.0}
+
+        for i, post in enumerate(posts):
+            platform = post.get("platform", "twitter")
+            subreddit = post.get("subreddit", "X/Twitter")
+            if platform == "reddit" and subreddit == "X/Twitter":
+                subreddit = "stocks"
+
+            url = (
+                f"https://x.com/search?q=%24{ticker}"
+                if platform == "twitter"
+                else f"https://www.reddit.com/search/?q={ticker}&sort=new"
+            )
+
+            formatted.append({
+                "id": f"grok_search_{ticker}_{platform}_{i}",
+                "subreddit": subreddit,
+                "title": post.get("content", "")[:200],
+                "selftext": "",
+                "score": post.get("engagement", 0),
+                "num_comments": 0,
+                "author": post.get("author", ""),
+                "url": url,
+                "created_utc": time.time(),
+                "sentiment": sentiment_map.get(post.get("sentiment", "neutral"), 0.0),
+                "tickers": [ticker],
+            })
+
+        print(f"[Grok] Found {len(formatted)} social posts for ${ticker}")
+        return formatted
+    except Exception as e:
+        print(f"[Grok] Error searching for {ticker}: {e}")
+        return []
+
+
 # ── ApeWisdom (Reddit mention tracker, free, no auth) ─────────────
 
 def scrape_apewisdom() -> list[dict]:

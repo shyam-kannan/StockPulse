@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Activity, Menu, X, Search, BarChart3, BookOpen, LayoutDashboard } from 'lucide-react';
+import { Activity, Menu, X, Search, BarChart3, BookOpen, LayoutDashboard, Briefcase } from 'lucide-react';
 
 export default function Navbar({ marketStatus }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,6 +36,7 @@ export default function Navbar({ marketStatus }) {
   const links = [
     { to: '/', label: 'Dashboard', icon: LayoutDashboard, end: true },
     { to: '/analysis', label: 'Analysis', icon: BarChart3 },
+    { to: '/portfolio', label: 'Portfolio', icon: Briefcase },
     { to: '/market', label: 'Learn', icon: BookOpen },
   ];
 

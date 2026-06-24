@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { TrendingUp, BarChart3, Target, Loader2 } from 'lucide-react';
+import { TrendingUp, BarChart3, Target, Loader2, Zap, Building2 } from 'lucide-react';
 import { api } from '../utils/api';
 import { formatPrice, formatPercent, formatMarketCap, changeColor } from '../utils/formatters';
 import SearchBar from '../components/analysis/SearchBar';
@@ -9,9 +9,7 @@ import PriceChart from '../components/analysis/PriceChart';
 import PriceTargetBar from '../components/analysis/PriceTargetBar';
 import RedditMentions from '../components/analysis/RedditMentions';
 
-/* ─────────────────────────────────────────────
-   Inline content components
-   ───────────────────────────────────────────── */
+/* ─── Momentum content ─── */
 
 function MomentumContent({ data }) {
   if (!data || data.error) return <p className="text-text-muted text-sm">Analysis unavailable</p>;
@@ -26,14 +24,12 @@ function MomentumContent({ data }) {
 
   return (
     <div className="space-y-5">
-      {/* One-liner quote — visually prominent at the top */}
       {data.one_liner && (
         <div className="p-5 bg-electric/[0.04] border border-electric/15 rounded-xl">
           <p className="text-sm text-electric/90 italic leading-relaxed">"{data.one_liner}"</p>
         </div>
       )}
 
-      {/* Rating badge */}
       {data.momentum_rating && (
         <div className="flex items-center gap-3">
           <span className="text-xs text-text-muted uppercase tracking-wider">Rating</span>
@@ -43,7 +39,6 @@ function MomentumContent({ data }) {
         </div>
       )}
 
-      {/* Narrative */}
       {data.narrative && (
         <div>
           <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Narrative</p>
@@ -51,7 +46,6 @@ function MomentumContent({ data }) {
         </div>
       )}
 
-      {/* Catalyst */}
       {data.catalyst && (
         <div>
           <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Catalyst</p>
@@ -59,7 +53,6 @@ function MomentumContent({ data }) {
         </div>
       )}
 
-      {/* Institutional view */}
       {data.institutional_view && (
         <div>
           <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Institutional View</p>
@@ -67,19 +60,18 @@ function MomentumContent({ data }) {
         </div>
       )}
 
-      {/* Key levels */}
-      {data.key_levels && (
+      {data.key_levels && (data.key_levels.support > 0 || data.key_levels.resistance > 0) && (
         <div>
           <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Key Levels</p>
           <div className="flex gap-4 text-sm font-[family-name:var(--font-mono)]">
-            {data.key_levels.support && (
+            {data.key_levels.support > 0 && (
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-electric" />
                 <span className="text-text-muted text-xs">Support</span>
                 <span className="text-electric font-medium">{formatPrice(data.key_levels.support)}</span>
               </div>
             )}
-            {data.key_levels.resistance && (
+            {data.key_levels.resistance > 0 && (
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-danger" />
                 <span className="text-text-muted text-xs">Resistance</span>
@@ -93,7 +85,9 @@ function MomentumContent({ data }) {
   );
 }
 
-function FundamentalsContent({ data, yfinance }) {
+/* ─── Fundamentals content ─── */
+
+function FundamentalsContent({ data }) {
   if (!data || data.error) return <p className="text-text-muted text-sm">Analysis unavailable</p>;
 
   const healthColor = {
@@ -104,7 +98,6 @@ function FundamentalsContent({ data, yfinance }) {
 
   return (
     <div className="space-y-5">
-      {/* Quality badges */}
       {data.key_metrics && (
         <div className="flex gap-2 flex-wrap">
           {data.key_metrics.growth_quality && (
@@ -120,7 +113,6 @@ function FundamentalsContent({ data, yfinance }) {
         </div>
       )}
 
-      {/* Valuation summary */}
       {data.valuation_summary && (
         <div>
           <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Valuation</p>
@@ -128,7 +120,6 @@ function FundamentalsContent({ data, yfinance }) {
         </div>
       )}
 
-      {/* Growth assessment */}
       {data.growth_assessment && (
         <div>
           <p className="text-xs text-text-muted uppercase tracking-wider mb-2">Growth</p>
@@ -136,7 +127,6 @@ function FundamentalsContent({ data, yfinance }) {
         </div>
       )}
 
-      {/* Fair value callout */}
       {data.fair_value_assessment && (
         <div className={`p-4 rounded-xl border ${
           data.fair_value_assessment === 'below_fair_value'
@@ -158,6 +148,8 @@ function FundamentalsContent({ data, yfinance }) {
   );
 }
 
+/* ─── Price target content ─── */
+
 function PriceTargetContent({ data, currentPrice }) {
   if (!data || data.error) return <p className="text-text-muted text-sm">Analysis unavailable</p>;
 
@@ -171,7 +163,6 @@ function PriceTargetContent({ data, currentPrice }) {
   return (
     <div className="space-y-5">
       <PriceTargetBar priceTargets={data} currentPrice={currentPrice} />
-
       <div className="space-y-2">
         {scenarios.map((s) => {
           const scenario = data[s.key];
@@ -198,23 +189,19 @@ function PriceTargetContent({ data, currentPrice }) {
   );
 }
 
-/* ─────────────────────────────────────────────
-   Key metrics pill strip
-   ───────────────────────────────────────────── */
+/* ─── Stat card for key metrics ─── */
 
-function MetricPill({ label, value }) {
+function MetricCard({ label, value }) {
   if (!value) return null;
   return (
-    <div className="flex flex-col items-center bg-white/[0.03] border border-border rounded-xl px-4 py-2.5 whitespace-nowrap shrink-0">
-      <span className="text-[10px] text-text-muted uppercase tracking-wider leading-none mb-1">{label}</span>
-      <span className="text-xs font-medium text-text-primary font-[family-name:var(--font-mono)] leading-none">{value}</span>
+    <div className="stat-card">
+      <p className="text-[10px] text-text-muted uppercase tracking-widest mb-1.5">{label}</p>
+      <p className="text-base font-semibold text-text-primary font-[family-name:var(--font-mono)] leading-none">{value}</p>
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   Main page component
-   ───────────────────────────────────────────── */
+/* ─── Main page component ─── */
 
 export default function AnalysisPage() {
   const { ticker } = useParams();
@@ -241,7 +228,7 @@ export default function AnalysisPage() {
     ? ((yf.current_price - yf.previous_close) / yf.previous_close) * 100
     : null;
 
-  /* ── Empty state: no ticker ── */
+  /* Empty state */
   if (!ticker && !loading) {
     return (
       <div className="space-y-8 fade-in">
@@ -260,7 +247,7 @@ export default function AnalysisPage() {
     );
   }
 
-  /* ── Loading state ── */
+  /* Loading state */
   if (loading) {
     return (
       <div className="space-y-8 fade-in">
@@ -276,7 +263,7 @@ export default function AnalysisPage() {
     );
   }
 
-  /* ── Error state ── */
+  /* Error state */
   if (error) {
     return (
       <div className="space-y-8 fade-in">
@@ -289,7 +276,6 @@ export default function AnalysisPage() {
     );
   }
 
-  /* ── No data (shouldn't happen, but guard) ── */
   if (!data) {
     return (
       <div className="space-y-8 fade-in">
@@ -298,66 +284,66 @@ export default function AnalysisPage() {
     );
   }
 
-  /* ── Data loaded: full analysis layout ── */
+  /* Full analysis layout */
   return (
     <div className="space-y-8 fade-in">
 
-      {/* 1. Search bar */}
+      {/* Search bar */}
       <SearchBar currentTicker={ticker} />
 
-      {/* 2. Stock header */}
-      <div className="space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-5">
-          {/* Ticker + company name */}
+      {/* Stock header — big ticker, price, change */}
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-6">
           <div className="flex items-baseline gap-3">
-            <h1 className="text-4xl sm:text-5xl font-bold gradient-text font-[family-name:var(--font-mono)] leading-none">
+            <h1 className="text-5xl sm:text-6xl font-bold gradient-text font-[family-name:var(--font-mono)] leading-none tracking-tight">
               {data.ticker}
             </h1>
             {data.company_name && (
-              <span className="text-base sm:text-lg text-text-secondary truncate max-w-[260px]">
+              <span className="text-base sm:text-lg text-text-secondary truncate max-w-[280px]">
                 {data.company_name}
               </span>
             )}
           </div>
 
-          {/* Price + change */}
-          {yf?.current_price && (
-            <div className="flex items-baseline gap-3 sm:ml-auto">
-              <span className="text-3xl sm:text-4xl font-semibold text-text-primary font-[family-name:var(--font-mono)]">
-                {formatPrice(yf.current_price)}
-              </span>
-              {priceChange != null && (
-                <span className={`text-lg font-semibold font-[family-name:var(--font-mono)] ${changeColor(priceChange)}`}>
-                  {formatPercent(priceChange)}
+          <div className="flex items-baseline gap-4 sm:ml-auto">
+            {yf?.current_price ? (
+              <>
+                <span className="text-3xl sm:text-4xl font-semibold text-text-primary font-[family-name:var(--font-mono)]">
+                  {formatPrice(yf.current_price)}
                 </span>
-              )}
-              {data.from_cache && (
-                <span className="text-[10px] bg-amber/10 text-amber px-2.5 py-1 rounded-lg font-medium uppercase tracking-wider">Cached</span>
-              )}
-            </div>
-          )}
+                {priceChange != null && (
+                  <span className={`text-lg font-semibold font-[family-name:var(--font-mono)] ${changeColor(priceChange)}`}>
+                    {formatPercent(priceChange)}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="text-lg text-text-muted">Price loading...</span>
+            )}
+            {data.from_cache && (
+              <span className="text-[10px] bg-amber/10 text-amber px-2.5 py-1 rounded-lg font-medium uppercase tracking-wider">Cached</span>
+            )}
+          </div>
         </div>
 
-        {/* 3. Key metrics strip */}
-        {yf && (
-          <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-1 px-1">
-            <MetricPill label="Market Cap" value={yf.market_cap ? formatMarketCap(yf.market_cap) : null} />
-            <MetricPill label="P/E (TTM)" value={yf.pe_ratio ? yf.pe_ratio.toFixed(1) : null} />
-            <MetricPill label="Fwd P/E" value={yf.forward_pe ? yf.forward_pe.toFixed(1) : null} />
-            <MetricPill
-              label="52W Range"
-              value={yf.fifty_two_week_low && yf.fifty_two_week_high
-                ? `${formatPrice(yf.fifty_two_week_low)} - ${formatPrice(yf.fifty_two_week_high)}`
-                : null
-              }
-            />
-            <MetricPill label="Sector" value={yf.sector || null} />
-            <MetricPill label="Beta" value={yf.beta ? yf.beta.toFixed(2) : null} />
-          </div>
-        )}
+        {/* Key metrics grid — stat cards instead of pills */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <MetricCard label="Market Cap" value={yf?.market_cap ? formatMarketCap(yf.market_cap) : null} />
+          <MetricCard label="P/E (TTM)" value={yf?.pe_ratio ? yf.pe_ratio.toFixed(1) : null} />
+          <MetricCard label="Fwd P/E" value={yf?.forward_pe ? yf.forward_pe.toFixed(1) : null} />
+          <MetricCard
+            label="52W Range"
+            value={yf?.fifty_two_week_low && yf?.fifty_two_week_high
+              ? `${formatPrice(yf.fifty_two_week_low)} - ${formatPrice(yf.fifty_two_week_high)}`
+              : null
+            }
+          />
+          <MetricCard label="Sector" value={yf?.sector || null} />
+          <MetricCard label="Beta" value={yf?.beta ? yf.beta.toFixed(2) : null} />
+        </div>
       </div>
 
-      {/* 4. Chart + Price Targets row */}
+      {/* Chart + Price Targets row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3">
           <PriceChart history={yf?.history} loading={false} />
@@ -369,21 +355,21 @@ export default function AnalysisPage() {
         </div>
       </div>
 
-      {/* 5. Momentum + Fundamentals row */}
+      {/* Momentum + Fundamentals row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3">
-          <AnalysisCard title="Momentum Analysis" icon={TrendingUp} accentColor="electric" loading={false}>
+          <AnalysisCard title="Momentum Analysis" icon={Zap} accentColor="electric" loading={false}>
             <MomentumContent data={data.momentum} />
           </AnalysisCard>
         </div>
         <div className="lg:col-span-2">
-          <AnalysisCard title="Fundamental Snapshot" icon={BarChart3} accentColor="amber" loading={false}>
-            <FundamentalsContent data={data.fundamentals} yfinance={yf} />
+          <AnalysisCard title="Fundamental Snapshot" icon={Building2} accentColor="amber" loading={false}>
+            <FundamentalsContent data={data.fundamentals} />
           </AnalysisCard>
         </div>
       </div>
 
-      {/* 6. Social Mentions — full width */}
+      {/* Social Mentions — full width */}
       <RedditMentions posts={data.reddit_posts} loading={false} />
     </div>
   );

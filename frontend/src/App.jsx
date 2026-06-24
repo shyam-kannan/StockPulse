@@ -3,6 +3,7 @@ import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
 import DashboardPage from './pages/DashboardPage';
 import AnalysisPage from './pages/AnalysisPage';
+import PortfolioPage from './pages/PortfolioPage';
 import MarketPage from './pages/MarketPage';
 import { usePolling } from './hooks/usePolling';
 import { api } from './utils/api';
@@ -19,6 +20,7 @@ function App() {
             <Route path="/" element={<DashboardPage />} />
             <Route path="/analysis" element={<AnalysisPage />} />
             <Route path="/analysis/:ticker" element={<AnalysisPage />} />
+            <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/market" element={<MarketPage />} />
             <Route path="*" element={
               <div className="flex items-center justify-center h-[60vh]">

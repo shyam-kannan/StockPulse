@@ -299,6 +299,16 @@ async def get_daily_briefing():
         raise HTTPException(status_code=500, detail=f"Briefing failed: {str(e)}")
 
 
+@app.get("/api/portfolio-recommendation")
+async def get_portfolio_recommendation():
+    from analysis import generate_portfolio_recommendation
+    try:
+        result = await generate_portfolio_recommendation()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Portfolio recommendation failed: {str(e)}")
+
+
 @app.get("/api/reddit-activity")
 async def get_reddit_activity():
     from database import get_recent_reddit_posts

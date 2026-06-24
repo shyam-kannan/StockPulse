@@ -4,6 +4,7 @@ import time
 import asyncio
 import traceback
 
+import httpx
 import yfinance as yf
 from anthropic import AsyncAnthropic
 
@@ -36,6 +37,84 @@ def get_client() -> AsyncAnthropic:
 MODEL = "claude-sonnet-4-6"
 
 
+def _fetch_price_via_grok(ticker: str, company_name: str) -> dict:
+    """Use Grok for real-time price data when yfinance is rate-limited."""
+    api_key = os.getenv("XAI_API_KEY")
+    if not api_key:
+        return {}
+
+    prompt = (
+        f"What is the current stock price and key data for {ticker} ({company_name})? "
+        "Return ONLY valid JSON, no other text:\n"
+        '{"price": 123.45, "previous_close": 122.30, "market_cap_billions": 3500, '
+        '"pe_ratio": 28.5, "sector": "Technology", "week52_high": 199.62, '
+        '"week52_low": 164.08, "company_name": "Apple Inc."}'
+    )
+
+    try:
+        with httpx.Client() as client:
+            resp = client.post(
+                "https://api.x.ai/v1/chat/completions",
+                json={
+                    "model": "grok-3-mini",
+                    "messages": [
+                        {"role": "system", "content": "You are a stock data provider. Return ONLY valid JSON with current market data. No markdown, no explanation."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0,
+                },
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                timeout=20,
+            )
+            resp.raise_for_status()
+            content = resp.json()["choices"][0]["message"]["content"].strip()
+            if "```" in content:
+                lines = content.split("\n")
+                content = "\n".join(l for l in lines if not l.strip().startswith("```"))
+            data = json.loads(content)
+            print(f"[Grok] Price fallback for {ticker}: ${data.get('price')}")
+            return data
+    except Exception as e:
+        print(f"[Grok] Price fallback failed for {ticker}: {e}")
+        return {}
+
+
+def _download_with_retry(ticker: str, period: str = "1mo", retries: int = 2):
+    """Download price data with retry on rate limit."""
+    import pandas as pd
+    for attempt in range(retries):
+        try:
+            dl = yf.download(ticker, period=period, progress=False, timeout=15)
+            if not dl.empty:
+                return dl
+        except Exception as e:
+            print(f"[yfinance] download attempt {attempt+1} for {ticker}: {e}")
+        if attempt < retries - 1:
+            time.sleep(3)
+    return None
+
+
+def _parse_download_history(dl) -> list:
+    """Convert yf.download DataFrame to history list."""
+    rows = []
+    for d, row in dl.iterrows():
+        try:
+            rows.append({
+                "date": d.strftime("%Y-%m-%d"),
+                "open": round(float(row["Open"]), 2),
+                "high": round(float(row["High"]), 2),
+                "low": round(float(row["Low"]), 2),
+                "close": round(float(row["Close"]), 2),
+                "volume": int(row["Volume"]),
+            })
+        except Exception:
+            continue
+    return rows
+
+
 def fetch_yfinance_data(ticker: str) -> dict:
     result = {
         "ticker": ticker,
@@ -66,58 +145,98 @@ def fetch_yfinance_data(ticker: str) -> dict:
         "history": [],
     }
 
+    # Step 1: yf.download() — uses chart API, most reliable and least rate-limited
+    dl = _download_with_retry(ticker, period="1mo")
+    if dl is not None and not dl.empty:
+        result["history"] = _parse_download_history(dl)
+        closes = dl["Close"].dropna()
+        if len(closes) >= 1:
+            result["current_price"] = round(float(closes.iloc[-1]), 2)
+        if len(closes) >= 2:
+            result["previous_close"] = round(float(closes.iloc[-2]), 2)
+        highs = dl["High"].dropna()
+        lows = dl["Low"].dropna()
+        if len(highs) > 0:
+            result["fifty_two_week_high"] = round(float(highs.max()), 2)
+        if len(lows) > 0:
+            result["fifty_two_week_low"] = round(float(lows.min()), 2)
+        print(f"[yfinance] {ticker} download OK: {len(dl)} days, price=${result['current_price']}")
+
+    # Step 2: Try t.info for fundamentals (separate API path, may rate-limit independently)
+    time.sleep(1)
     try:
         t = yf.Ticker(ticker)
         info = t.info
-
-        result.update({
-            "company_name": info.get("longName") or info.get("shortName") or get_company_name(ticker),
-            "current_price": info.get("currentPrice") or info.get("regularMarketPrice"),
-            "previous_close": info.get("previousClose"),
-            "market_cap": info.get("marketCap"),
-            "pe_ratio": info.get("trailingPE"),
-            "forward_pe": info.get("forwardPE"),
-            "ev_to_revenue": info.get("enterpriseToRevenue"),
-            "ev_to_ebitda": info.get("enterpriseToEbitda"),
-            "revenue_growth": info.get("revenueGrowth"),
-            "earnings_growth": info.get("earningsGrowth"),
-            "profit_margin": info.get("profitMargins"),
-            "total_cash": info.get("totalCash"),
-            "total_debt": info.get("totalDebt"),
-            "shares_outstanding": info.get("sharesOutstanding"),
-            "fifty_two_week_high": info.get("fiftyTwoWeekHigh"),
-            "fifty_two_week_low": info.get("fiftyTwoWeekLow"),
-            "avg_volume": info.get("averageVolume"),
-            "beta": info.get("beta"),
-            "dividend_yield": info.get("dividendYield"),
-            "sector": info.get("sector"),
-            "industry": info.get("industry"),
-            "eps_trailing": info.get("trailingEps"),
-            "eps_forward": info.get("forwardEps"),
-            "revenue": info.get("totalRevenue"),
-        })
-
+        if info and isinstance(info, dict) and len(info) > 5:
+            result["company_name"] = info.get("longName") or info.get("shortName") or result["company_name"]
+            if info.get("currentPrice"):
+                result["current_price"] = info["currentPrice"]
+            elif info.get("regularMarketPrice") and result["current_price"] is None:
+                result["current_price"] = info["regularMarketPrice"]
+            if info.get("previousClose"):
+                result["previous_close"] = info["previousClose"]
+            for key, field in {
+                "marketCap": "market_cap",
+                "trailingPE": "pe_ratio",
+                "forwardPE": "forward_pe",
+                "enterpriseToRevenue": "ev_to_revenue",
+                "enterpriseToEbitda": "ev_to_ebitda",
+                "revenueGrowth": "revenue_growth",
+                "earningsGrowth": "earnings_growth",
+                "profitMargins": "profit_margin",
+                "totalCash": "total_cash",
+                "totalDebt": "total_debt",
+                "sharesOutstanding": "shares_outstanding",
+                "fiftyTwoWeekHigh": "fifty_two_week_high",
+                "fiftyTwoWeekLow": "fifty_two_week_low",
+                "averageVolume": "avg_volume",
+                "beta": "beta",
+                "dividendYield": "dividend_yield",
+                "sector": "sector",
+                "industry": "industry",
+                "trailingEps": "eps_trailing",
+                "forwardEps": "eps_forward",
+                "totalRevenue": "revenue",
+            }.items():
+                val = info.get(key)
+                if val is not None:
+                    result[field] = val
+            print(f"[yfinance] {ticker} info OK: pe={result['pe_ratio']}, sector={result['sector']}")
     except Exception as e:
-        print(f"[yfinance] Error fetching info for {ticker}: {e}")
+        print(f"[yfinance] {ticker} info failed (non-fatal): {e}")
 
-    try:
-        t = yf.Ticker(ticker)
-        hist = t.history(period="1mo")
-        if not hist.empty:
-            result["history"] = [
-                {
-                    "date": d.strftime("%Y-%m-%d"),
-                    "open": round(float(row["Open"]), 2),
-                    "high": round(float(row["High"]), 2),
-                    "low": round(float(row["Low"]), 2),
-                    "close": round(float(row["Close"]), 2),
-                    "volume": int(row["Volume"]),
-                }
-                for d, row in hist.iterrows()
-            ]
-    except Exception as e:
-        print(f"[yfinance] Error fetching history for {ticker}: {e}")
+    # Step 3: If download also failed, try Ticker.history as last resort
+    if result["current_price"] is None:
+        time.sleep(2)
+        try:
+            t = yf.Ticker(ticker)
+            hist = t.history(period="5d")
+            if not hist.empty:
+                result["current_price"] = round(float(hist["Close"].iloc[-1]), 2)
+                if len(hist) >= 2:
+                    result["previous_close"] = round(float(hist["Close"].iloc[-2]), 2)
+                if not result["history"]:
+                    result["history"] = _parse_download_history(hist)
+                print(f"[yfinance] {ticker} history fallback: price=${result['current_price']}")
+        except Exception as e:
+            print(f"[yfinance] {ticker} history fallback failed: {e}")
 
+    # Step 4: Grok fallback — always returns data when yfinance is rate-limited
+    if result["current_price"] is None:
+        grok_data = _fetch_price_via_grok(ticker, result["company_name"])
+        if grok_data:
+            result["current_price"] = grok_data.get("price")
+            result["previous_close"] = grok_data.get("previous_close") or result["previous_close"]
+            if grok_data.get("market_cap_billions"):
+                result["market_cap"] = grok_data["market_cap_billions"] * 1e9
+            result["pe_ratio"] = grok_data.get("pe_ratio") or result["pe_ratio"]
+            result["sector"] = grok_data.get("sector") or result["sector"]
+            result["fifty_two_week_high"] = grok_data.get("week52_high") or result["fifty_two_week_high"]
+            result["fifty_two_week_low"] = grok_data.get("week52_low") or result["fifty_two_week_low"]
+            if grok_data.get("company_name"):
+                result["company_name"] = grok_data["company_name"]
+
+    print(f"[yfinance] {ticker} FINAL: price={result['current_price']}, mcap={result['market_cap']}, history={len(result['history'])} days")
     return result
 
 
@@ -469,20 +588,27 @@ async def get_stock_analysis(ticker: str) -> dict:
         cached["from_cache"] = True
         return cached
 
-    # Fetch yfinance data in thread pool (sync library)
     loop = asyncio.get_event_loop()
+
+    # Fetch yfinance data in thread pool (sync library)
     yf_data = await loop.run_in_executor(None, fetch_yfinance_data, ticker)
 
     # Fetch recent mentions and Reddit posts from DB
     mentions = await get_ticker_mentions(ticker, hours=48)
     reddit_posts = await get_reddit_posts_for_ticker(ticker, hours=48)
 
-    # Run all 3 Claude analyses in parallel
+    # Run all 3 Claude analyses + Grok social search in parallel
+    from scrapers import search_social_for_ticker
+
     try:
-        momentum, fundamentals, price_targets = await asyncio.gather(
+        momentum, fundamentals, price_targets, social_posts = await asyncio.gather(
             analyze_momentum(ticker, yf_data, mentions, reddit_posts),
             analyze_fundamentals(ticker, yf_data),
             analyze_price_targets(ticker, yf_data),
+            loop.run_in_executor(
+                None, search_social_for_ticker, ticker,
+                yf_data.get("company_name", ticker)
+            ),
             return_exceptions=True,
         )
     except Exception as e:
@@ -491,6 +617,7 @@ async def get_stock_analysis(ticker: str) -> dict:
         momentum = {"error": str(e)}
         fundamentals = {"error": str(e)}
         price_targets = {"error": str(e)}
+        social_posts = []
 
     if isinstance(momentum, Exception):
         momentum = {"error": str(momentum), "narrative": "Analysis failed"}
@@ -498,6 +625,12 @@ async def get_stock_analysis(ticker: str) -> dict:
         fundamentals = {"error": str(fundamentals), "valuation_summary": "Analysis failed"}
     if isinstance(price_targets, Exception):
         price_targets = {"error": str(price_targets)}
+    if isinstance(social_posts, Exception):
+        print(f"[Analysis] Social search error: {social_posts}")
+        social_posts = []
+
+    # Merge Grok social results with DB posts, deduplicate
+    all_social = (social_posts or []) + reddit_posts[:5]
 
     result = {
         "ticker": ticker,
@@ -507,7 +640,7 @@ async def get_stock_analysis(ticker: str) -> dict:
         "fundamentals": fundamentals,
         "price_targets": price_targets,
         "mentions": [dict(m) for m in mentions[:20]],
-        "reddit_posts": reddit_posts[:10],
+        "reddit_posts": all_social[:15],
         "analyzed_at": time.time(),
         "from_cache": False,
     }
@@ -516,3 +649,136 @@ async def get_stock_analysis(ticker: str) -> dict:
     await set_cached_analysis(ticker, result, ttl_hours=4)
 
     return result
+
+
+async def generate_portfolio_recommendation() -> dict:
+    """Generate AI-powered portfolio recommendations based on current market data."""
+    trending = await get_trending_tickers(hours=24, limit=25)
+    recent_news = await get_recent_news(limit=20)
+    reddit = await get_recent_reddit_posts(limit=30)
+
+    trending_text = "\n".join([
+        f"- {t['ticker']} ({get_company_name(t['ticker'])}): {t['mention_count']} mentions, "
+        f"sentiment {t['avg_sentiment']:+.2f}"
+        for t in trending
+    ]) or "No trending data."
+
+    news_text = "\n".join([
+        f"- [{n['source']}] {n['title'][:120]}"
+        for n in recent_news
+    ]) or "No news."
+
+    reddit_text = "\n".join([
+        f"- [r/{p.get('subreddit', '?')}] {p.get('title', '')[:120]}"
+        for p in reddit
+    ]) or "No social data."
+
+    # Fetch prices for trending tickers
+    price_data = {}
+    if trending:
+        loop = asyncio.get_event_loop()
+        top_tickers = [t["ticker"] for t in trending[:15]]
+        try:
+            from main import _fetch_batch_prices
+            price_data = await loop.run_in_executor(None, _fetch_batch_prices, top_tickers)
+        except Exception as e:
+            print(f"[Portfolio] Price fetch error: {e}")
+
+    price_text = "\n".join([
+        f"- {tk}: ${pd.get('price', 'N/A')} ({pd.get('change_pct', 0):+.1f}% today)"
+        for tk, pd in price_data.items()
+    ]) or "Price data unavailable."
+
+    client = get_client()
+    prompt = f"""You are building a recommended stock portfolio for a retail investor.
+Analyze current market conditions, trending stocks, and recent news to recommend
+a diversified portfolio of 8-12 stocks.
+
+TRENDING STOCKS (by social + news mentions):
+{trending_text}
+
+CURRENT PRICES:
+{price_text}
+
+RECENT NEWS:
+{news_text}
+
+SOCIAL SENTIMENT:
+{reddit_text}
+
+Build a portfolio recommendation in this exact JSON format:
+{{
+  "strategy": "1-2 sentence overall strategy description",
+  "risk_level": "conservative|moderate|aggressive",
+  "market_outlook": "1-2 sentences on current market conditions",
+  "positions": [
+    {{
+      "ticker": "AAPL",
+      "company": "Apple Inc.",
+      "action": "BUY|HOLD|WATCH",
+      "conviction": "high|medium|low",
+      "allocation_pct": 12,
+      "entry_price": 185.00,
+      "target_price": 210.00,
+      "stop_loss": 170.00,
+      "sector": "Technology",
+      "reasoning": "2-3 sentences explaining why this stock, what the catalyst is, and when to enter",
+      "risk": "1 sentence key risk"
+    }}
+  ],
+  "sector_breakdown": [
+    {{"sector": "Technology", "pct": 40}},
+    {{"sector": "Healthcare", "pct": 20}}
+  ],
+  "avoid_list": [
+    {{
+      "ticker": "XYZ",
+      "company": "Company Name",
+      "reason": "Why to avoid this stock right now"
+    }}
+  ],
+  "timing_notes": "When to execute - is now a good time? Should you wait for a pullback?",
+  "warnings": [
+    "Specific risk warning about current market conditions"
+  ]
+}}
+
+Rules:
+- Recommend 8-12 positions that sum to ~100% allocation
+- Include at least 3 different sectors for diversification
+- Use REAL current prices from the data provided for entry/target/stop
+- Be specific about WHY each stock and WHEN to buy
+- Include 2-3 stocks to actively AVOID with reasoning
+- Consider both momentum (social buzz) and fundamentals
+- Return ONLY valid JSON"""
+
+    try:
+        response = await client.messages.create(
+            model=MODEL,
+            max_tokens=3000,
+            system=(
+                "You are a senior portfolio strategist at a top investment bank. "
+                "Build actionable, diversified portfolios for retail investors. "
+                "Use real data, specific price levels, and clear reasoning. "
+                "No generic advice — every recommendation must have a specific catalyst."
+            ),
+            messages=[{"role": "user", "content": prompt}],
+            timeout=60,
+        )
+        result = _parse_json_response(response.content[0].text)
+        result["generated_at"] = time.time()
+        result["from_cache"] = False
+        return result
+    except Exception as e:
+        print(f"[Claude] Portfolio recommendation error: {e}")
+        traceback.print_exc()
+        return {
+            "error": str(e),
+            "strategy": "Portfolio recommendation unavailable.",
+            "positions": [],
+            "sector_breakdown": [],
+            "avoid_list": [],
+            "warnings": [],
+            "generated_at": time.time(),
+            "from_cache": False,
+        }

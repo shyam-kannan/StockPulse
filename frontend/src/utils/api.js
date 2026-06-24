@@ -22,4 +22,5 @@ export const api = {
   getRedditActivity: () => fetchApi('/api/reddit-activity'),
   searchTickers: (q) => fetchApi(`/api/tickers/search?q=${encodeURIComponent(q)}`),
   triggerScrape: () => fetchApi('/api/scrape', { method: 'POST' }),
+  getPortfolioRecommendation: () => fetchApi('/api/portfolio-recommendation'),
 };

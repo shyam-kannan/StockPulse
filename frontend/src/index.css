@@ -97,6 +97,18 @@ body {
   background: rgba(255, 255, 255, 0.035);
 }
 
+.stat-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.25s ease;
+}
+
+.stat-card:hover {
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
 /* ---- Loading shimmer ---- */
 
 .shimmer {
