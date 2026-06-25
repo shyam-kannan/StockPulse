@@ -250,7 +250,9 @@ export default function PortfolioPage() {
 
   if (!data) return null;
 
-  const positions = data.positions || [];
+  const allPositions = data.positions || [];
+  const stocks = allPositions.filter(p => p.type !== 'etf');
+  const etfs = allPositions.filter(p => p.type === 'etf');
   const sectors = data.sector_breakdown || [];
   const maxSectorPct = Math.max(...sectors.map(s => s.pct), 1);
   const avoidList = data.avoid_list || [];
@@ -293,7 +295,7 @@ export default function PortfolioPage() {
                 sub="Risk profile"
                 icon={Shield}
               />
-              <StatCard label="Positions" value={positions.length} sub="Recommended stocks" icon={Briefcase} />
+              <StatCard label="Positions" value={allPositions.length} sub={`${stocks.length} stocks, ${etfs.length} ETFs`} icon={Briefcase} />
               <StatCard
                 label="Top Sector"
                 value={sectors[0]?.sector || '—'}
@@ -339,36 +341,65 @@ export default function PortfolioPage() {
         </section>
       )}
 
-      {/* Positions */}
-      <section className="alt-section py-16 sm:py-20">
-        <div className="max-w-5xl mx-auto px-6">
-          <FadeInView>
-            <div className="text-center mb-10">
-              <p className="section-label mb-2">Based on today's market</p>
-              <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.02em]">Recommended Positions</h2>
-            </div>
-          </FadeInView>
-
-          <FadeInView delay={0.1}>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <Stagger className="lg:col-span-2 space-y-3">
-                {positions.map((pos) => (
+      {/* Stocks */}
+      {stocks.length > 0 && (
+        <section className="alt-section py-16 sm:py-20">
+          <div className="max-w-5xl mx-auto px-6">
+            <FadeInView>
+              <div className="text-center mb-10">
+                <p className="section-label mb-2">Individual picks</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.02em]">Stocks</h2>
+              </div>
+            </FadeInView>
+            <FadeInView delay={0.1}>
+              <Stagger className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {stocks.map((pos) => (
                   <PositionCard key={pos.ticker} position={pos} onNavigate={navigate} />
                 ))}
               </Stagger>
+            </FadeInView>
+          </div>
+        </section>
+      )}
+
+      {/* ETFs */}
+      {etfs.length > 0 && (
+        <section className="py-16 sm:py-20">
+          <div className="max-w-5xl mx-auto px-6">
+            <FadeInView>
+              <div className="text-center mb-10">
+                <p className="section-label mb-2">Diversified exposure</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-text-primary tracking-[-0.02em]">ETFs</h2>
+              </div>
+            </FadeInView>
+            <FadeInView delay={0.1}>
+              <Stagger className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                {etfs.map((pos) => (
+                  <PositionCard key={pos.ticker} position={pos} onNavigate={navigate} />
+                ))}
+              </Stagger>
+            </FadeInView>
+          </div>
+        </section>
+      )}
+
+      {/* Sidebar info */}
+      <section className="alt-section py-16 sm:py-20">
+        <div className="max-w-5xl mx-auto px-6">
+          <FadeInView>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {sectors.length > 0 && (
+                <div className="card p-4">
+                  <h3 className="text-[13px] font-semibold text-text-primary mb-3">Sector Allocation</h3>
+                  <div className="space-y-2.5">
+                    {sectors.map((s) => (
+                      <SectorBar key={s.sector} sector={s.sector} pct={s.pct} maxPct={maxSectorPct} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-4">
-                {sectors.length > 0 && (
-                  <div className="card p-4">
-                    <h3 className="text-[13px] font-semibold text-text-primary mb-3">Sector Allocation</h3>
-                    <div className="space-y-2.5">
-                      {sectors.map((s) => (
-                        <SectorBar key={s.sector} sector={s.sector} pct={s.pct} maxPct={maxSectorPct} />
-                      ))}
-                    </div>
-                  </div>
-                )}
-
                 {data.timing_notes && (
                   <div className="card p-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -392,24 +423,24 @@ export default function PortfolioPage() {
                     </div>
                   </div>
                 )}
-
-                {warnings.length > 0 && (
-                  <div className="card p-4 border-warning/12">
-                    <h3 className="text-[13px] font-semibold text-warning mb-2 flex items-center gap-2">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      Risk Warnings
-                    </h3>
-                    <ul className="space-y-1.5">
-                      {warnings.map((w, i) => (
-                        <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex items-start gap-1.5">
-                          <span className="text-warning mt-0.5">-</span>
-                          {w}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
+
+              {warnings.length > 0 && (
+                <div className="card p-4 border-warning/12">
+                  <h3 className="text-[13px] font-semibold text-warning mb-2 flex items-center gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    Risk Warnings
+                  </h3>
+                  <ul className="space-y-1.5">
+                    {warnings.map((w, i) => (
+                      <li key={i} className="text-[13px] text-text-secondary leading-relaxed flex items-start gap-1.5">
+                        <span className="text-warning mt-0.5">-</span>
+                        {w}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </FadeInView>
         </div>

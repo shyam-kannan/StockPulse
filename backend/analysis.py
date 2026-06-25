@@ -1047,9 +1047,9 @@ async def generate_portfolio_recommendation(force_refresh: bool = False) -> dict
     ]) or "Price data unavailable."
 
     client = get_client()
-    prompt = f"""You are building a recommended stock portfolio for a retail investor.
-Analyze current market conditions, trending stocks, and recent news to recommend
-a diversified portfolio of 8-12 stocks.
+    prompt = f"""You are building a recommended portfolio for a retail investor that includes
+BOTH individual stocks AND ETFs. Analyze current market conditions, trending stocks,
+and recent news.
 
 TRENDING STOCKS (by social + news mentions):
 {trending_text}
@@ -1072,41 +1072,55 @@ Build a portfolio recommendation in this exact JSON format:
     {{
       "ticker": "AAPL",
       "company": "Apple Inc.",
+      "type": "stock",
       "action": "BUY|HOLD|WATCH",
       "conviction": "high|medium|low",
-      "allocation_pct": 12,
+      "allocation_pct": 8,
       "entry_price": 185.00,
       "target_price": 210.00,
       "stop_loss": 170.00,
       "sector": "Technology",
-      "reasoning": "2-3 sentences explaining why this stock, what the catalyst is, and when to enter",
+      "reasoning": "1-2 sentences why, catalyst, when to enter",
       "risk": "1 sentence key risk"
+    }},
+    {{
+      "ticker": "QQQ",
+      "company": "Invesco QQQ Trust (Nasdaq 100)",
+      "type": "etf",
+      "action": "BUY",
+      "conviction": "high",
+      "allocation_pct": 15,
+      "entry_price": 480.00,
+      "target_price": 520.00,
+      "stop_loss": 450.00,
+      "sector": "Broad Market",
+      "reasoning": "Core Nasdaq 100 exposure for diversified tech allocation",
+      "risk": "Concentrated in large-cap tech"
     }}
   ],
   "sector_breakdown": [
     {{"sector": "Technology", "pct": 40}},
-    {{"sector": "Healthcare", "pct": 20}}
+    {{"sector": "Broad Market ETFs", "pct": 25}}
   ],
   "avoid_list": [
     {{
       "ticker": "XYZ",
       "company": "Company Name",
-      "reason": "Why to avoid this stock right now"
+      "reason": "Why to avoid right now"
     }}
   ],
-  "timing_notes": "When to execute - is now a good time? Should you wait for a pullback?",
-  "warnings": [
-    "Specific risk warning about current market conditions"
-  ]
+  "timing_notes": "When to execute - good time or wait for pullback?",
+  "warnings": ["Specific risk warning"]
 }}
 
 Rules:
-- Recommend 8-12 positions that sum to ~100% allocation
-- Include at least 3 different sectors for diversification
-- Use REAL current prices from the data provided for entry/target/stop
-- Be specific about WHY each stock and WHEN to buy
-- Include 2-3 stocks to actively AVOID with reasoning
-- Consider both momentum (social buzz) and fundamentals
+- Include 5-7 individual STOCKS and 3-4 ETFs (like SPY, QQQ, XLK, SOXX, XLE, VTI, ARKK, etc.)
+- Every position MUST have "type": "stock" or "type": "etf"
+- All allocations sum to ~100%
+- Include at least 3 sectors for diversification
+- Use REAL prices from the data provided for entry/target/stop
+- Be specific about WHY and WHEN to buy
+- Include 2-3 to AVOID with reasoning
 - Return ONLY valid JSON"""
 
     try:

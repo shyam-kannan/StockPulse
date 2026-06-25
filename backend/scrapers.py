@@ -692,6 +692,21 @@ def run_all_scrapers():
                 save_scrape_results(social_posts, social_mentions, news_items, news_mentions)
             )
             loop.run_until_complete(cleanup_old_data(days=7))
+
+            # Pre-generate AI content so endpoints return instantly
+            print("[Scraper] Pre-generating daily briefing & portfolio...")
+            try:
+                from analysis import generate_daily_briefing, generate_portfolio_recommendation
+                loop.run_until_complete(generate_daily_briefing(force_refresh=True))
+                print("[Scraper] Daily briefing cached")
+            except Exception as e:
+                print(f"[Scraper] Briefing pre-gen failed: {e}")
+            try:
+                from analysis import generate_portfolio_recommendation
+                loop.run_until_complete(generate_portfolio_recommendation(force_refresh=True))
+                print("[Scraper] Portfolio recommendation cached")
+            except Exception as e:
+                print(f"[Scraper] Portfolio pre-gen failed: {e}")
         finally:
             loop.close()
 
