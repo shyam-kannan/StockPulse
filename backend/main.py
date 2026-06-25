@@ -279,10 +279,10 @@ async def get_daily_briefing(refresh: bool = False):
 
 
 @app.get("/api/portfolio-recommendation")
-async def get_portfolio_recommendation():
+async def get_portfolio_recommendation(refresh: bool = False):
     from analysis import generate_portfolio_recommendation
     try:
-        result = await generate_portfolio_recommendation()
+        result = await generate_portfolio_recommendation(force_refresh=refresh)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Portfolio recommendation failed: {str(e)}")

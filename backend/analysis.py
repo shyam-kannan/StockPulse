@@ -948,8 +948,70 @@ async def get_stock_analysis(ticker: str) -> dict:
     return result
 
 
-async def generate_portfolio_recommendation() -> dict:
+def _fetch_batch_prices_local(tickers: list[str]) -> dict:
+    prices = {}
+    with httpx.Client() as hc:
+        hc.headers.update({"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"})
+        for ticker in tickers[:15]:
+            try:
+                resp = hc.get(
+                    f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}",
+                    params={"interval": "1d", "range": "5d"},
+                    timeout=8,
+                )
+                if resp.status_code == 200:
+                    meta = resp.json().get("chart", {}).get("result", [{}])[0].get("meta", {})
+                    price = meta.get("regularMarketPrice")
+                    prev = meta.get("chartPreviousClose")
+                    if price and prev:
+                        prices[ticker] = {"price": round(price, 2), "change_pct": round(((price - prev) / prev) * 100, 2)}
+            except Exception:
+                continue
+    return prices
+
+
+async def _get_portfolio_cache():
+    from database import get_db
+    db = await get_db()
+    try:
+        cursor = await db.execute(
+            "SELECT * FROM analysis_cache WHERE ticker = '__PORTFOLIO__' AND expires_at > ?",
+            (time.time(),),
+        )
+        row = await cursor.fetchone()
+        if row and row["momentum_json"]:
+            return json.loads(row["momentum_json"])
+        return None
+    finally:
+        await db.close()
+
+
+async def _set_portfolio_cache(data: dict, ttl_hours: int = 2):
+    from database import get_db
+    now = time.time()
+    db = await get_db()
+    try:
+        await db.execute(
+            """INSERT OR REPLACE INTO analysis_cache
+               (ticker, momentum_json, fundamental_json, price_target_json, yfinance_json, created_at, expires_at)
+               VALUES ('__PORTFOLIO__', ?, NULL, NULL, NULL, ?, ?)""",
+            (json.dumps(data), now, now + (ttl_hours * 3600)),
+        )
+        await db.commit()
+    except Exception as e:
+        print(f"Error caching portfolio: {e}")
+    finally:
+        await db.close()
+
+
+async def generate_portfolio_recommendation(force_refresh: bool = False) -> dict:
     """Generate AI-powered portfolio recommendations based on current market data."""
+    if not force_refresh:
+        cached = await _get_portfolio_cache()
+        if cached:
+            cached["from_cache"] = True
+            return cached
+
     trending = await get_trending_tickers(hours=24, limit=25)
     recent_news = await get_recent_news(limit=20)
     reddit = await get_recent_reddit_posts(limit=30)
@@ -970,14 +1032,12 @@ async def generate_portfolio_recommendation() -> dict:
         for p in reddit
     ]) or "No social data."
 
-    # Fetch prices for trending tickers
     price_data = {}
     if trending:
         loop = asyncio.get_event_loop()
         top_tickers = [t["ticker"] for t in trending[:15]]
         try:
-            from main import _fetch_batch_prices
-            price_data = await loop.run_in_executor(None, _fetch_batch_prices, top_tickers)
+            price_data = await loop.run_in_executor(None, _fetch_batch_prices_local, top_tickers)
         except Exception as e:
             print(f"[Portfolio] Price fetch error: {e}")
 
@@ -1052,15 +1112,15 @@ Rules:
     try:
         response = await client.messages.create(
             model=MODEL,
-            max_tokens=6000,
+            max_tokens=3500,
             system=(
                 "You are a senior portfolio strategist at a top investment bank. "
                 "Build actionable, diversified portfolios for retail investors. "
                 "Use real data, specific price levels, and clear reasoning. "
-                "No generic advice — every recommendation must have a specific catalyst."
+                "No generic advice — every recommendation must have a specific catalyst. Be concise."
             ),
             messages=[{"role": "user", "content": prompt}],
-            timeout=120,
+            timeout=55,
         )
         raw = response.content[0].text
         result = _parse_json_response(raw)
@@ -1094,6 +1154,7 @@ Rules:
                 print(f"[Portfolio] JSON repair failed: {repair_err}")
         result["generated_at"] = time.time()
         result["from_cache"] = False
+        await _set_portfolio_cache(result, ttl_hours=2)
         return result
     except Exception as e:
         print(f"[Claude] Portfolio recommendation error: {e}")
