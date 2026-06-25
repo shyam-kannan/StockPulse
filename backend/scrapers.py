@@ -13,8 +13,6 @@ from textblob import TextBlob
 
 from tickers import extract_tickers, get_company_name
 from database import (
-    insert_reddit_post,
-    insert_news_item,
     batch_insert_ticker_mentions,
     cleanup_old_data,
 )
@@ -617,11 +615,52 @@ def scrape_all_news() -> tuple[list[dict], list[dict]]:
 # ── Save + orchestrate ────────────────────────────────────────────
 
 async def save_scrape_results(posts, post_mentions, news_items, news_mentions):
-    for post in posts:
-        await insert_reddit_post(post)
+    from database import get_db, batch_insert_ticker_mentions
+    import hashlib as _hashlib
 
-    for item in news_items:
-        await insert_news_item(item)
+    db = await get_db()
+    try:
+        if posts:
+            await db.executemany(
+                """INSERT OR IGNORE INTO reddit_posts
+                   (id, subreddit, title, selftext, score, num_comments, author, url, created_utc, scraped_at, sentiment)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                [
+                    (
+                        p["id"], p["subreddit"], p["title"],
+                        p.get("selftext", ""), p.get("score", 0),
+                        p.get("num_comments", 0), p.get("author", ""),
+                        p.get("url", ""), p["created_utc"],
+                        time.time(), p.get("sentiment", 0.0),
+                    )
+                    for p in posts
+                ],
+            )
+            print(f"  [DB] Inserted {len(posts)} reddit/social posts")
+
+        if news_items:
+            await db.executemany(
+                """INSERT OR IGNORE INTO news_items
+                   (id, source, title, link, summary, published_at, scraped_at, sentiment)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                [
+                    (
+                        _hashlib.md5((item["source"] + item["link"]).encode()).hexdigest(),
+                        item["source"], item["title"], item["link"],
+                        item.get("summary", ""), item.get("published_at"),
+                        time.time(), item.get("sentiment", 0.0),
+                    )
+                    for item in news_items
+                ],
+            )
+            print(f"  [DB] Inserted {len(news_items)} news items")
+
+        await db.commit()
+    except Exception as e:
+        print(f"  [DB] Error saving scrape results: {e}")
+        traceback.print_exc()
+    finally:
+        await db.close()
 
     await batch_insert_ticker_mentions(post_mentions + news_mentions)
 

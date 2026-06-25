@@ -761,11 +761,12 @@ Use real multiples and math. Return ONLY valid JSON."""
         return _compute_fallback_price_targets(ticker, yf_data)
 
 
-async def generate_daily_briefing() -> dict:
-    cached = await get_briefing_cache()
-    if cached:
-        cached["from_cache"] = True
-        return cached
+async def generate_daily_briefing(force_refresh: bool = False) -> dict:
+    if not force_refresh:
+        cached = await get_briefing_cache()
+        if cached:
+            cached["from_cache"] = True
+            return cached
 
     trending = await get_trending_tickers(hours=24, limit=20)
     reddit_posts = await get_recent_reddit_posts(limit=60)

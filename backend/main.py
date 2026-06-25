@@ -269,10 +269,10 @@ async def get_education():
 
 
 @app.get("/api/daily-briefing")
-async def get_daily_briefing():
+async def get_daily_briefing(refresh: bool = False):
     from analysis import generate_daily_briefing
     try:
-        result = await generate_daily_briefing()
+        result = await generate_daily_briefing(force_refresh=refresh)
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Briefing failed: {str(e)}")
@@ -315,6 +315,22 @@ async def get_stock(ticker: str):
 async def search_tickers(q: str = Query("", min_length=1, max_length=10)):
     from tickers import search_tickers
     return search_tickers(q, limit=10)
+
+
+@app.get("/api/debug/db-stats")
+async def db_stats():
+    from database import get_db
+    db = await get_db()
+    try:
+        tables = ["reddit_posts", "news_items", "ticker_mentions", "analysis_cache"]
+        counts = {}
+        for table in tables:
+            cursor = await db.execute(f"SELECT COUNT(*) FROM {table}")
+            row = await cursor.fetchone()
+            counts[table] = row[0]
+        return counts
+    finally:
+        await db.close()
 
 
 if __name__ == "__main__":
